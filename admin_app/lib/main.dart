@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiBaseUrl = 'http://localhost:3000';// your PC IP
+const String apiBaseUrl = 'http://localhost:3000'; // your PC IP
 
 void main() => runApp(const AdminApp());
 
@@ -130,7 +130,7 @@ class _OtpScreenState extends State<OtpScreen> {
   }
 }
 
-// ========== ADMIN HOME (with Banners tab) ==========
+// ========== ADMIN HOME ==========
 class AdminHome extends StatefulWidget {
   const AdminHome({super.key});
   @override
@@ -143,7 +143,7 @@ class _AdminHomeState extends State<AdminHome> {
     ProductsTab(),
     OrdersTab(),
     RidersTab(),
-    BannersTab(),   // <-- added
+    BannersTab(),
   ];
 
   @override
@@ -161,7 +161,7 @@ class _AdminHomeState extends State<AdminHome> {
           NavigationDestination(icon: Icon(Icons.inventory), label: 'Products'),
           NavigationDestination(icon: Icon(Icons.shopping_bag), label: 'Orders'),
           NavigationDestination(icon: Icon(Icons.delivery_dining), label: 'Riders'),
-          NavigationDestination(icon: Icon(Icons.photo_library), label: 'Banners'),  // <-- added
+          NavigationDestination(icon: Icon(Icons.photo_library), label: 'Banners'),
         ],
       ),
     );
@@ -213,12 +213,13 @@ class _DashboardTabState extends State<DashboardTab> {
   Widget _statCard(String label, dynamic value, Color color) => Card(margin: const EdgeInsets.only(bottom: 12), child: ListTile(leading: CircleAvatar(backgroundColor: color.withOpacity(0.1), child: Icon(Icons.analytics, color: color)), title: Text(label, style: GoogleFonts.poppins(fontSize: 16)), trailing: Text('$value', style: GoogleFonts.poppins(fontSize: 22, fontWeight: FontWeight.bold, color: color))));
 }
 
-// ========== PRODUCTS TAB ==========
+// ========== PRODUCTS TAB (with Featured + Deal Toggles) ==========
 class ProductsTab extends StatefulWidget {
   const ProductsTab({super.key});
   @override
   State<ProductsTab> createState() => _ProductsTabState();
 }
+
 class _ProductsTabState extends State<ProductsTab> {
   List<dynamic> _products = [];
   bool _loading = true;
@@ -229,42 +230,162 @@ class _ProductsTabState extends State<ProductsTab> {
   }
 
   @override
-  void initState() { super.initState(); _fetchProducts(); }
+  void initState() {
+    super.initState();
+    _fetchProducts();
+  }
 
   Future<void> _fetchProducts() async {
     final token = await _getToken();
     try {
-      final res = await http.get(Uri.parse('$apiBaseUrl/api/admin/products'), headers: {'Authorization': 'Bearer $token'});
-      if (res.statusCode == 200) setState(() { _products = json.decode(res.body); _loading = false; });
-    } catch (e) { setState(() => _loading = false); }
+      final res = await http.get(
+        Uri.parse('$apiBaseUrl/api/admin/products'),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+      if (res.statusCode == 200) {
+        setState(() {
+          _products = json.decode(res.body);
+          _loading = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _toggleFeatured(int id, bool currentValue) async {
+    final token = await _getToken();
+    await http.put(
+      Uri.parse('$apiBaseUrl/api/admin/products/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({'is_featured': !currentValue}),
+    );
+    _fetchProducts();
+  }
+
+  Future<void> _toggleDeal(int id, bool currentValue, dynamic product) async {
+    final token = await _getToken();
+    // Default deal: 20% off, expires in 24 hours
+    final dealPrice = (double.parse(product['price'].toString()) * 0.8).toStringAsFixed(2);
+    final dealExpiry = DateTime.now().add(const Duration(hours: 24)).toIso8601String();
+    await http.put(
+      Uri.parse('$apiBaseUrl/api/admin/products/$id'),
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+      body: json.encode({
+        'is_deal': !currentValue,
+        'deal_price': double.parse(dealPrice),
+        'deal_expiry': dealExpiry,
+      }),
+    );
+    _fetchProducts();
   }
 
   Future<void> _addProduct() async {
-    final nameCtrl = TextEditingController(), priceCtrl = TextEditingController(), catCtrl = TextEditingController(), stockCtrl = TextEditingController();
-    final result = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(title: const Text('Add Product'), content: Column(mainAxisSize: MainAxisSize.min, children: [
-      TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
-      TextField(controller: catCtrl, decoration: const InputDecoration(labelText: 'Category')),
-      TextField(controller: priceCtrl, decoration: const InputDecoration(labelText: 'Price'), keyboardType: TextInputType.number),
-      TextField(controller: stockCtrl, decoration: const InputDecoration(labelText: 'Stock'), keyboardType: TextInputType.number),
-    ]), actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')), ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add'))]));
+    final nameCtrl = TextEditingController();
+    final priceCtrl = TextEditingController();
+    final catCtrl = TextEditingController();
+    final stockCtrl = TextEditingController();
+
+    final result = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Add Product'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Name')),
+            TextField(controller: catCtrl, decoration: const InputDecoration(labelText: 'Category')),
+            TextField(controller: priceCtrl, decoration: const InputDecoration(labelText: 'Price'), keyboardType: TextInputType.number),
+            TextField(controller: stockCtrl, decoration: const InputDecoration(labelText: 'Stock'), keyboardType: TextInputType.number),
+          ],
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')),
+          ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add')),
+        ],
+      ),
+    );
+
     if (result == true) {
       final token = await _getToken();
-      await http.post(Uri.parse('$apiBaseUrl/api/admin/products'), headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'}, body: json.encode({'name': nameCtrl.text, 'category': catCtrl.text, 'price': double.parse(priceCtrl.text), 'stock_quantity': int.parse(stockCtrl.text)}));
+      await http.post(
+        Uri.parse('$apiBaseUrl/api/admin/products'),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+        body: json.encode({
+          'name': nameCtrl.text,
+          'category': catCtrl.text,
+          'price': double.parse(priceCtrl.text),
+          'stock_quantity': int.parse(stockCtrl.text),
+        }),
+      );
       _fetchProducts();
     }
   }
 
   Future<void> _deleteProduct(int id) async {
     final token = await _getToken();
-    await http.delete(Uri.parse('$apiBaseUrl/api/admin/products/$id'), headers: {'Authorization': 'Bearer $token'});
+    await http.delete(
+      Uri.parse('$apiBaseUrl/api/admin/products/$id'),
+      headers: {'Authorization': 'Bearer $token'},
+    );
     _fetchProducts();
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(floatingActionButton: FloatingActionButton(onPressed: _addProduct, child: const Icon(Icons.add)), body: _loading ? const Center(child: CircularProgressIndicator()) : ListView.builder(padding: const EdgeInsets.all(16), itemCount: _products.length, itemBuilder: (_, i) {
-    final p = _products[i];
-    return Card(margin: const EdgeInsets.only(bottom: 8), child: ListTile(title: Text(p['name']), subtitle: Text('₹${p['price']} - Stock: ${p['stock_quantity']}'), trailing: IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteProduct(p['id']))));
-  }));
+  Widget build(BuildContext context) {
+    return Scaffold(
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addProduct,
+        child: const Icon(Icons.add),
+      ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: _products.length,
+              itemBuilder: (_, i) {
+                final p = _products[i];
+                return Card(
+                  margin: const EdgeInsets.only(bottom: 8),
+                  child: ListTile(
+                    title: Text(p['name']),
+                    subtitle: Text('₹${p['price']} - Stock: ${p['stock_quantity']}'),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Featured toggle
+                        Switch(
+                          value: p['is_featured'] == true,
+                          onChanged: (_) => _toggleFeatured(p['id'], p['is_featured'] == true),
+                          activeColor: Colors.orange,
+                        ),
+                        // Deal toggle
+                        Switch(
+                          value: p['is_deal'] == true,
+                          onChanged: (_) => _toggleDeal(p['id'], p['is_deal'] == true, p),
+                          activeColor: Colors.red,
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () => _deleteProduct(p['id']),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
 }
 
 // ========== ORDERS TAB ==========

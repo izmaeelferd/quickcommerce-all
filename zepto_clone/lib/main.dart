@@ -8,6 +8,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:zepto_clone/core/theme/app_theme.dart';
+import 'package:zepto_clone/features/product/product_detail_page.dart';
+import 'package:zepto_clone/product_detail_page.dart';
 
 const String apiBaseUrl = 'http://192.168.0.65:3000';
 
@@ -22,25 +25,60 @@ class QuickCartApp extends StatelessWidget {
       const SystemUiOverlayStyle(statusBarColor: Colors.transparent, statusBarIconBrightness: Brightness.light),
     );
     return MaterialApp(
-      title: 'QuickCart',
+      title: 'ZAMZA',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF6C0BA0),
-        brightness: Brightness.light,
-        scaffoldBackgroundColor: const Color(0xFFF8F6FE),
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: ZamzaColors.primary,
+          primary: ZamzaColors.primary,
+          secondary: ZamzaColors.secondary,
+          surface: ZamzaColors.card,
+          error: ZamzaColors.error,
+        ),
+        scaffoldBackgroundColor: ZamzaColors.background,
         textTheme: GoogleFonts.poppinsTextTheme(),
-        appBarTheme: const AppBarTheme(elevation: 0, centerTitle: false, backgroundColor: Color(0xFF6C0BA0), foregroundColor: Colors.white),
-        cardTheme: CardTheme(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), color: Colors.white),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+          foregroundColor: ZamzaColors.accent,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: ZamzaColors.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+          shadowColor: ZamzaShadows.card.color,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ZamzaColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+          ),
+        ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: const Color(0xFF6C0BA0),
-        brightness: Brightness.dark,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: ZamzaColors.primary,
+          brightness: Brightness.dark,
+        ),
         scaffoldBackgroundColor: const Color(0xFF1A1A2E),
         textTheme: GoogleFonts.poppinsTextTheme(ThemeData.dark().textTheme),
-        appBarTheme: const AppBarTheme(elevation: 0, centerTitle: false, backgroundColor: Color(0xFF16213E), foregroundColor: Colors.white),
-        cardTheme: CardTheme(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), color: const Color(0xFF0F3460)),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Color(0xFF16213E),
+          foregroundColor: Colors.white,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: const Color(0xFF0F3460),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+        ),
       ),
       themeMode: ThemeMode.system,
       home: const SplashScreen(),
@@ -51,23 +89,48 @@ class QuickCartApp extends StatelessWidget {
 // ============ MODELS ============
 class Product {
   final int id;
-  final String name, category;
+  final String name;
+  final String category;
   final double price;
   final Color color;
+  final String? imageUrl;
   bool isFavorite;
-  
-  Product({required this.id, required this.name, required this.category, required this.price, required this.color, this.isFavorite = false});
-  
+
+  Product({
+    required this.id,
+    required this.name,
+    required this.category,
+    required this.price,
+    required this.color,
+    this.imageUrl,
+    this.isFavorite = false,
+  });
+
   factory Product.fromJson(Map<String, dynamic> j) {
     final name = j['name'] as String;
-    return Product(id: j['id'], name: name, category: j['category'] ?? 'General', price: double.parse(j['price'].toString()), color: _color(name));
+    return Product(
+      id: j['id'],
+      name: name,
+      category: j['category'] ?? 'General',
+      price: double.parse(j['price'].toString()),
+      color: _color(name),
+      imageUrl: j['image_url'],
+    );
   }
-  
-  static Color _color(String n) => {
-    'banana': const Color(0xFFFFE135), 'milk': const Color(0xFFE8F5E9), 'bread': const Color(0xFFFFF3E0),
-    'eggs (6 pcs)': const Color(0xFFFFF9C4), 'tomato': const Color(0xFFFFCDD2), 'onion': const Color(0xFFE1BEE7),
-    'coca cola': const Color(0xFFFFCDD2), 'potato chips': const Color(0xFFFFF9C4)
-  }[n.toLowerCase()] ?? Colors.grey.shade300;
+
+  static Color _color(String n) {
+    switch (n.toLowerCase()) {
+      case 'banana': return const Color(0xFFFFE135);
+      case 'milk': return const Color(0xFFE8F5E9);
+      case 'bread': return const Color(0xFFFFF3E0);
+      case 'eggs (6 pcs)': return const Color(0xFFFFF9C4);
+      case 'tomato': return const Color(0xFFFFCDD2);
+      case 'onion': return const Color(0xFFE1BEE7);
+      case 'coca cola': return const Color(0xFFFFCDD2);
+      case 'potato chips': return const Color(0xFFFFF9C4);
+      default: return Colors.grey.shade300;
+    }
+  }
 }
 
 class Address {
@@ -99,14 +162,26 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF6C0BA0),
-      body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Container(width: 100, height: 100, decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)), child: const Icon(Icons.shopping_bag, size: 50, color: Color(0xFF6C0BA0))).animate().scale(duration: 800.ms).then().shake(),
-        const SizedBox(height: 24),
-        Text('QuickCart', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
-        const SizedBox(height: 8),
-        Text('Groceries in minutes', style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70)),
-      ])),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [ZamzaColors.primary, ZamzaColors.secondary],
+          ),
+        ),
+        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Container(
+            width: 100, height: 100,
+            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(25)),
+            child: const Icon(Icons.shopping_bag, size: 50, color: Color(0xFFFF6A00)),
+          ).animate().scale(duration: 800.ms).then().shake(),
+          const SizedBox(height: 24),
+          Text('ZAMZA', style: GoogleFonts.poppins(fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white)),
+          const SizedBox(height: 8),
+          Text('Everything. Delivered.', style: GoogleFonts.poppins(fontSize: 14, color: Colors.white70)),
+        ])),
+      ),
     );
   }
 }
@@ -139,15 +214,29 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: ZamzaColors.background,
       body: SafeArea(child: Center(child: SingleChildScrollView(padding: const EdgeInsets.all(32), child: Column(children: [
-        const Icon(Icons.shopping_bag, size: 80, color: Colors.white),
+        Container(
+          width: 80, height: 80,
+          decoration: BoxDecoration(color: ZamzaColors.primary.withOpacity(0.1), borderRadius: BorderRadius.circular(20)),
+          child: const Icon(Icons.shopping_bag_outlined, size: 40, color: ZamzaColors.primary),
+        ),
         const SizedBox(height: 24),
-        Text('Welcome!', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('Welcome to ZAMZA', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: ZamzaColors.accent)),
         const SizedBox(height: 40),
-        TextField(controller: _phoneCtrl, keyboardType: TextInputType.phone, maxLength: 10, style: const TextStyle(color: Colors.white, fontSize: 18), decoration: InputDecoration(labelText: 'Phone Number', labelStyle: const TextStyle(color: Colors.white70), prefixText: '+91 ', prefixStyle: const TextStyle(color: Colors.white, fontSize: 18), counterStyle: const TextStyle(color: Colors.white54), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white30)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white)))),
+        TextField(
+          controller: _phoneCtrl, keyboardType: TextInputType.phone, maxLength: 10,
+          style: const TextStyle(fontSize: 18),
+          decoration: InputDecoration(
+            labelText: 'Phone Number', labelStyle: TextStyle(color: ZamzaColors.grey500),
+            prefixText: '+91 ', prefixStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+            counterStyle: TextStyle(color: ZamzaColors.grey500),
+            enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: ZamzaColors.grey200)),
+            focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: ZamzaColors.primary)),
+          ),
+        ),
         const SizedBox(height: 32),
-        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _sendOtp, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Theme.of(context).primaryColor), child: _loading ? const CircularProgressIndicator() : Text('Send OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
+        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _sendOtp, child: _loading ? const CircularProgressIndicator() : Text('Send OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
       ])))),
     );
   }
@@ -184,15 +273,15 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: ZamzaColors.background,
       body: SafeArea(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        Text('Enter OTP', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('Enter OTP', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: ZamzaColors.accent)),
         const SizedBox(height: 8),
-        Text('Sent to ${widget.phone} (Dev: ${widget.otp})', style: const TextStyle(color: Colors.white70)),
+        Text('Sent to ${widget.phone} (Dev: ${widget.otp})', style: TextStyle(color: ZamzaColors.grey500)),
         const SizedBox(height: 40),
-        TextField(controller: _otpCtrl, keyboardType: TextInputType.number, maxLength: 6, style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8), textAlign: TextAlign.center, decoration: InputDecoration(counterStyle: const TextStyle(color: Colors.white54), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white30)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white)))),
+        TextField(controller: _otpCtrl, keyboardType: TextInputType.number, maxLength: 6, style: const TextStyle(fontSize: 24, letterSpacing: 8), textAlign: TextAlign.center, decoration: InputDecoration(counterStyle: TextStyle(color: ZamzaColors.grey500), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: ZamzaColors.grey200)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: ZamzaColors.primary)))),
         const SizedBox(height: 32),
-        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _verifyOtp, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Theme.of(context).primaryColor), child: _loading ? const CircularProgressIndicator() : Text('Verify OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
+        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _verifyOtp, child: _loading ? const CircularProgressIndicator() : Text('Verify OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
       ]))),
     );
   }
@@ -216,18 +305,19 @@ class _MainScreenState extends State<MainScreen> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: (i) => setState(() => _currentIndex = i),
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.store), label: 'Shop'),
-          NavigationDestination(icon: Icon(Icons.receipt_long), label: 'Orders'),
-          NavigationDestination(icon: Icon(Icons.favorite), label: 'Favorites'),
-          NavigationDestination(icon: Icon(Icons.person), label: 'Profile'),
+        indicatorColor: ZamzaColors.primary.withOpacity(0.2),
+        destinations: [
+          NavigationDestination(icon: Icon(Icons.store, color: _currentIndex == 0 ? ZamzaColors.primary : ZamzaColors.grey500), label: 'Shop'),
+          NavigationDestination(icon: Icon(Icons.receipt_long, color: _currentIndex == 1 ? ZamzaColors.primary : ZamzaColors.grey500), label: 'Orders'),
+          NavigationDestination(icon: Icon(Icons.favorite, color: _currentIndex == 2 ? ZamzaColors.primary : ZamzaColors.grey500), label: 'Favorites'),
+          NavigationDestination(icon: Icon(Icons.person, color: _currentIndex == 3 ? ZamzaColors.primary : ZamzaColors.grey500), label: 'Profile'),
         ],
       ),
     );
   }
 }
 
-// ============ SHOP PAGE (with Banners) ============
+// ============ SHOP PAGE (ZAMZA Premium Design) ============
 class ShopPage extends StatefulWidget {
   const ShopPage({super.key});
   @override
@@ -235,6 +325,7 @@ class ShopPage extends StatefulWidget {
 }
 
 class _ShopPageState extends State<ShopPage> {
+  // ---- State variables ----
   final Map<String, int> _cart = {};
   List<Product> _products = [], _filtered = [];
   bool _loading = true;
@@ -244,11 +335,17 @@ class _ShopPageState extends State<ShopPage> {
   List<Address> _addresses = [Address(id: '1', label: 'Home', address: '123 Main St, Mumbai', isDefault: true)];
   Address? _selectedAddress;
   List<dynamic> _banners = [];
+  List<dynamic> _featuredProducts = [];
+  final ScrollController _scrollController = ScrollController();
+  bool _showFloatingSearch = false;
 
   final _categories = [
-    {'name': 'All', 'icon': Icons.grid_view}, {'name': 'Fruits', 'icon': Icons.apple},
-    {'name': 'Dairy', 'icon': Icons.egg}, {'name': 'Bakery', 'icon': Icons.bakery_dining},
-    {'name': 'Vegetables', 'icon': Icons.eco}, {'name': 'Beverages', 'icon': Icons.local_drink},
+    {'name': 'All', 'icon': Icons.grid_view},
+    {'name': 'Fruits', 'icon': Icons.apple},
+    {'name': 'Dairy', 'icon': Icons.egg},
+    {'name': 'Bakery', 'icon': Icons.bakery_dining},
+    {'name': 'Vegetables', 'icon': Icons.eco},
+    {'name': 'Beverages', 'icon': Icons.local_drink},
     {'name': 'Snacks', 'icon': Icons.cookie},
   ];
 
@@ -264,14 +361,27 @@ class _ShopPageState extends State<ShopPage> {
     super.initState();
     _fetchProducts();
     _fetchBanners();
+    _fetchFeatured();
     _selectedAddress = _addresses.first;
     _razorpay = Razorpay();
     _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, (r) => _placeOrderAfterPayment(r.paymentId ?? ''));
     _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, (r) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Payment failed: ${r.message}'))));
+    _scrollController.addListener(() {
+      if (_scrollController.offset > 120 && !_showFloatingSearch) {
+        setState(() => _showFloatingSearch = true);
+      } else if (_scrollController.offset <= 120 && _showFloatingSearch) {
+        setState(() => _showFloatingSearch = false);
+      }
+    });
   }
 
   @override
-  void dispose() { _razorpay.clear(); _searchCtrl.dispose(); super.dispose(); }
+  void dispose() {
+    _razorpay.clear();
+    _searchCtrl.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   Future<void> _fetchProducts() async {
     try {
@@ -293,16 +403,30 @@ class _ShopPageState extends State<ShopPage> {
     } catch (_) {}
   }
 
+  Future<void> _fetchFeatured() async {
+    try {
+      final res = await http.get(Uri.parse('$apiBaseUrl/api/products/featured'));
+      if (res.statusCode == 200) setState(() => _featuredProducts = json.decode(res.body));
+    } catch (_) {}
+  }
+
   void _filter() {
     setState(() {
-      _filtered = _products.where((p) => (_selectedCategory == 'All' || p.category == _selectedCategory) && (_searchCtrl.text.isEmpty || p.name.toLowerCase().contains(_searchCtrl.text.toLowerCase()))).toList();
+      _filtered = _products.where((p) =>
+          (_selectedCategory == 'All' || p.category == _selectedCategory) &&
+          (_searchCtrl.text.isEmpty || p.name.toLowerCase().contains(_searchCtrl.text.toLowerCase()))
+      ).toList();
     });
   }
 
   void _addToCart(Product p) => setState(() => _cart[p.name] = (_cart[p.name] ?? 0) + 1);
-  
+
   void _removeFromCart(Product p) => setState(() {
-    if (_cart.containsKey(p.name) && _cart[p.name]! > 1) { _cart[p.name] = _cart[p.name]! - 1; } else { _cart.remove(p.name); }
+    if (_cart.containsKey(p.name) && _cart[p.name]! > 1) {
+      _cart[p.name] = _cart[p.name]! - 1;
+    } else {
+      _cart.remove(p.name);
+    }
   });
 
   Future<void> _toggleFavorite(Product p) async {
@@ -315,9 +439,16 @@ class _ShopPageState extends State<ShopPage> {
 
   Future<void> _placeOrderAfterPayment(String paymentId) async {
     final token = await _getToken();
-    final items = _cart.entries.map((e) => {'product_id': _products.firstWhere((p) => p.name == e.key).id, 'quantity': e.value}).toList();
+    final items = _cart.entries.map((e) => {
+      'product_id': _products.firstWhere((p) => p.name == e.key).id,
+      'quantity': e.value
+    }).toList();
     try {
-      final res = await http.post(Uri.parse('$apiBaseUrl/api/orders'), headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'}, body: json.encode({'items': items, 'delivery_address': _selectedAddress?.address ?? '123 Main St'}));
+      final res = await http.post(
+        Uri.parse('$apiBaseUrl/api/orders'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: json.encode({'items': items, 'delivery_address': _selectedAddress?.address ?? '123 Main St'}),
+      );
       if (res.statusCode == 201) {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Order placed! Payment: $paymentId')));
         setState(() => _cart.clear());
@@ -328,141 +459,286 @@ class _ShopPageState extends State<ShopPage> {
   Future<void> _placeOrder() async {
     final token = await _getToken();
     if (token.isEmpty) return;
-    
     final addr = await showDialog<Address>(context: context, builder: (ctx) => AlertDialog(
       title: const Text('Select Address'),
-      content: Column(mainAxisSize: MainAxisSize.min, children: _addresses.map((a) => ListTile(title: Text(a.label), subtitle: Text(a.address), leading: Radio<Address>(value: a, groupValue: _selectedAddress, onChanged: (v) { setState(() => _selectedAddress = v); Navigator.pop(ctx, v); }))).toList()),
+      content: Column(mainAxisSize: MainAxisSize.min, children: _addresses.map((a) => ListTile(
+        title: Text(a.label),
+        subtitle: Text(a.address),
+        leading: Radio<Address>(value: a, groupValue: _selectedAddress, onChanged: (v) { setState(() => _selectedAddress = v); Navigator.pop(ctx, v); })
+      )).toList()),
       actions: [TextButton(onPressed: () => Navigator.pop(ctx, _selectedAddress), child: const Text('Close'))],
     ));
     if (addr != null) _selectedAddress = addr;
-    
-    final action = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(title: const Text('Choose Payment'), actions: [TextButton(onPressed: () => Navigator.pop(ctx, 'cod'), child: const Text('💰 COD')), ElevatedButton(onPressed: () => Navigator.pop(ctx, 'razorpay'), child: const Text('🧪 Pay Online'))]));
+    final action = await showDialog<String>(context: context, builder: (ctx) => AlertDialog(
+      title: const Text('Choose Payment'),
+      actions: [
+        TextButton(onPressed: () => Navigator.pop(ctx, 'cod'), child: const Text('💰 COD')),
+        ElevatedButton(onPressed: () => Navigator.pop(ctx, 'razorpay'), child: const Text('🧪 Pay Online')),
+      ],
+    ));
     if (action == 'cod') { _placeOrderAfterPayment('test_cod'); return; }
     if (action == 'razorpay') {
       double total = 0;
-      for (final e in _cart.entries) { final p = _products.firstWhere((x) => x.name == e.key); total += p.price * e.value; }
+      for (final e in _cart.entries) {
+        final p = _products.firstWhere((x) => x.name == e.key);
+        total += p.price * e.value;
+      }
       final amount = (total * 100).toInt();
-      final res = await http.post(Uri.parse('$apiBaseUrl/api/payment/create-order'), headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'}, body: json.encode({'amount': amount, 'currency': 'INR'}));
+      final res = await http.post(
+        Uri.parse('$apiBaseUrl/api/payment/create-order'),
+        headers: {'Content-Type': 'application/json', 'Authorization': 'Bearer $token'},
+        body: json.encode({'amount': amount, 'currency': 'INR'}),
+      );
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
-        _razorpay.open({'key': 'rzp_test_TCzpDsuYcI2co3', 'amount': amount, 'name': 'QuickCart', 'order_id': data['razorpayOrderId'], 'prefill': {'contact': '9999999999'}, 'theme': {'color': '#6C0BA0'}});
+        _razorpay.open({
+          'key': 'rzp_test_TCzpDsuYcI2co3',
+          'amount': amount,
+          'name': 'ZAMZA',
+          'order_id': data['razorpayOrderId'],
+          'prefill': {'contact': '9999999999'},
+          'theme': {'color': '#FF6A00'}
+        });
       }
     }
   }
 
+  // ---- UI Helpers ----
+  Widget _buildCategoryChip(Map<String, dynamic> cat) {
+    final sel = _selectedCategory == cat['name'];
+    return GestureDetector(
+      onTap: () { setState(() => _selectedCategory = cat['name'] as String); _filter(); },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: sel ? ZamzaColors.primary : ZamzaColors.card,
+          borderRadius: BorderRadius.circular(ZamzaRadius.xl),
+          boxShadow: sel ? [BoxShadow(color: ZamzaColors.primary.withOpacity(0.3), blurRadius: 10)] : [],
+        ),
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Icon(cat['icon'] as IconData, size: 20, color: sel ? Colors.white : ZamzaColors.primary),
+          const SizedBox(width: 8),
+          Text(cat['name'] as String, style: TextStyle(fontWeight: FontWeight.w500, color: sel ? Colors.white : ZamzaColors.accent)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _buildFeaturedCard(dynamic p) {
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        width: 150,
+        decoration: BoxDecoration(color: ZamzaColors.card, borderRadius: BorderRadius.circular(ZamzaRadius.md), boxShadow: const [ZamzaShadows.card]),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.md)),
+            child: Image.network(p['image_url'] ?? 'https://via.placeholder.com/150', height: 100, width: double.infinity, fit: BoxFit.cover, errorBuilder: (_, __, ___) => Container(height: 100, color: ZamzaColors.grey200, child: const Icon(Icons.image, color: ZamzaColors.grey500))),
+          ),
+          Padding(padding: const EdgeInsets.all(8), child: Text(p['name'], style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis)),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('₹${p['price']}', style: ZamzaText.price)),
+        ]),
+      ),
+    );
+  }
+
+Widget _buildProductCard(Product p) {
+  final inCart = _cart.containsKey(p.name);
+  return GestureDetector(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => ProductDetailPage(
+            product: p,
+            isFavorite: p.isFavorite,
+            onFavoriteToggle: () => _toggleFavorite(p),
+            onAddToCart: (prod) => _addToCart(prod),
+            cart: _cart,
+          ),
+        ),
+      );
+    },
+    child: Container(
+      decoration: BoxDecoration(
+        color: ZamzaColors.card,
+        borderRadius: BorderRadius.circular(ZamzaRadius.md),
+        boxShadow: const [ZamzaShadows.card],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Stack(children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.md)),
+              child: Image.network(
+                p.imageUrl ?? 'https://via.placeholder.com/300',
+                height: 120,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(height: 120, color: ZamzaColors.grey200, child: const Icon(Icons.image, color: ZamzaColors.grey500)),
+              ),
+            ),
+            Positioned(top: 8, left: 8, child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(12)), child: Text('20% OFF', style: ZamzaText.caption.copyWith(color: Colors.white, fontSize: 10)))),
+            Positioned(top: 8, right: 8, child: GestureDetector(onTap: () => _toggleFavorite(p), child: Icon(p.isFavorite ? Icons.favorite : Icons.favorite_border, color: p.isFavorite ? Colors.red : Colors.white, size: 22))),
+          ]),
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text(p.name, style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+              const SizedBox(height: 4),
+              Row(children: [
+                const Icon(Icons.star, size: 14, color: Colors.amber),
+                const SizedBox(width: 4),
+                Text('4.5 (120)', style: ZamzaText.caption),
+                const Spacer(),
+                Text('10 min', style: ZamzaText.caption.copyWith(color: ZamzaColors.primary)),
+              ]),
+              const SizedBox(height: 8),
+              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                Text('₹${p.price.toStringAsFixed(0)}', style: ZamzaText.price),
+                if (!inCart)
+                  InkWell(
+                    onTap: () => _addToCart(p),
+                    child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.add, color: Colors.white, size: 18)),
+                  )
+                else
+                  Row(children: [
+                    GestureDetector(onTap: () => _removeFromCart(p), child: const Icon(Icons.remove_circle, color: ZamzaColors.primary, size: 20)),
+                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('${_cart[p.name]}', style: const TextStyle(fontWeight: FontWeight.w600))),
+                    GestureDetector(onTap: () => _addToCart(p), child: const Icon(Icons.add_circle, color: ZamzaColors.primary, size: 20)),
+                  ]),
+              ]),
+            ]),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(children: [const Icon(Icons.location_on, size: 20), const SizedBox(width: 4), Text(_selectedAddress?.label ?? 'Home', style: GoogleFonts.poppins(fontSize: 16))]),
-        actions: [
-          IconButton(icon: const Icon(Icons.add_location), onPressed: () async {
-            final labelCtrl = TextEditingController();
-            final addrCtrl = TextEditingController();
-            final result = await showDialog<bool>(context: context, builder: (ctx) => AlertDialog(title: const Text('Add Address'), content: Column(mainAxisSize: MainAxisSize.min, children: [TextField(controller: labelCtrl, decoration: const InputDecoration(labelText: 'Label (Home/Work)')), TextField(controller: addrCtrl, decoration: const InputDecoration(labelText: 'Address'))]), actions: [TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel')), ElevatedButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Add'))]));
-            if (result == true) setState(() => _addresses.add(Address(id: DateTime.now().toString(), label: labelCtrl.text, address: addrCtrl.text)));
-          }),
-          Stack(children: [
-            IconButton(icon: const Icon(Icons.shopping_bag), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage(cart: _cart, products: _products, onRemove: _removeFromCart, onAdd: _addToCart, onPlaceOrder: _placeOrder)))),
-            if (_cartCount > 0) Positioned(right: 6, top: 2, child: Container(padding: const EdgeInsets.all(4), decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle), child: Text('$_cartCount', style: const TextStyle(color: Colors.white, fontSize: 10)))),
-          ]),
-        ],
-      ),
-      body: _loading
-          ? _shimmerGrid()
-          : RefreshIndicator(
-              onRefresh: _fetchProducts,
-              child: CustomScrollView(slivers: [
-                // Search bar
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: TextField(
-                      controller: _searchCtrl,
-                      onChanged: (_) => _filter(),
-                      decoration: InputDecoration(hintText: 'Search products...', prefixIcon: const Icon(Icons.search), filled: true, fillColor: Theme.of(context).cardColor, border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none)),
-                    ),
+      body: Stack(
+        children: [
+          CustomScrollView(
+            controller: _scrollController,
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 0, floating: true, backgroundColor: ZamzaColors.background,
+                title: Row(children: [
+                  const Icon(Icons.location_on, size: 18, color: ZamzaColors.primary),
+                  const SizedBox(width: 4),
+                  Text(_selectedAddress?.label ?? 'Home', style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600)),
+                  const Icon(Icons.keyboard_arrow_down, size: 18),
+                ]),
+                actions: [
+                  Container(
+                    margin: const EdgeInsets.only(right: 8), padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(gradient: const LinearGradient(colors: [ZamzaColors.primary, ZamzaColors.secondary]), borderRadius: BorderRadius.circular(20)),
+                    child: Row(mainAxisSize: MainAxisSize.min, children: [
+                      const Icon(Icons.account_balance_wallet, size: 16, color: Colors.white),
+                      const SizedBox(width: 4),
+                      Text('₹250', style: ZamzaText.caption.copyWith(color: Colors.white)),
+                    ]),
                   ),
-                ),
-                // Banners carousel
-                if (_banners.isNotEmpty)
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: 140,
-                      child: PageView.builder(
-                        itemCount: _banners.length,
-                        itemBuilder: (_, i) {
-                          final b = _banners[i];
-                          return Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                            child: GestureDetector(
-                              onTap: () {},
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Image.network(
-                                  b['image_url'],
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  errorBuilder: (_, __, ___) => Container(
-                                    color: Colors.grey.shade200,
-                                    child: const Icon(Icons.broken_image, size: 40),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
+                  IconButton(icon: const Icon(Icons.notifications_outlined, color: ZamzaColors.accent), onPressed: () {}),
+                  IconButton(icon: const Icon(Icons.shopping_bag_outlined, color: ZamzaColors.accent), onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CartPage(cart: _cart, products: _products, onRemove: _removeFromCart, onAdd: _addToCart, onPlaceOrder: _placeOrder)))),
+                ],
+              ),
+              if (_banners.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: SizedBox(
+                    height: 180,
+                    child: PageView.builder(
+                      itemCount: _banners.length,
+                      itemBuilder: (_, i) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(ZamzaRadius.lg),
+                          child: Container(
+                            decoration: BoxDecoration(gradient: const LinearGradient(colors: [ZamzaColors.primary, ZamzaColors.secondary]), borderRadius: BorderRadius.circular(ZamzaRadius.lg)),
+                            child: Stack(children: [
+                              Positioned(left: 20, top: 30, child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                Text(_banners[i]['title'] ?? 'Special Offer', style: ZamzaText.heading2.copyWith(color: Colors.white)),
+                                const SizedBox(height: 8),
+                                Text('Grab it now!', style: ZamzaText.body.copyWith(color: Colors.white70)),
+                                const SizedBox(height: 12),
+                                ElevatedButton(onPressed: () {}, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: ZamzaColors.primary, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))), child: const Text('Shop Now')),
+                              ])),
+                            ]),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                // Categories
-                SliverToBoxAdapter(
-                  child: SizedBox(height: 100, child: ListView.builder(scrollDirection: Axis.horizontal, padding: const EdgeInsets.symmetric(horizontal: 16), itemCount: _categories.length, itemBuilder: (_, i) {
-                    final cat = _categories[i];
-                    final sel = _selectedCategory == cat['name'];
-                    return Padding(padding: const EdgeInsets.only(right: 12), child: GestureDetector(onTap: () => setState(() { _selectedCategory = cat['name'] as String; _filter(); }), child: AnimatedContainer(duration: const Duration(milliseconds: 300), width: 80, decoration: BoxDecoration(color: sel ? const Color(0xFF6C0BA0) : Theme.of(context).cardColor, borderRadius: BorderRadius.circular(16), boxShadow: sel ? [BoxShadow(color: const Color(0xFF6C0BA0).withOpacity(0.3), blurRadius: 10)] : null), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [Icon(cat['icon'] as IconData, color: sel ? Colors.white : const Color(0xFF6C0BA0), size: 28), const SizedBox(height: 4), Text(cat['name'] as String, style: TextStyle(fontSize: 11, fontWeight: FontWeight.w500, color: sel ? Colors.white : Colors.black87))]))));
-                  })),
                 ),
-                // Products grid
+              if (_featuredProducts.isNotEmpty)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Text('Featured Products', style: ZamzaText.heading3),
+                        TextButton(onPressed: () {}, child: Text('See All', style: ZamzaText.body.copyWith(color: ZamzaColors.primary))),
+                      ]),
+                      const SizedBox(height: 12),
+                      SizedBox(height: 200, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: _featuredProducts.length, separatorBuilder: (_, __) => const SizedBox(width: 12), itemBuilder: (_, i) => _buildFeaturedCard(_featuredProducts[i]))),
+                    ]),
+                  ),
+                ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Categories', style: ZamzaText.heading3),
+                    const SizedBox(height: 12),
+                    SizedBox(height: 80, child: ListView.separated(scrollDirection: Axis.horizontal, itemCount: _categories.length, separatorBuilder: (_, __) => const SizedBox(width: 12), itemBuilder: (_, i) => _buildCategoryChip(_categories[i]))),
+                  ]),
+                ),
+              ),
+              if (_loading)
+                SliverToBoxAdapter(child: _shimmerGrid())
+              else
                 SliverPadding(
                   padding: const EdgeInsets.all(16),
                   sliver: SliverGrid(
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.72, crossAxisSpacing: 12, mainAxisSpacing: 12),
-                    delegate: SliverChildBuilderDelegate(
-                      (_, index) => _productCard(_filtered[index]).animate().fadeIn(duration: 400.ms, delay: (index * 100).ms).slideY(begin: 0.1, end: 0),
-                      childCount: _filtered.length,
-                    ),
+                    delegate: SliverChildBuilderDelegate((_, index) => _buildProductCard(_filtered[index]), childCount: _filtered.length),
                   ),
                 ),
-              ]),
+              const SliverToBoxAdapter(child: SizedBox(height: 80)),
+            ],
+          ),
+          if (_showFloatingSearch)
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8, left: 16, right: 16,
+              child: Material(
+                elevation: 8, borderRadius: BorderRadius.circular(ZamzaRadius.lg),
+                child: TextField(
+                  controller: _searchCtrl, onChanged: (_) => _filter(),
+                  decoration: InputDecoration(
+                    hintText: 'Search for products...', hintStyle: ZamzaText.body.copyWith(color: ZamzaColors.grey500),
+                    prefixIcon: const Icon(Icons.search, color: ZamzaColors.primary),
+                    suffixIcon: IconButton(icon: const Icon(Icons.mic, color: ZamzaColors.primary), onPressed: () {}),
+                    filled: true, fillColor: ZamzaColors.card,
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(ZamzaRadius.lg), borderSide: BorderSide.none),
+                  ),
+                ),
+              ),
             ),
+        ],
+      ),
     );
   }
 
-  Widget _shimmerGrid() => GridView.builder(padding: const EdgeInsets.all(16), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.72, crossAxisSpacing: 12, mainAxisSpacing: 12), itemCount: 6, itemBuilder: (_, __) => Shimmer.fromColors(baseColor: Colors.grey.shade200, highlightColor: Colors.grey.shade100, child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))));
-
-  Widget _productCard(Product p) {
-    final inCart = _cart.containsKey(p.name);
-    return Card(
-      child: Stack(children: [
-        Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          Expanded(child: Container(decoration: BoxDecoration(gradient: LinearGradient(colors: [p.color.withOpacity(0.3), p.color]), borderRadius: const BorderRadius.vertical(top: Radius.circular(16))), child: Center(child: Icon(Icons.shopping_basket, size: 40, color: Colors.white.withOpacity(0.5))))),
-          Padding(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14), maxLines: 1, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 2),
-            Text(p.category, style: TextStyle(color: Colors.grey.shade500, fontSize: 11)),
-            const SizedBox(height: 6),
-            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-              Text('₹${p.price.toStringAsFixed(0)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF6C0BA0))),
-              if (!inCart) Material(color: const Color(0xFF6C0BA0), borderRadius: BorderRadius.circular(8), child: InkWell(onTap: () => _addToCart(p), borderRadius: BorderRadius.circular(8), child: const Padding(padding: EdgeInsets.all(6), child: Icon(Icons.add, color: Colors.white, size: 18))))
-              else Row(children: [GestureDetector(onTap: () => _removeFromCart(p), child: const Icon(Icons.remove_circle, color: Color(0xFF6C0BA0), size: 20)), Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('${_cart[p.name]}', style: const TextStyle(fontWeight: FontWeight.w600))), GestureDetector(onTap: () => _addToCart(p), child: const Icon(Icons.add_circle, color: Color(0xFF6C0BA0), size: 20))]),
-            ]),
-          ])),
-        ]),
-        Positioned(top: 8, right: 8, child: GestureDetector(onTap: () => _toggleFavorite(p), child: Icon(p.isFavorite ? Icons.favorite : Icons.favorite_border, color: p.isFavorite ? Colors.red : Colors.white, size: 22))),
-      ]),
-    );
-  }
+  Widget _shimmerGrid() => GridView.builder(
+    padding: const EdgeInsets.all(16), gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, childAspectRatio: 0.72, crossAxisSpacing: 12, mainAxisSpacing: 12),
+    itemCount: 6, itemBuilder: (_, __) => Shimmer.fromColors(baseColor: Colors.grey.shade200, highlightColor: Colors.grey.shade100, child: Container(decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16)))),
+  );
 }
 
 // ============ CART PAGE ============
@@ -493,8 +769,7 @@ class CartPage extends StatelessWidget {
                 ])));
               })),
               Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(color: Theme.of(context).cardColor, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))]),
+                padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Theme.of(context).cardColor, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))]),
                 child: SafeArea(
                   child: Row(children: [
                     Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -530,11 +805,7 @@ class _OrdersPageState extends State<OrdersPage> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _fetchOrders();
-    _connectSocket();
-  }
+  void initState() { super.initState(); _fetchOrders(); _connectSocket(); }
 
   Future<void> _connectSocket() async {
     final prefs = await SharedPreferences.getInstance();
@@ -561,11 +832,7 @@ class _OrdersPageState extends State<OrdersPage> {
 
   Future<void> _cancelOrder(int orderId) async {
     final token = await _getToken();
-    await http.put(
-      Uri.parse('$apiBaseUrl/api/admin/orders/$orderId/status'),
-      headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'},
-      body: json.encode({'status': 'cancelled'}),
-    );
+    await http.put(Uri.parse('$apiBaseUrl/api/admin/orders/$orderId/status'), headers: {'Authorization': 'Bearer $token', 'Content-Type': 'application/json'}, body: json.encode({'status': 'cancelled'}));
     _fetchOrders();
   }
 
@@ -583,9 +850,7 @@ class _OrdersPageState extends State<OrdersPage> {
           final o = filtered[i];
           return Card(margin: const EdgeInsets.only(bottom: 12), child: Padding(padding: const EdgeInsets.all(16), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Order #${o['id']}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)), Container(padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4), decoration: BoxDecoration(color: _statusColor(o['status']).withOpacity(0.1), borderRadius: BorderRadius.circular(20)), child: Text(o['status'], style: TextStyle(color: _statusColor(o['status']), fontSize: 12, fontWeight: FontWeight.w500)))]),
-            const SizedBox(height: 8),
-            Text('Total: ₹${o['total_amount']}'),
-            const SizedBox(height: 8),
+            const SizedBox(height: 8), Text('Total: ₹${o['total_amount']}'), const SizedBox(height: 8),
             LinearProgressIndicator(value: _progress(o['status']), backgroundColor: Colors.grey.shade200, valueColor: const AlwaysStoppedAnimation(Color(0xFF6C0BA0))),
             if (o['status'] == 'placed') ...[const SizedBox(height: 8), SizedBox(width: double.infinity, child: OutlinedButton(onPressed: () => _cancelOrder(o['id']), style: OutlinedButton.styleFrom(foregroundColor: Colors.red), child: const Text('Cancel Order')))],
           ])));
@@ -608,10 +873,7 @@ class _FavoritesPageState extends State<FavoritesPage> {
   bool _loading = true;
 
   @override
-  void initState() {
-    super.initState();
-    _loadFavorites();
-  }
+  void initState() { super.initState(); _loadFavorites(); }
 
   Future<void> _loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();

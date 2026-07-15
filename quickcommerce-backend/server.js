@@ -486,6 +486,40 @@ app.get('/api/admin/store-operators', authMiddleware, adminMiddleware, async (re
     }
 });
 
+// Public endpoint for featured products
+app.get('/api/products/featured', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM products WHERE is_featured = true ORDER BY id'
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Get all active deals
+app.get('/api/products/deals', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT * FROM products WHERE is_deal = true AND deal_expiry > NOW() ORDER BY id'
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.get('/api/products/:id', async (req, res) => {
+    try {
+        const result = await pool.query('SELECT * FROM products WHERE id = $1', [req.params.id]);
+        if (result.rows.length === 0) return res.status(404).json({ error: 'Not found' });
+        res.json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 // ---------- START SERVER ----------
 httpServer.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);
