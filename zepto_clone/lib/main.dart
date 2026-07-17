@@ -1,3 +1,4 @@
+import 'package:zepto_clone/product_detail_page.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -9,8 +10,6 @@ import 'package:shimmer/shimmer.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:zepto_clone/core/theme/app_theme.dart';
-import 'package:zepto_clone/features/product/product_detail_page.dart';
-import 'package:zepto_clone/product_detail_page.dart';
 
 const String apiBaseUrl = 'http://192.168.0.65:3000';
 
@@ -741,47 +740,242 @@ Widget _buildProductCard(Product p) {
   );
 }
 
-// ============ CART PAGE ============
-class CartPage extends StatelessWidget {
+class CartPage extends StatefulWidget {
   final Map<String, int> cart;
   final List<Product> products;
-  final Function(Product) onRemove, onAdd;
+  final Function(Product) onRemove;
+  final Function(Product) onAdd;
   final VoidCallback onPlaceOrder;
 
-  const CartPage({super.key, required this.cart, required this.products, required this.onRemove, required this.onAdd, required this.onPlaceOrder});
+  const CartPage({
+    super.key,
+    required this.cart,
+    required this.products,
+    required this.onRemove,
+    required this.onAdd,
+    required this.onPlaceOrder,
+  });
+
+  @override
+  State<CartPage> createState() => _CartPageState();
+}
+
+class _CartPageState extends State<CartPage> {
+  final TextEditingController _couponCtrl = TextEditingController();
+  String? _appliedCoupon;
+  double _discount = 0;
 
   @override
   Widget build(BuildContext context) {
-    final items = products.where((p) => cart.containsKey(p.name)).toList();
-    final total = items.fold<double>(0, (s, p) => s + (p.price * cart[p.name]!));
+    final items = widget.products
+        .where((p) => widget.cart.containsKey(p.name))
+        .toList();
+    final subtotal =
+        items.fold<double>(0, (s, p) => s + (p.price * widget.cart[p.name]!));
+    final deliveryFee = subtotal > 499 ? 0.0 : 29.0;
+    final savings = items.isNotEmpty ? (subtotal * 0.1) : 0.0; // dummy saving
+    final total = subtotal + deliveryFee - _discount;
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Your Cart')),
+      backgroundColor: ZamzaColors.background,
+      appBar: AppBar(
+        title: Text('Your Cart', style: ZamzaText.heading3.copyWith(color: ZamzaColors.accent)),
+      ),
       body: items.isEmpty
-          ? Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.shopping_cart_outlined, size: 80, color: Colors.grey), const SizedBox(height: 16), Text('Your cart is empty', style: GoogleFonts.poppins(fontSize: 16, color: Colors.grey))]))
-          : Column(children: [
-              Expanded(child: ListView.builder(itemCount: items.length, itemBuilder: (_, i) {
-                final p = items[i], q = cart[p.name]!;
-                return Card(margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 4), child: Padding(padding: const EdgeInsets.all(12), child: Row(children: [
-                  Container(width: 60, height: 60, decoration: BoxDecoration(borderRadius: BorderRadius.circular(12), color: p.color.withOpacity(0.3))),
-                  const SizedBox(width: 12),
-                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [Text(p.name, style: const TextStyle(fontWeight: FontWeight.w600)), Text('₹${p.price.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFF6C0BA0)))])),
-                  Row(children: [IconButton(icon: const Icon(Icons.remove_circle_outline), onPressed: () => onRemove(p)), Text('$q', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)), IconButton(icon: const Icon(Icons.add_circle_outline), onPressed: () => onAdd(p))]),
-                ])));
-              })),
-              Container(
-                padding: const EdgeInsets.all(20), decoration: BoxDecoration(color: Theme.of(context).cardColor, boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), blurRadius: 20, offset: const Offset(0, -5))]),
-                child: SafeArea(
-                  child: Row(children: [
-                    Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Text('Total', style: TextStyle(color: Colors.grey.shade500)),
-                      Text('₹${total.toStringAsFixed(0)}', style: GoogleFonts.poppins(fontSize: 24, fontWeight: FontWeight.bold, color: const Color(0xFF6C0BA0))),
-                    ]),
-                    const Spacer(),
-                    ElevatedButton(onPressed: onPlaceOrder, style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16)), child: const Text('Place Order', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600))),
-                  ]),
-                ),
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.shopping_cart_outlined,
+                      size: 80, color: ZamzaColors.grey500),
+                  const SizedBox(height: 16),
+                  Text('Your cart is empty',
+                      style: ZamzaText.body.copyWith(color: ZamzaColors.grey500)),
+                ],
               ),
-            ]),
+            )
+          : Column(
+              children: [
+                // Cart Items
+                Expanded(
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: items.length,
+                    itemBuilder: (_, i) {
+                      final p = items[i];
+                      final qty = widget.cart[p.name]!;
+                      return Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        decoration: BoxDecoration(
+                          color: ZamzaColors.card,
+                          borderRadius: BorderRadius.circular(ZamzaRadius.md),
+                          boxShadow: const [ZamzaShadows.card],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(12),
+                          child: Row(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(ZamzaRadius.sm),
+                                child: Image.network(
+                                  p.imageUrl ?? 'https://via.placeholder.com/80',
+                                  width: 70,
+                                  height: 70,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => Container(
+                                    width: 70, height: 70,
+                                    color: ZamzaColors.grey200,
+                                    child: const Icon(Icons.image, color: ZamzaColors.grey500),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(p.name, style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600)),
+                                    const SizedBox(height: 4),
+                                    Text('₹${p.price.toStringAsFixed(0)}',
+                                        style: ZamzaText.price),
+                                  ],
+                                ),
+                              ),
+                              // Quantity buttons
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: ZamzaColors.grey100,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: Row(
+                                  children: [
+                                    GestureDetector(
+                                      onTap: () => widget.onRemove(p),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Icon(Icons.remove, color: ZamzaColors.primary, size: 20),
+                                      ),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                                      child: Text('$qty', style: const TextStyle(fontWeight: FontWeight.w600)),
+                                    ),
+                                    GestureDetector(
+                                      onTap: () => widget.onAdd(p),
+                                      child: const Padding(
+                                        padding: EdgeInsets.all(8),
+                                        child: Icon(Icons.add, color: ZamzaColors.primary, size: 20),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                // Coupon, Summary, Checkout
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: ZamzaColors.card,
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.xl)),
+                    boxShadow: const [ZamzaShadows.card],
+                  ),
+                  child: Column(
+                    children: [
+                      // Coupon input
+                      Row(
+                        children: [
+                          Expanded(
+                            child: TextField(
+                              controller: _couponCtrl,
+                              decoration: InputDecoration(
+                                hintText: 'Enter coupon code',
+                                hintStyle: ZamzaText.caption,
+                                prefixIcon: const Icon(Icons.discount, color: ZamzaColors.primary),
+                                filled: true,
+                                fillColor: ZamzaColors.grey100,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(ZamzaRadius.sm),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          ElevatedButton(
+                            onPressed: () {
+                              setState(() {
+                                _appliedCoupon = _couponCtrl.text.trim();
+                                _discount = subtotal * 0.2; // dummy 20% off
+                              });
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(_appliedCoupon!.isEmpty ? 'Enter a code' : 'Coupon applied!')),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: ZamzaColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(ZamzaRadius.sm),
+                              ),
+                              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                            ),
+                            child: const Text('Apply'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      // Price breakdown
+                      _summaryRow('Subtotal', '₹${subtotal.toStringAsFixed(0)}'),
+                      _summaryRow('Delivery', deliveryFee == 0 ? 'FREE' : '₹$deliveryFee'),
+                      _summaryRow('Savings', '-₹${savings.toStringAsFixed(0)}'),
+                      if (_appliedCoupon != null)
+                        _summaryRow('Coupon (${_appliedCoupon!})', '-₹${_discount.toStringAsFixed(0)}'),
+                      const Divider(height: 24),
+                      _summaryRow('Total', '₹${total.toStringAsFixed(0)}', isTotal: true),
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: widget.onPlaceOrder,
+                          icon: const Icon(Icons.lock),
+                          label: const Text('Place Order'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ZamzaColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(ZamzaRadius.md),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+    );
+  }
+
+  Widget _summaryRow(String label, String value, {bool isTotal = false}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: isTotal ? ZamzaText.heading3 : ZamzaText.body),
+          Text(value,
+              style: isTotal
+                  ? ZamzaText.heading3.copyWith(color: ZamzaColors.primary)
+                  : ZamzaText.body.copyWith(fontWeight: FontWeight.w600)),
+        ],
+      ),
     );
   }
 }

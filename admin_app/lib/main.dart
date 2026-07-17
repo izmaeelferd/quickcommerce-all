@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiBaseUrl = 'http://localhost:3000'; // your PC IP
+const String apiBaseUrl = 'http://10.0.2.2:3000'; // your PC IP
 
 void main() => runApp(const AdminApp());
 

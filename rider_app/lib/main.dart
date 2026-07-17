@@ -4,32 +4,59 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:rider_app/core/theme/app_theme.dart'; // adjust package name if needed
 
-const String apiBaseUrl = 'http://192.168.0.65:3000'; // emulator; for Chrome use localhost:3000
+const String apiBaseUrl = 'http://192.168.0.65:3000'; // your PC IP
 
 void main() => runApp(const RiderApp());
 
 class RiderApp extends StatelessWidget {
   const RiderApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'QuickCart Rider',
+      title: 'ZAMZA Rider',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
-        colorSchemeSeed: Colors.orange,
-        brightness: Brightness.light,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: ZamzaColors.primary,
+          primary: ZamzaColors.primary,
+          secondary: ZamzaColors.secondary,
+          surface: ZamzaColors.card,
+          error: ZamzaColors.error,
+        ),
+        scaffoldBackgroundColor: ZamzaColors.background,
         textTheme: GoogleFonts.poppinsTextTheme(),
-        appBarTheme: const AppBarTheme(elevation: 0, backgroundColor: Colors.orange, foregroundColor: Colors.white),
-        cardTheme: CardTheme(elevation: 0, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)), color: Colors.white),
+        appBarTheme: const AppBarTheme(
+          elevation: 0,
+          centerTitle: false,
+          backgroundColor: Colors.transparent,
+          foregroundColor: ZamzaColors.accent,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 0,
+          color: ZamzaColors.card,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+          shadowColor: ZamzaShadows.card.color,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: ZamzaColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+          ),
+        ),
       ),
       home: const SplashScreen(),
     );
   }
 }
 
-// ====================== SPLASH ======================
+// ============ SPLASH ============
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
   @override
@@ -43,15 +70,31 @@ class _SplashScreenState extends State<SplashScreen> {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
       if (mounted) {
-        Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => token != null && token!.isNotEmpty ? const RiderHome() : const LoginScreen()));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => token != null && token!.isNotEmpty ? const RiderHome() : const LoginScreen()),
+        );
       }
     });
   }
   @override
-  Widget build(BuildContext context) => Scaffold(backgroundColor: Colors.orange, body: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [const Icon(Icons.delivery_dining, size: 80, color: Colors.white), const SizedBox(height: 24), Text('QuickCart Rider', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white))])));
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(colors: [ZamzaColors.primary, ZamzaColors.secondary]),
+        ),
+        child: Center(child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          const Icon(Icons.delivery_dining, size: 80, color: Colors.white),
+          const SizedBox(height: 24),
+          Text('ZAMZA Rider', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+        ])),
+      ),
+    );
+  }
 }
 
-// ====================== LOGIN ======================
+// ============ LOGIN ============
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
   @override
@@ -78,21 +121,21 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.orange,
+      backgroundColor: ZamzaColors.background,
       body: SafeArea(child: Center(child: SingleChildScrollView(padding: const EdgeInsets.all(32), child: Column(children: [
-        const Icon(Icons.delivery_dining, size: 80, color: Colors.white),
+        const Icon(Icons.delivery_dining, size: 80, color: ZamzaColors.primary),
         const SizedBox(height: 24),
-        Text('Rider Login', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text('Rider Login', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: ZamzaColors.accent)),
         const SizedBox(height: 40),
-        TextField(controller: _phoneCtrl, keyboardType: TextInputType.phone, maxLength: 10, style: const TextStyle(color: Colors.white, fontSize: 18), decoration: InputDecoration(labelText: 'Phone Number', labelStyle: const TextStyle(color: Colors.white70), prefixText: '+91 ', prefixStyle: const TextStyle(color: Colors.white, fontSize: 18), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white30)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white)))),
+        TextField(controller: _phoneCtrl, keyboardType: TextInputType.phone, maxLength: 10, style: const TextStyle(fontSize: 18), decoration: InputDecoration(labelText: 'Phone Number', labelStyle: TextStyle(color: ZamzaColors.grey500), prefixText: '+91 ', prefixStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600), enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: ZamzaColors.grey200)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: ZamzaColors.primary)))),
         const SizedBox(height: 32),
-        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _sendOtp, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.orange), child: _loading ? const CircularProgressIndicator() : Text('Send OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
+        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _sendOtp, child: _loading ? const CircularProgressIndicator() : Text('Send OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
       ])))),
     );
   }
 }
 
-// ====================== OTP ======================
+// ============ OTP ============
 class OtpScreen extends StatefulWidget {
   final String phone, otp;
   const OtpScreen({super.key, required this.phone, required this.otp});
@@ -121,19 +164,22 @@ class _OtpScreenState extends State<OtpScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(backgroundColor: Colors.orange, body: SafeArea(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-      Text('Enter OTP', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white)),
-      const SizedBox(height: 8),
-      Text('Sent to ${widget.phone} (Dev: ${widget.otp})', style: const TextStyle(color: Colors.white70)),
-      const SizedBox(height: 40),
-      TextField(controller: _otpCtrl, keyboardType: TextInputType.number, maxLength: 6, style: const TextStyle(color: Colors.white, fontSize: 24, letterSpacing: 8), textAlign: TextAlign.center, decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white30)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: Colors.white)))),
-      const SizedBox(height: 32),
-      SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _verifyOtp, style: ElevatedButton.styleFrom(backgroundColor: Colors.white, foregroundColor: Colors.orange), child: _loading ? const CircularProgressIndicator() : Text('Verify OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
-    ]))));
+    return Scaffold(
+      backgroundColor: ZamzaColors.background,
+      body: SafeArea(child: Padding(padding: const EdgeInsets.all(32), child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+        Text('Enter OTP', style: GoogleFonts.poppins(fontSize: 28, fontWeight: FontWeight.bold, color: ZamzaColors.accent)),
+        const SizedBox(height: 8),
+        Text('Sent to ${widget.phone} (Dev: ${widget.otp})', style: TextStyle(color: ZamzaColors.grey500)),
+        const SizedBox(height: 40),
+        TextField(controller: _otpCtrl, keyboardType: TextInputType.number, maxLength: 6, style: const TextStyle(fontSize: 24, letterSpacing: 8), textAlign: TextAlign.center, decoration: InputDecoration(enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: ZamzaColors.grey200)), focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: const BorderSide(color: ZamzaColors.primary)))),
+        const SizedBox(height: 32),
+        SizedBox(width: double.infinity, height: 56, child: ElevatedButton(onPressed: _loading ? null : _verifyOtp, child: _loading ? const CircularProgressIndicator() : Text('Verify OTP', style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.w600)))),
+      ]))),
+    );
   }
 }
 
-// ====================== RIDER HOME (All features) ======================
+// ============ RIDER HOME (Tabs + Earnings Stats) ============
 class RiderHome extends StatefulWidget {
   const RiderHome({super.key});
   @override
@@ -178,7 +224,6 @@ class _RiderHomeState extends State<RiderHome> {
       final myRes = await http.get(Uri.parse('$apiBaseUrl/api/rider/orders/my'), headers: {'Authorization': 'Bearer $token'});
       if (newRes.statusCode == 200 && myRes.statusCode == 200) {
         final myOrders = json.decode(myRes.body) as List;
-        // Calculate stats and history
         int deliveries = 0;
         double earnings = 0;
         List<dynamic> history = [];
@@ -219,114 +264,134 @@ class _RiderHomeState extends State<RiderHome> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Rider Dashboard'),
+        title: Text('Rider Dashboard', style: ZamzaText.heading3),
         actions: [
-          Switch(value: _isOnline, activeColor: Colors.green, onChanged: (v) => setState(() => _isOnline = v)),
-          IconButton(icon: const Icon(Icons.logout), onPressed: () async { final prefs = await SharedPreferences.getInstance(); await prefs.clear(); if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false); }),
+          Switch(value: _isOnline, activeColor: ZamzaColors.success, onChanged: (v) => setState(() => _isOnline = v)),
+          IconButton(icon: const Icon(Icons.logout), onPressed: () async {
+            final prefs = await SharedPreferences.getInstance();
+            await prefs.clear();
+            if (mounted) Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false);
+          }),
         ],
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
-          : DefaultTabController(
-              length: 3,
-              child: Column(children: [
-                const TabBar(
-                  labelColor: Colors.orange,
-                  unselectedLabelColor: Colors.grey,
-                  tabs: [Tab(text: 'New Orders'), Tab(text: 'Active'), Tab(text: 'History')],
+          : Column(
+              children: [
+                // Earnings & deliveries summary card
+                Container(
+                  margin: const EdgeInsets.all(16),
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(colors: [ZamzaColors.primary, ZamzaColors.secondary]),
+                    borderRadius: BorderRadius.circular(ZamzaRadius.lg),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      _statItem(Icons.check_circle, '$_totalDeliveries', 'Deliveries'),
+                      _statItem(Icons.currency_rupee, '₹${_totalEarnings.toStringAsFixed(0)}', 'Earnings'),
+                    ],
+                  ),
                 ),
                 Expanded(
-                  child: TabBarView(children: [
-                    // New Orders tab
-                    RefreshIndicator(
-                      onRefresh: _fetchOrders,
-                      child: _newOrders.isEmpty
-                          ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No new orders', style: TextStyle(color: Colors.grey.shade500))))])
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _newOrders.length,
-                              itemBuilder: (_, i) {
-                                final o = _newOrders[i];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: ListTile(
-                                    title: Text('Order #${o['id']} - ₹${o['total_amount']}'),
-                                    subtitle: Text(o['delivery_address'] ?? ''),
-                                    trailing: ElevatedButton(onPressed: () => _acceptOrder(o['id']), child: const Text('Accept')),
-                                  ),
-                                );
-                              },
-                            ),
-                    ),
-                    // Active orders tab
-                    RefreshIndicator(
-                      onRefresh: _fetchOrders,
-                      child: _myOrders.isEmpty
-                          ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No active orders', style: TextStyle(color: Colors.grey.shade500))))])
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _myOrders.length,
-                              itemBuilder: (_, i) {
-                                final o = _myOrders[i];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(12),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: [
-                                        Text('Order #${o['id']} - ₹${o['total_amount']}', style: const TextStyle(fontWeight: FontWeight.bold)),
-                                        const SizedBox(height: 4),
-                                        Text('Status: ${o['status']}'),
-                                        Text('Address: ${o['delivery_address'] ?? ''}'),
-                                        const SizedBox(height: 8),
-                                        Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                                          if (o['status'] == 'assigned')
-                                            ElevatedButton.icon(onPressed: () => _updateStatus(o['id'], 'picked_up'), icon: const Icon(Icons.shopping_bag), label: const Text('Picked Up')),
-                                          if (o['status'] == 'picked_up')
-                                            ElevatedButton.icon(onPressed: () => _updateStatus(o['id'], 'delivered'), icon: const Icon(Icons.check), label: const Text('Delivered'), style: ElevatedButton.styleFrom(backgroundColor: Colors.green)),
-                                        ]),
-                                      ],
+                  child: DefaultTabController(
+                    length: 3,
+                    child: Column(children: [
+                      TabBar(
+                        labelColor: ZamzaColors.primary,
+                        unselectedLabelColor: ZamzaColors.grey500,
+                        indicatorColor: ZamzaColors.primary,
+                        tabs: const [Tab(text: 'New'), Tab(text: 'Active'), Tab(text: 'History')],
+                      ),
+                      Expanded(
+                        child: TabBarView(children: [
+                          // New Orders
+                          RefreshIndicator(
+                            onRefresh: _fetchOrders,
+                            child: _newOrders.isEmpty
+                                ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No new orders', style: TextStyle(color: ZamzaColors.grey500))))])
+                                : ListView.builder(
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: _newOrders.length,
+                                    itemBuilder: (_, i) => Card(
+                                      child: ListTile(
+                                        title: Text('Order #${_newOrders[i]['id']} - ₹${_newOrders[i]['total_amount']}'),
+                                        subtitle: Text(_newOrders[i]['delivery_address'] ?? ''),
+                                        trailing: ElevatedButton(
+                                          onPressed: () => _acceptOrder(_newOrders[i]['id']),
+                                          child: const Text('Accept'),
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                );
-                              },
-                            ),
-                    ),
-                    // History tab
-                    RefreshIndicator(
-                      onRefresh: _fetchOrders,
-                      child: _deliveryHistory.isEmpty
-                          ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No deliveries yet', style: TextStyle(color: Colors.grey.shade500))))])
-                          : ListView.builder(
-                              padding: const EdgeInsets.all(16),
-                              itemCount: _deliveryHistory.length,
-                              itemBuilder: (_, i) {
-                                final o = _deliveryHistory[i];
-                                return Card(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  child: ListTile(
-                                    title: Text('Order #${o['id']}'),
-                                    subtitle: Text('₹${o['total_amount']}'),
-                                    trailing: const Icon(Icons.check_circle, color: Colors.green),
+                          ),
+                          // Active Orders
+                          RefreshIndicator(
+                            onRefresh: _fetchOrders,
+                            child: _myOrders.isEmpty
+                                ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No active orders', style: TextStyle(color: ZamzaColors.grey500))))])
+                                : ListView.builder(
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: _myOrders.length,
+                                    itemBuilder: (_, i) {
+                                      final o = _myOrders[i];
+                                      return Card(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(12),
+                                          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                                            Text('Order #${o['id']} - ₹${o['total_amount']}', style: ZamzaText.body.copyWith(fontWeight: FontWeight.bold)),
+                                            const SizedBox(height: 4),
+                                            Text('Status: ${o['status']}', style: ZamzaText.caption),
+                                            Text('Address: ${o['delivery_address'] ?? ''}', style: ZamzaText.caption),
+                                            const SizedBox(height: 8),
+                                            Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
+                                              if (o['status'] == 'assigned')
+                                                ElevatedButton.icon(onPressed: () => _updateStatus(o['id'], 'picked_up'), icon: const Icon(Icons.shopping_bag), label: const Text('Picked Up')),
+                                              if (o['status'] == 'picked_up')
+                                                ElevatedButton.icon(onPressed: () => _updateStatus(o['id'], 'delivered'), icon: const Icon(Icons.check), label: const Text('Delivered'), style: ElevatedButton.styleFrom(backgroundColor: ZamzaColors.success)),
+                                            ]),
+                                          ]),
+                                        ),
+                                      );
+                                    },
                                   ),
-                                );
-                              },
-                            ),
-                    ),
-                  ]),
+                          ),
+                          // History
+                          RefreshIndicator(
+                            onRefresh: _fetchOrders,
+                            child: _deliveryHistory.isEmpty
+                                ? ListView(children: [Padding(padding: const EdgeInsets.all(32), child: Center(child: Text('No deliveries yet', style: TextStyle(color: ZamzaColors.grey500))))])
+                                : ListView.builder(
+                                    padding: const EdgeInsets.all(16),
+                                    itemCount: _deliveryHistory.length,
+                                    itemBuilder: (_, i) => Card(
+                                      child: ListTile(
+                                        title: Text('Order #${_deliveryHistory[i]['id']}'),
+                                        subtitle: Text('₹${_deliveryHistory[i]['total_amount']}'),
+                                        trailing: const Icon(Icons.check_circle, color: ZamzaColors.success),
+                                      ),
+                                    ),
+                                  ),
+                          ),
+                        ]),
+                      ),
+                    ]),
+                  ),
                 ),
-                // Stats summary at bottom
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  color: Colors.orange.shade50,
-                  child: Row(mainAxisAlignment: MainAxisAlignment.spaceEvenly, children: [
-                    Column(children: [Text('$_totalDeliveries', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.orange)), Text('Deliveries', style: TextStyle(color: Colors.grey.shade600))]),
-                    Column(children: [Text('₹${_totalEarnings.toStringAsFixed(0)}', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.green)), Text('Earnings', style: TextStyle(color: Colors.grey.shade600))]),
-                  ]),
-                ),
-              ]),
+              ],
             ),
+    );
+  }
+
+  Widget _statItem(IconData icon, String value, String label) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 28),
+        const SizedBox(height: 4),
+        Text(value, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.white)),
+        Text(label, style: TextStyle(color: Colors.white.withOpacity(0.8), fontSize: 12)),
+      ],
     );
   }
 }
