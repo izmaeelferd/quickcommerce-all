@@ -520,6 +520,72 @@ app.get('/api/products/:id', async (req, res) => {
     }
 });
 
+
+// Get reviews for a product (only approved)
+app.get('/api/products/:id/reviews', async (req, res) => {
+    try {
+        const result = await pool.query(
+            'SELECT r.*, u.phone FROM reviews r JOIN users u ON r.user_id = u.id WHERE r.product_id = $1 AND r.is_approved = true ORDER BY r.created_at DESC',
+            [req.params.id]
+        );
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Submit a review (customer)
+app.post('/api/products/:id/reviews', authMiddleware, async (req, res) => {
+    const userId = req.user.userId;
+    const productId = req.params.id;
+    const { rating, comment, order_id } = req.body;
+    if (!rating || rating < 1 || rating > 5) return res.status(400).json({ error: 'Rating required (1-5)' });
+
+    try {
+        // Optional: check if user already reviewed this order
+        const existing = await pool.query('SELECT * FROM reviews WHERE user_id=$1 AND order_id=$2', [userId, order_id]);
+        if (existing.rows.length > 0) return res.status(400).json({ error: 'Already reviewed this order' });
+
+        const result = await pool.query(
+            'INSERT INTO reviews (user_id, product_id, order_id, rating, comment) VALUES ($1,$2,$3,$4,$5) RETURNING *',
+            [userId, productId, order_id || null, rating, comment || '']
+        );
+        res.status(201).json(result.rows[0]);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: get all reviews (including unapproved)
+app.get('/api/admin/reviews', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT r.*, u.phone, p.name AS product_name FROM reviews r JOIN users u ON r.user_id = u.id JOIN products p ON r.product_id = p.id ORDER BY r.created_at DESC');
+        res.json(result.rows);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Admin: approve/delete review
+app.put('/api/admin/reviews/:id/approve', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        await pool.query('UPDATE reviews SET is_approved=true WHERE id=$1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+app.delete('/api/admin/reviews/:id', authMiddleware, adminMiddleware, async (req, res) => {
+    try {
+        await pool.query('DELETE FROM reviews WHERE id=$1', [req.params.id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+
 // ---------- START SERVER ----------
 httpServer.listen(port, () => {
     console.log(`Server running on http://localhost:${port}`);

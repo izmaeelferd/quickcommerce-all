@@ -162,6 +162,9 @@ class _AdminHomeState extends State<AdminHome> {
           NavigationDestination(icon: Icon(Icons.shopping_bag), label: 'Orders'),
           NavigationDestination(icon: Icon(Icons.delivery_dining), label: 'Riders'),
           NavigationDestination(icon: Icon(Icons.photo_library), label: 'Banners'),
+          NavigationDestination(icon: Icon(Icons.reviews), label: 'Reviews'),
+
+
         ],
       ),
     );
@@ -522,4 +525,72 @@ class _BannersTabState extends State<BannersTab> {
       );
     }),
   );
+}
+
+
+class ReviewsTab extends StatefulWidget {
+  const ReviewsTab({super.key});
+  @override
+  State<ReviewsTab> createState() => _ReviewsTabState();
+}
+
+class _ReviewsTabState extends State<ReviewsTab> {
+  List<dynamic> _reviews = [];
+  bool _loading = true;
+
+  Future<String> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString('token') ?? '';
+  }
+
+  @override
+  void initState() { super.initState(); _fetchReviews(); }
+
+  Future<void> _fetchReviews() async {
+    final token = await _getToken();
+    try {
+      final res = await http.get(Uri.parse('$apiBaseUrl/api/admin/reviews'), headers: {'Authorization': 'Bearer $token'});
+      if (res.statusCode == 200) setState(() { _reviews = json.decode(res.body); _loading = false; });
+    } catch (e) { setState(() => _loading = false); }
+  }
+
+  Future<void> _approveReview(int id) async {
+    final token = await _getToken();
+    await http.put(Uri.parse('$apiBaseUrl/api/admin/reviews/$id/approve'), headers: {'Authorization': 'Bearer $token'});
+    _fetchReviews();
+  }
+
+  Future<void> _deleteReview(int id) async {
+    final token = await _getToken();
+    await http.delete(Uri.parse('$apiBaseUrl/api/admin/reviews/$id'), headers: {'Authorization': 'Bearer $token'});
+    _fetchReviews();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _loading
+        ? const Center(child: CircularProgressIndicator())
+        : ListView.builder(
+            padding: const EdgeInsets.all(16),
+            itemCount: _reviews.length,
+            itemBuilder: (_, i) {
+              final r = _reviews[i];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  title: Row(children: List.generate(5, (star) => Icon(star < r['rating'] ? Icons.star : Icons.star_border, color: Colors.amber, size: 18))),
+                  subtitle: Text('${r['comment'] ?? ''}\nProduct: ${r['product_name']} | By: ${r['phone']}'),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (!r['is_approved'])
+                        IconButton(icon: const Icon(Icons.check, color: Colors.green), onPressed: () => _approveReview(r['id'])),
+                      IconButton(icon: const Icon(Icons.delete, color: Colors.red), onPressed: () => _deleteReview(r['id'])),
+                    ],
+                  ),
+                ),
+              );
+            },
+          );
+  }
 }

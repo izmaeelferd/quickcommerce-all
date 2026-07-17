@@ -1,7 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
+import 'package:http/http.dart' as http;
 import 'package:zepto_clone/core/theme/app_theme.dart';
-import 'package:zepto_clone/main.dart' show Product; // adjust if needed
+import 'package:zepto_clone/main.dart' show Product, apiBaseUrl;
 
 class ProductDetailPage extends StatefulWidget {
   final Product product;
@@ -28,7 +29,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   int _currentImage = 0;
 
   List<String> get _images {
-    if (widget.product.imageUrl != null && widget.product.imageUrl!.isNotEmpty) {
+    if (widget.product.imageUrl != null &&
+        widget.product.imageUrl!.isNotEmpty) {
       return [widget.product.imageUrl!, widget.product.imageUrl!];
     }
     return [
@@ -60,6 +62,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
         children: [
           CustomScrollView(
             slivers: [
+              // Image gallery
               SliverToBoxAdapter(
                 child: Stack(
                   children: [
@@ -67,7 +70,8 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                       height: 350,
                       child: PageView.builder(
                         controller: _imageController,
-                        onPageChanged: (i) => setState(() => _currentImage = i),
+                        onPageChanged: (i) =>
+                            setState(() => _currentImage = i),
                         itemCount: _images.length,
                         itemBuilder: (_, i) => Container(
                           color: ZamzaColors.card,
@@ -76,23 +80,27 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                             fit: BoxFit.contain,
                             errorBuilder: (_, __, ___) => Container(
                               color: ZamzaColors.grey200,
-                              child: const Icon(Icons.image, size: 80, color: ZamzaColors.grey500),
+                              child: const Icon(Icons.image,
+                                  size: 80, color: ZamzaColors.grey500),
                             ),
                           ),
                         ),
                       ),
                     ),
+                    // Back button
                     Positioned(
                       top: MediaQuery.of(context).padding.top + 8,
                       left: 16,
                       child: CircleAvatar(
                         backgroundColor: ZamzaColors.card.withOpacity(0.9),
                         child: IconButton(
-                          icon: const Icon(Icons.arrow_back, color: ZamzaColors.accent),
+                          icon: const Icon(Icons.arrow_back,
+                              color: ZamzaColors.accent),
                           onPressed: () => Navigator.pop(context),
                         ),
                       ),
                     ),
+                    // Wishlist button
                     Positioned(
                       top: MediaQuery.of(context).padding.top + 8,
                       right: 16,
@@ -100,13 +108,18 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         backgroundColor: ZamzaColors.card.withOpacity(0.9),
                         child: IconButton(
                           icon: Icon(
-                            widget.isFavorite ? Icons.favorite : Icons.favorite_border,
-                            color: widget.isFavorite ? Colors.red : ZamzaColors.accent,
+                            widget.isFavorite
+                                ? Icons.favorite
+                                : Icons.favorite_border,
+                            color: widget.isFavorite
+                                ? Colors.red
+                                : ZamzaColors.accent,
                           ),
                           onPressed: widget.onFavoriteToggle,
                         ),
                       ),
                     ),
+                    // Image dots
                     Positioned(
                       bottom: 16,
                       left: 0,
@@ -116,12 +129,15 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         children: List.generate(
                           _images.length,
                           (i) => Container(
-                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            margin:
+                                const EdgeInsets.symmetric(horizontal: 4),
                             width: 8,
                             height: 8,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: _currentImage == i ? ZamzaColors.primary : ZamzaColors.grey200,
+                              color: _currentImage == i
+                                  ? ZamzaColors.primary
+                                  : ZamzaColors.grey200,
                             ),
                           ),
                         ),
@@ -130,46 +146,62 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                   ],
                 ),
               ),
+              // Product info
               SliverToBoxAdapter(
                 child: Container(
                   margin: const EdgeInsets.only(top: 8),
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
                     color: ZamzaColors.card,
-                    borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.xl)),
+                    borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(ZamzaRadius.xl)),
                   ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(product.name, style: ZamzaText.heading2),
                       const SizedBox(height: 4),
-                      Text(product.category, style: ZamzaText.body.copyWith(color: ZamzaColors.grey500)),
+                      Text(product.category,
+                          style: ZamzaText.body
+                              .copyWith(color: ZamzaColors.grey500)),
                       const SizedBox(height: 16),
+                      // Price row
                       Row(
                         children: [
-                          Text('₹${product.price.toStringAsFixed(0)}', style: ZamzaText.price),
+                          Text('₹${product.price.toStringAsFixed(0)}',
+                              style: ZamzaText.price),
                           const SizedBox(width: 8),
-                          Text('MRP ₹${(product.price * 1.2).toStringAsFixed(0)}',
-                              style: ZamzaText.caption.copyWith(decoration: TextDecoration.lineThrough)),
+                          Text(
+                            'MRP ₹${(product.price * 1.2).toStringAsFixed(0)}',
+                            style: ZamzaText.caption.copyWith(
+                                decoration: TextDecoration.lineThrough),
+                          ),
                           const SizedBox(width: 8),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 2),
                             decoration: BoxDecoration(
                               color: ZamzaColors.primary.withOpacity(0.1),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text('20% OFF', style: ZamzaText.caption.copyWith(color: ZamzaColors.primary, fontWeight: FontWeight.w600)),
+                            child: Text('20% OFF',
+                                style: ZamzaText.caption.copyWith(
+                                    color: ZamzaColors.primary,
+                                    fontWeight: FontWeight.w600)),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
+                      // Rating & delivery (FIXED)
                       Row(
                         children: [
                           const Icon(Icons.star, size: 16, color: Colors.amber),
                           const SizedBox(width: 4),
                           Text('4.5 (120 reviews)', style: ZamzaText.caption),
                           const Spacer(),
-                          Text('Delivery in 10 mins', style: ZamzaText.caption.copyWith(color: ZamzaColors.primary)),
+                          Text('Delivery in 10 mins',
+                              style: ZamzaText.caption.copyWith(
+                                  color: ZamzaColors.primary)),
                         ],
                       ),
                       const Divider(height: 32),
@@ -180,16 +212,64 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         style: ZamzaText.body,
                       ),
                       const SizedBox(height: 24),
-                      Text('Nutritional Facts', style: ZamzaText.heading3),
+                      Text('Nutritional Facts',
+                          style: ZamzaText.heading3),
                       const SizedBox(height: 8),
                       Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        mainAxisAlignment:
+                            MainAxisAlignment.spaceAround,
                         children: [
                           _nutritionChip('Calories', '52 kcal'),
                           _nutritionChip('Protein', '1.3 g'),
                           _nutritionChip('Carbs', '12 g'),
                           _nutritionChip('Fat', '0.2 g'),
                         ],
+                      ),
+                      const SizedBox(height: 24),
+                      // Reviews section
+                      FutureBuilder(
+                        future: http.get(Uri.parse(
+                            '$apiBaseUrl/api/products/${product.id}/reviews')),
+                        builder: (ctx, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          }
+                          if (!snapshot.hasData ||
+                              snapshot.data!.statusCode != 200) {
+                            return Text('Could not load reviews',
+                                style: ZamzaText.caption);
+                          }
+                          final reviews = json
+                              .decode(snapshot.data!.body) as List;
+                          return Column(
+                            crossAxisAlignment:
+                                CrossAxisAlignment.start,
+                            children: [
+                              Text('Reviews (${reviews.length})',
+                                  style: ZamzaText.heading3),
+                              const SizedBox(height: 12),
+                              if (reviews.isEmpty)
+                                Text('No reviews yet',
+                                    style: ZamzaText.caption),
+                              ...reviews.take(3).map((r) => ListTile(
+                                    leading: const CircleAvatar(
+                                        child: Icon(Icons.person)),
+                                    title: Row(
+                                      children: List.generate(
+                                        r['rating'] as int,
+                                        (_) => const Icon(Icons.star,
+                                            size: 16,
+                                            color: Colors.amber),
+                                      ),
+                                    ),
+                                    subtitle:
+                                        Text(r['comment'] ?? ''),
+                                  )),
+                            ],
+                          );
+                        },
                       ),
                       const SizedBox(height: 32),
                     ],
@@ -198,6 +278,7 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
               ),
             ],
           ),
+          // Bottom Add to Cart bar
           Positioned(
             bottom: 0,
             left: 0,
@@ -214,29 +295,41 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                     if (quantity > 0) ...[
                       GestureDetector(
                         onTap: () => widget.onAddToCart(product),
-                        child: const Icon(Icons.remove_circle, color: ZamzaColors.primary, size: 32),
+                        child: const Icon(Icons.remove_circle,
+                            color: ZamzaColors.primary, size: 32),
                       ),
                       Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('$quantity', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text('$quantity',
+                            style: const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w600)),
                       ),
                       GestureDetector(
                         onTap: () => widget.onAddToCart(product),
-                        child: const Icon(Icons.add_circle, color: ZamzaColors.primary, size: 32),
+                        child: const Icon(Icons.add_circle,
+                            color: ZamzaColors.primary, size: 32),
                       ),
                     ],
                     const Spacer(),
                     if (quantity == 0)
                       Expanded(
                         child: ElevatedButton.icon(
-                          onPressed: () => widget.onAddToCart(product),
-                          icon: const Icon(Icons.shopping_cart_outlined),
+                          onPressed: () =>
+                              widget.onAddToCart(product),
+                          icon: const Icon(
+                              Icons.shopping_cart_outlined),
                           label: const Text('Add to Cart'),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ZamzaColors.primary,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ZamzaRadius.md),
+                            ),
                           ),
                         ),
                       )
@@ -245,7 +338,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                         child: ElevatedButton.icon(
                           onPressed: () {
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(content: Text('Added to cart!')),
+                              const SnackBar(
+                                  content:
+                                      Text('Added to cart!')),
                             );
                             Navigator.pop(context);
                           },
@@ -254,8 +349,12 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
                           style: ElevatedButton.styleFrom(
                             backgroundColor: ZamzaColors.success,
                             foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(ZamzaRadius.md)),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                  ZamzaRadius.md),
+                            ),
                           ),
                         ),
                       ),
@@ -272,7 +371,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
   Widget _nutritionChip(String label, String value) {
     return Column(
       children: [
-        Text(value, style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600)),
+        Text(value,
+            style: ZamzaText.body
+                .copyWith(fontWeight: FontWeight.w600)),
         const SizedBox(height: 4),
         Text(label, style: ZamzaText.caption),
       ],

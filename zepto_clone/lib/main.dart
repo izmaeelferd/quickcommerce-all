@@ -1,4 +1,3 @@
-import 'package:zepto_clone/product_detail_page.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -10,6 +9,7 @@ import 'package:shimmer/shimmer.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:zepto_clone/core/theme/app_theme.dart';
+import 'package:zepto_clone/product_detail_page.dart';
 
 const String apiBaseUrl = 'http://192.168.0.65:3000';
 
@@ -94,6 +94,8 @@ class Product {
   final Color color;
   final String? imageUrl;
   bool isFavorite;
+  double? rating;
+  int? reviewCount;
 
   Product({
     required this.id,
@@ -103,6 +105,8 @@ class Product {
     required this.color,
     this.imageUrl,
     this.isFavorite = false,
+    this.rating,
+    this.reviewCount,
   });
 
   factory Product.fromJson(Map<String, dynamic> j) {
@@ -114,6 +118,8 @@ class Product {
       price: double.parse(j['price'].toString()),
       color: _color(name),
       imageUrl: j['image_url'],
+      rating: j['rating'] != null ? double.tryParse(j['rating'].toString()) : null,
+      reviewCount: j['review_count'] != null ? int.tryParse(j['review_count'].toString()) : null,
     );
   }
 
@@ -542,81 +548,81 @@ class _ShopPageState extends State<ShopPage> {
     );
   }
 
-Widget _buildProductCard(Product p) {
-  final inCart = _cart.containsKey(p.name);
-  return GestureDetector(
-    onTap: () {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => ProductDetailPage(
-            product: p,
-            isFavorite: p.isFavorite,
-            onFavoriteToggle: () => _toggleFavorite(p),
-            onAddToCart: (prod) => _addToCart(prod),
-            cart: _cart,
-          ),
-        ),
-      );
-    },
-    child: Container(
-      decoration: BoxDecoration(
-        color: ZamzaColors.card,
-        borderRadius: BorderRadius.circular(ZamzaRadius.md),
-        boxShadow: const [ZamzaShadows.card],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Stack(children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.md)),
-              child: Image.network(
-                p.imageUrl ?? 'https://via.placeholder.com/300',
-                height: 120,
-                width: double.infinity,
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(height: 120, color: ZamzaColors.grey200, child: const Icon(Icons.image, color: ZamzaColors.grey500)),
-              ),
+  Widget _buildProductCard(Product p) {
+    final inCart = _cart.containsKey(p.name);
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => ProductDetailPage(
+              product: p,
+              isFavorite: p.isFavorite,
+              onFavoriteToggle: () => _toggleFavorite(p),
+              onAddToCart: (prod) => _addToCart(prod),
+              cart: _cart,
             ),
-            Positioned(top: 8, left: 8, child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(12)), child: Text('20% OFF', style: ZamzaText.caption.copyWith(color: Colors.white, fontSize: 10)))),
-            Positioned(top: 8, right: 8, child: GestureDetector(onTap: () => _toggleFavorite(p), child: Icon(p.isFavorite ? Icons.favorite : Icons.favorite_border, color: p.isFavorite ? Colors.red : Colors.white, size: 22))),
-          ]),
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(p.name, style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
-              const SizedBox(height: 4),
-              Row(children: [
-                const Icon(Icons.star, size: 14, color: Colors.amber),
-                const SizedBox(width: 4),
-                Text('4.5 (120)', style: ZamzaText.caption),
-                const Spacer(),
-                Text('10 min', style: ZamzaText.caption.copyWith(color: ZamzaColors.primary)),
-              ]),
-              const SizedBox(height: 8),
-              Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-                Text('₹${p.price.toStringAsFixed(0)}', style: ZamzaText.price),
-                if (!inCart)
-                  InkWell(
-                    onTap: () => _addToCart(p),
-                    child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.add, color: Colors.white, size: 18)),
-                  )
-                else
-                  Row(children: [
-                    GestureDetector(onTap: () => _removeFromCart(p), child: const Icon(Icons.remove_circle, color: ZamzaColors.primary, size: 20)),
-                    Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('${_cart[p.name]}', style: const TextStyle(fontWeight: FontWeight.w600))),
-                    GestureDetector(onTap: () => _addToCart(p), child: const Icon(Icons.add_circle, color: ZamzaColors.primary, size: 20)),
-                  ]),
-              ]),
-            ]),
           ),
-        ],
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: ZamzaColors.card,
+          borderRadius: BorderRadius.circular(ZamzaRadius.md),
+          boxShadow: const [ZamzaShadows.card],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(children: [
+              ClipRRect(
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(ZamzaRadius.md)),
+                child: Image.network(
+                  p.imageUrl ?? 'https://via.placeholder.com/300',
+                  height: 120,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) => Container(height: 120, color: ZamzaColors.grey200, child: const Icon(Icons.image, color: ZamzaColors.grey500)),
+                ),
+              ),
+              Positioned(top: 8, left: 8, child: Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(12)), child: Text('20% OFF', style: ZamzaText.caption.copyWith(color: Colors.white, fontSize: 10)))),
+              Positioned(top: 8, right: 8, child: GestureDetector(onTap: () => _toggleFavorite(p), child: Icon(p.isFavorite ? Icons.favorite : Icons.favorite_border, color: p.isFavorite ? Colors.red : Colors.white, size: 22))),
+            ]),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(p.name, style: ZamzaText.body.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 4),
+                Row(children: [
+                  const Icon(Icons.star, size: 14, color: Colors.amber),
+                  const SizedBox(width: 4),
+                  Text(p.rating?.toStringAsFixed(1) ?? '4.5', style: ZamzaText.caption),
+                  Text(' (${p.reviewCount ?? 120})', style: ZamzaText.caption),
+                  const Spacer(),
+                  Text('10 min', style: ZamzaText.caption.copyWith(color: ZamzaColors.primary)),
+                ]),
+                const SizedBox(height: 8),
+                Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                  Text('₹${p.price.toStringAsFixed(0)}', style: ZamzaText.price),
+                  if (!inCart)
+                    InkWell(
+                      onTap: () => _addToCart(p),
+                      child: Container(padding: const EdgeInsets.all(6), decoration: BoxDecoration(color: ZamzaColors.primary, borderRadius: BorderRadius.circular(8)), child: const Icon(Icons.add, color: Colors.white, size: 18)),
+                    )
+                  else
+                    Row(children: [
+                      GestureDetector(onTap: () => _removeFromCart(p), child: const Icon(Icons.remove_circle, color: ZamzaColors.primary, size: 20)),
+                      Padding(padding: const EdgeInsets.symmetric(horizontal: 8), child: Text('${_cart[p.name]}', style: const TextStyle(fontWeight: FontWeight.w600))),
+                      GestureDetector(onTap: () => _addToCart(p), child: const Icon(Icons.add_circle, color: ZamzaColors.primary, size: 20)),
+                    ]),
+                ]),
+              ]),
+            ),
+          ],
+        ),
       ),
-    ),
-  );
-}
-
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
