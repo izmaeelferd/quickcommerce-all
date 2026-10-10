@@ -1,0 +1,8 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Rider flavor only: GPS keeps streaming while the app is in the background via a
+         location foreground service (started while the rider is online, stopped when offline).
+         Customer and Partner builds do not declare these, so they need no background-location
+         declaration on Google Play. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+</manifest>

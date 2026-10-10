@@ -70,7 +70,8 @@ The repository ships `ios/Flutter/<flavor>.xcconfig` and `Debug-|Release-|Profil
 2. Runner project → Info → Configurations: duplicate Debug/Release/Profile as `Debug-customer`, `Release-customer`, `Profile-customer` (repeat for vendor and delivery) and set each one's base configuration file to the matching `Flutter/<Config>-<flavor>.xcconfig`.
 3. Product → Scheme → Manage Schemes: duplicate *Runner* into schemes named `customer`, `vendor`, `delivery`; set Run/Test/Profile/Analyze/Archive to the matching configurations.
 4. `cd ios && pod install`.
-5. Add `GoogleService-Info.plist` per flavor (Build Phase script copying `Firebase/<flavor>/GoogleService-Info.plist`), enable Push Notifications, Background Modes (location, remote notifications) and *Sign in with Apple* capabilities.
+5. Add `GoogleService-Info.plist` per flavor (Build Phase script copying `Firebase/<flavor>/GoogleService-Info.plist`), enable Push Notifications, Background Modes (remote notifications) and *Sign in with Apple* capabilities.
+6. **Rider target only — background location.** The shared `Info.plist` declares only *when-in-use* location so the Customer and Partner apps pass App Review. For the Rider target, use a separate Info.plist (target Build Settings → `INFOPLIST_FILE`) that adds `location` to `UIBackgroundModes` and an `NSLocationAlwaysAndWhenInUseUsageDescription` string, then build with `--dart-define=IOS_BACKGROUND_LOCATION=true`. Without both, rider GPS updates continue only while the app is open.
 6. Build: `flutter build ipa --flavor customer -t lib/main_customer.dart --dart-define-from-file=env/prod.json`.
 
 ## 6. Payments
@@ -88,3 +89,8 @@ Layouts use flexible lists/grids; grid column counts come from `homeLayout[].col
 | Maps blank | Missing `GOOGLE_MAPS_KEY` (Gradle/env for Android, xcconfig for iOS) |
 | Google sign-in fails | Add the client IDs to backend `GOOGLE_CLIENT_IDS` and pass `GOOGLE_SERVER_CLIENT_ID` |
 | No push | `google-services.json` / `GoogleService-Info.plist` missing; backend `FIREBASE_SERVICE_ACCOUNT_*` unset |
+
+## Permissions per flavor (Android)
+* `src/main/AndroidManifest.xml` — shared: internet, fine/coarse location (when in use), camera, notifications. `usesCleartextTraffic="false"`: release builds must use an `https://` API_BASE_URL.
+* `src/debug` and `src/profile` manifests re-enable cleartext so a local `http://` API works during development.
+* `src/delivery/AndroidManifest.xml` — Rider only: `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_LOCATION`. While the rider is online, GPS streams through a location foreground service with a persistent notification, so tracking survives backgrounding. No `ACCESS_BACKGROUND_LOCATION` is requested. On Play Console declare the *location* foreground-service type for the Rider app.

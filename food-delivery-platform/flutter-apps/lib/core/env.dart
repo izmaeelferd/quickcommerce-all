@@ -9,6 +9,9 @@ class Env {
   static const String apiPrefix = String.fromEnvironment('API_PREFIX', defaultValue: '/api');
   static const String googleMapsKey = String.fromEnvironment('GOOGLE_MAPS_KEY', defaultValue: '');
   static const String googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID', defaultValue: '');
+  /// Rider iOS builds only: set to true after adding the `location` background mode and
+  /// NSLocationAlwaysAndWhenInUseUsageDescription to the Rider target (docs/FLUTTER_BUILD_GUIDE.md).
+  static const bool iosBackgroundLocation = bool.fromEnvironment('IOS_BACKGROUND_LOCATION');
   static const String flavorName = String.fromEnvironment('FLAVOR', defaultValue: 'customer');
 
   static AppFlavor flavor = _parse(flavorName);

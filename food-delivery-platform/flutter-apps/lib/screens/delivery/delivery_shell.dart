@@ -36,7 +36,9 @@ class _DeliveryShellState extends ConsumerState<DeliveryShell> {
   /// Streams GPS to the backend while the partner is online.
   void _syncTracking(bool online) {
     if (online && _loc == null) {
-      _loc = LocationService.instance.stream().listen((p) => SocketService.instance.sendLocation(p.latitude, p.longitude, heading: p.heading, speed: p.speed));
+      _loc = LocationService.instance
+          .stream(background: true, notificationTitle: tr('delivery.trackingTitle'), notificationText: tr('delivery.trackingText'))
+          .listen((p) => SocketService.instance.sendLocation(p.latitude, p.longitude, heading: p.heading, speed: p.speed));
     } else if (!online && _loc != null) {
       _loc!.cancel();
       _loc = null;

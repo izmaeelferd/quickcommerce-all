@@ -4,15 +4,12 @@
 <dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Your location is used to show nearby restaurants and to track deliveries.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Your location is shared with customers while you are delivering an order.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera is used to take photos of food items and proof of delivery.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Photos are used for your profile, menu items and reviews.</string>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>location</string>
 		<string>remote-notification</string>
 		<string>fetch</string>
 	</array>
