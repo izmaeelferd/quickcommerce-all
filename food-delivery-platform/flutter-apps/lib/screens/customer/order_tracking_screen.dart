@@ -12,6 +12,7 @@ import '../../providers/config_provider.dart';
 import '../../providers/order_provider.dart';
 import '../../services/payment_service.dart';
 import '../../widgets/common/cards.dart';
+import '../../widgets/common/map_or_fallback.dart';
 import '../../widgets/common/states.dart';
 import '../../widgets/common/status_chip.dart';
 
@@ -212,12 +213,15 @@ class _TrackingMapState extends State<_TrackingMap> {
           infoWindow: InfoWindow(title: tr('order.yourRider')),
         ),
     };
-    return GoogleMap(
-      initialCameraPosition: CameraPosition(target: drop, zoom: 14),
-      markers: markers,
-      myLocationButtonEnabled: false,
-      zoomControlsEnabled: false,
-      onMapCreated: (c) => _map = c,
+    return MapOrFallback(
+      target: drop,
+      map: () => GoogleMap(
+        initialCameraPosition: CameraPosition(target: drop, zoom: 14),
+        markers: markers,
+        myLocationButtonEnabled: false,
+        zoomControlsEnabled: false,
+        onMapCreated: (c) => _map = c,
+      ),
     );
   }
 }

@@ -2,6 +2,9 @@
 
 A Zomato-style marketplace where **nothing visible is hardcoded**: theme, branding, home layout, banners, feature flags, business rules (fees, taxes, commission, tips, referral, wallet, timeouts), every UI string (multi-language, RTL), legal pages and maintenance mode live in MongoDB and are edited live from the Admin Panel.
 
+## Try every app in 1 command
+With Docker Desktop installed, run `./scripts/demo.sh` (Windows: `scripts\demo.ps1`). It starts the API, database, all three Flutter apps as web apps, the admin panel and the vendor dashboard, with demo data. See **[TESTING.md](TESTING.md)**.
+
 ## Quick start (3 commands)
 ```bash
 git clone <your-repo-url> && cd quickcommerce-all/food-delivery-platform

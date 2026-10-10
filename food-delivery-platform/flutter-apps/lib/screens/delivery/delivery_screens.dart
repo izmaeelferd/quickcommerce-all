@@ -18,6 +18,7 @@ import '../../services/location_service.dart';
 import '../../services/socket_service.dart';
 import '../../widgets/common/buttons.dart';
 import '../../widgets/common/cards.dart';
+import '../../widgets/common/map_or_fallback.dart';
 import '../../widgets/common/inputs.dart';
 import '../../widgets/common/states.dart';
 import '../../widgets/common/status_chip.dart';
@@ -259,11 +260,14 @@ class _ActiveDeliveryScreenState extends ConsumerState<ActiveDeliveryScreen> {
                 height: 220,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppColors.of(context).cardRadius),
-                  child: GoogleMap(
-                    initialCameraPosition: CameraPosition(target: LatLng(targetLat, targetLng), zoom: 14),
-                    myLocationEnabled: true,
-                    zoomControlsEnabled: false,
-                    markers: {Marker(markerId: const MarkerId('target'), position: LatLng(targetLat, targetLng))},
+                  child: MapOrFallback(
+                    target: LatLng(targetLat, targetLng),
+                    map: () => GoogleMap(
+                      initialCameraPosition: CameraPosition(target: LatLng(targetLat, targetLng), zoom: 14),
+                      myLocationEnabled: true,
+                      zoomControlsEnabled: false,
+                      markers: {Marker(markerId: const MarkerId('target'), position: LatLng(targetLat, targetLng))},
+                    ),
                   ),
                 ),
               ),

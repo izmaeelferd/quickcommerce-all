@@ -1,12 +1,13 @@
 # File manifest (bytes  path) — generated at packaging time
        122  .dockerignore
        427  .env.example
-       442  .gitignore
+       548  .gitignore
      13092  AUDIT_REPORT.md
        514  Dockerfile.admin
        347  Dockerfile.backend
        529  Dockerfile.vendor-dashboard
-      4690  README.md
+      4964  README.md
+      4479  TESTING.md
        273  admin-panel/.env.example
        386  admin-panel/index.html
        216  admin-panel/nginx.conf
@@ -134,7 +135,7 @@
       7408  backend/seeders/sampleData.js
       9808  backend/seeders/seedDatabase.js
      19439  backend/seeders/translations/en-admin.js
-     34896  backend/seeders/translations/en.js
+     34986  backend/seeders/translations/en.js
      17601  backend/seeders/translations/others.js
       2990  backend/server.js
       5589  backend/sockets/orderTracking.js
@@ -153,6 +154,8 @@
        875  backend/utils/sms.js
       1680  backend/utils/storage.js
        952  backend/utils/tokens.js
+      2552  demo/nginx.conf
+      1940  docker-compose.demo.yml
       1469  docker-compose.yml
      16651  docs/API_DOCUMENTATION.md
       2179  docs/APP_STORE_DEPLOYMENT.md
@@ -163,7 +166,7 @@
       7280  docs/FLUTTER_BUILD_GUIDE.md
       2244  docs/PLAY_STORE_DEPLOYMENT.md
        216  flutter-apps/.gitignore
-       262  flutter-apps/analysis_options.yaml
+       275  flutter-apps/analysis_options.yaml
        253  flutter-apps/android/.gitignore
       3475  flutter-apps/android/app/build.gradle.kts
        407  flutter-apps/android/app/proguard-rules.pro
@@ -258,7 +261,7 @@
        285  flutter-apps/ios/RunnerTests/RunnerTests.swift
       5541  flutter-apps/lib/core/api_client.dart
       6418  flutter-apps/lib/core/dynamic_theme.dart
-      1724  flutter-apps/lib/core/env.dart
+      2076  flutter-apps/lib/core/env.dart
       1311  flutter-apps/lib/core/formatters.dart
       6262  flutter-apps/lib/core/routes.dart
       1706  flutter-apps/lib/core/translation_manager.dart
@@ -293,7 +296,7 @@
       3402  flutter-apps/lib/screens/customer/onboarding_screen.dart
       2505  flutter-apps/lib/screens/customer/order_confirmation_screen.dart
       4868  flutter-apps/lib/screens/customer/order_history_screen.dart
-     12219  flutter-apps/lib/screens/customer/order_tracking_screen.dart
+     12342  flutter-apps/lib/screens/customer/order_tracking_screen.dart
       5118  flutter-apps/lib/screens/customer/payment_screen.dart
       2782  flutter-apps/lib/screens/customer/profile_screens.dart
       4196  flutter-apps/lib/screens/customer/rate_review_screen.dart
@@ -301,7 +304,7 @@
      17412  flutter-apps/lib/screens/customer/restaurant_detail_screen.dart
       5615  flutter-apps/lib/screens/customer/search_screen.dart
       4294  flutter-apps/lib/screens/customer/wallet_screen.dart
-     30690  flutter-apps/lib/screens/delivery/delivery_screens.dart
+     30877  flutter-apps/lib/screens/delivery/delivery_screens.dart
       3156  flutter-apps/lib/screens/delivery/delivery_shell.dart
      15443  flutter-apps/lib/screens/shared/auth_screens.dart
       1412  flutter-apps/lib/screens/shared/legal_screen.dart
@@ -326,6 +329,7 @@
        576  flutter-apps/lib/widgets/common/feature_gate.dart
        838  flutter-apps/lib/widgets/common/feature_route.dart
       2931  flutter-apps/lib/widgets/common/inputs.dart
+      1629  flutter-apps/lib/widgets/common/map_or_fallback.dart
       3695  flutter-apps/lib/widgets/common/states.dart
        897  flutter-apps/lib/widgets/common/status_chip.dart
       5044  flutter-apps/lib/widgets/dynamic/banner_widget.dart
@@ -338,6 +342,16 @@
      40745  flutter-apps/pubspec.lock
        995  flutter-apps/pubspec.yaml
       2103  flutter-apps/test/models_test.dart
+       934  flutter-apps/web/favicon.png
+      7718  flutter-apps/web/icons/Icon-192.png
+     21666  flutter-apps/web/icons/Icon-512.png
+      7718  flutter-apps/web/icons/Icon-maskable-192.png
+     21666  flutter-apps/web/icons/Icon-maskable-512.png
+      1715  flutter-apps/web/index.html
+       907  flutter-apps/web/manifest.json
+      1229  scripts/build-web-demo.sh
+      2733  scripts/demo.ps1
+      2199  scripts/demo.sh
        747  scripts/seed-database.js
       2698  scripts/setup.sh
        273  vendor-dashboard/.env.example

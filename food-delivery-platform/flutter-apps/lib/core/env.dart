@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// Build-time environment. Everything here comes from `--dart-define`,
 /// never from source: `flutter run --flavor customer -t lib/main_customer.dart
 /// --dart-define=API_BASE_URL=https://api.example.com`.
@@ -5,7 +7,10 @@ enum AppFlavor { customer, vendor, delivery }
 
 class Env {
   /// Required. No fallback is compiled in, so a build can never silently point at a dev server.
-  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  /// `API_BASE_URL=origin` (web builds only) means "same host that served the app", for builds
+  /// served behind a reverse proxy that forwards /api, /socket.io and /uploads (see docker-compose.demo.yml).
+  static const String _apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static String get apiBaseUrl => _apiBaseUrl == 'origin' && kIsWeb ? Uri.base.origin : _apiBaseUrl;
   static const String apiPrefix = String.fromEnvironment('API_PREFIX', defaultValue: '/api');
   static const String googleMapsKey = String.fromEnvironment('GOOGLE_MAPS_KEY', defaultValue: '');
   static const String googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID', defaultValue: '');

@@ -30,3 +30,6 @@ backend/uploads/*
 *.log
 backend/api.log
 backend/api.pid
+
+# Prebuilt demo web apps (shipped in the all-in-one zip, rebuilt by scripts/build-web-demo.sh)
+demo/web/
