@@ -1,0 +1,60 @@
+# Full stack: MongoDB + API + Admin Panel + Vendor Dashboard.
+#   cp backend/.env.example backend/.env   # then edit secrets
+#   docker compose up -d --build
+#   docker compose exec backend npm run seed
+services:
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    restart: unless-stopped
+    env_file: ./backend/.env
+    environment:
+      MONGO_URI: mongodb://mongo:27017/food_delivery
+      PORT: 5000
+    ports:
+      - "${API_PORT:-5000}:5000"
+    volumes:
+      - uploads:/app/uploads
+    depends_on:
+      mongo:
+        condition: service_healthy
+
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:5000}
+    restart: unless-stopped
+    ports:
+      - "${ADMIN_PORT:-5173}:80"
+    depends_on:
+      - backend
+
+  vendor-dashboard:
+    build:
+      context: .
+      dockerfile: Dockerfile.vendor-dashboard
+      args:
+        VITE_API_BASE_URL: ${PUBLIC_API_URL:-http://localhost:5000}
+    restart: unless-stopped
+    ports:
+      - "${VENDOR_PORT:-5174}:80"
+    depends_on:
+      - backend
+
+volumes:
+  mongo_data:
+  uploads:

@@ -1,0 +1,11 @@
+**/node_modules
+**/dist
+**/build
+**/.dart_tool
+**/.env
+!**/.env.example
+**/*.log
+flutter-apps
+docs
+backend/uploads/*
+.git

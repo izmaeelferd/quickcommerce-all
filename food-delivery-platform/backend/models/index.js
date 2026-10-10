@@ -1,0 +1,17 @@
+module.exports = {
+  AppConfig: require('./AppConfig'),
+  Banner: require('./Banner'),
+  Translation: require('./Translation'),
+  User: require('./User'),
+  AdminRole: require('./AdminRole'),
+  Restaurant: require('./Restaurant'),
+  Category: require('./Category'),
+  MenuCategory: require('./MenuCategory'),
+  MenuItem: require('./MenuItem'),
+  Order: require('./Order'),
+  Transaction: require('./Transaction'),
+  Coupon: require('./Coupon'),
+  Review: require('./Review'),
+  DeliveryPartner: require('./DeliveryPartner'),
+  Notification: require('./Notification'),
+};

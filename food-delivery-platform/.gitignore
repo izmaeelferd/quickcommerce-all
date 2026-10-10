@@ -1,0 +1,30 @@
+# dependencies & builds
+node_modules/
+dist/
+build/
+coverage/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.iml
+.idea/
+.vscode/
+.DS_Store
+
+# env & secrets
+.env
+!.env.example
+backend/.env
+admin-panel/.env
+vendor-dashboard/.env
+*.keystore
+*.jks
+key.properties
+google-services.json
+GoogleService-Info.plist
+firebase-service-account*.json
+
+# runtime
+backend/uploads/*
+!backend/uploads/.gitkeep
+*.log
