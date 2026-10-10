@@ -87,3 +87,6 @@ ADMIN_DEFAULT_PASSWORD="<seeded password>" API_URL=http://localhost:5000/api npm
 npm run test:scheduler                                                     # background jobs
 cd ../flutter-apps && flutter analyze && flutter test
 ```
+
+### RUN_SCHEDULER
+`true` (default) runs the background jobs (vendor-accept and unpaid-payment timeouts) in this API process. When you run more than one API instance against the same database, set `RUN_SCHEDULER=false` on all but one of them.

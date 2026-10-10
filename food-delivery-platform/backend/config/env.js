@@ -25,6 +25,8 @@ const env = {
   },
   otpExpiryMinutes: num(process.env.OTP_EXPIRY_MINUTES, 10),
   otpMaxAttempts: num(process.env.OTP_MAX_ATTEMPTS, 5),
+  // Background jobs (accept/payment timeouts). Set RUN_SCHEDULER=false on every API instance but one.
+  runScheduler: process.env.RUN_SCHEDULER !== 'false',
   otpResendSeconds: num(process.env.OTP_RESEND_SECONDS, 30),
   bcryptRounds: num(process.env.BCRYPT_ROUNDS, 10),
   google: { clientIds: list(process.env.GOOGLE_CLIENT_IDS) },

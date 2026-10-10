@@ -67,7 +67,7 @@ async function start() {
     throw new Error('Unsafe production configuration — fix the variables above in backend/.env');
   }
   await connectDatabase();
-  startScheduler();
+  if (env.runScheduler) startScheduler();
   server.listen(env.port, () => console.log(`[server] listening on :${env.port} (${env.nodeEnv})`));
 }
 

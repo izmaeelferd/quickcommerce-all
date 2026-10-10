@@ -110,7 +110,10 @@ async function refundCancelled(order, penaltyPercent = 0) {
         await Transaction.create({ user: order.customer._id || order.customer, order: order._id, type: 'refund', direction: 'credit', amount: refund, currencyCode, provider: gateway.provider(), providerRef: r.id });
         order.payment.status = penalty > 0 ? 'partially_refunded' : 'refunded';
       } catch (e) {
-        console.error('[refund] gateway refund failed', e.message);
+        // Never leave a cancelled, paid order unrefunded: fall back to the wallet.
+        console.error('[refund] gateway refund failed, crediting wallet', e.message);
+        await creditWallet(order.customer._id || order.customer, refund, { type: 'refund', order: order._id, description: 'order.refund', currencyCode });
+        order.payment.status = penalty > 0 ? 'partially_refunded' : 'refunded';
       }
     }
   }

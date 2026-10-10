@@ -135,5 +135,6 @@ Then: log in at `https://admin.example.com` with `ADMIN_DEFAULT_EMAIL`, **change
 ## 7. Operations
 * **Backups**: Path A `docker compose exec -T mongo mongodump --archive --gzip > backup-$(date +%F).gz`; Path B `mongodump --archive=backup.gz --gzip`. Schedule with cron and copy off-site; back up `uploads` too (or use `UPLOAD_DRIVER=s3`).
 * **Logs**: `docker compose logs -f backend` / `pm2 logs food-api`.
-* **Background jobs** (vendor accept timeout, unpaid-order timeout) run inside the API process every minute — run exactly one scheduler per database, or set the timeouts to 0 on extra instances.
+* **Payment webhooks** keep working during maintenance mode (`/api/payments/webhook/*` is always allowed).
+* **Background jobs** (vendor accept timeout, unpaid-order timeout) run inside the API process every minute — run exactly one scheduler per database: set `RUN_SCHEDULER=false` on every additional API instance.
 * **Scaling**: multiple API instances need sticky sessions (or the Socket.io Redis adapter) for realtime events.

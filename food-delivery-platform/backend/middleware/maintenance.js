@@ -4,7 +4,7 @@ const { getConfig } = require('../utils/configCache');
  * Blocks non-admin API traffic when maintenance mode is on.
  * Clients send `X-App-Type: customer|vendor|delivery|admin|vendor-web`.
  */
-const ALLOW_PREFIXES = ['/config', '/auth/login', '/auth/refresh-token', '/admin', '/health', '/translations'];
+const ALLOW_PREFIXES = ['/config', '/auth/login', '/auth/refresh-token', '/admin', '/health', '/translations', '/payments/webhook'];
 
 const maintenanceGuard = async (req, res, next) => {
   try {
