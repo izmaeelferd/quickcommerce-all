@@ -2,6 +2,8 @@
 
 All collections have `createdAt` / `updatedAt`. `→` denotes an ObjectId reference.
 
+Indexes are declared on the schemas and created explicitly at API start-up and by the seeder (`ensureIndexes()` in `config/database.js`), because Mongoose `autoIndex` is disabled in production.
+
 ## appconfigs (singleton, `key: "main"`)
 | Field | Type | Notes |
 |---|---|---|
@@ -11,10 +13,10 @@ All collections have `createdAt` / `updatedAt`. `→` denotes an ObjectId refere
 | onboarding | Object | enabled, pages[{title, description, imageUrl, order}] |
 | homeLayout | Array | {id, type (banner\|categories\|search\|restaurants\|offers\|cuisines\|featured\|topRated\|nearby\|reorder\|custom), enabled, order, title, titleKey, subtitle, layout (grid\|list\|carousel), columns, limit, filter{}, style{}} |
 | features | Object<Boolean> | wallet, coupons, tipping, reviews, favorites, referral, liveTracking, chatWithVendor, deliveryPartnerTips, scheduleOrder, vegOnlyFilter, searchFilters, googleSignIn, appleSignIn, otpLogin, emailNotifications, smsNotifications, pushNotifications, onboarding, darkModeToggle, deliveryPhotoProof, deliveryOtp |
-| businessRules | Object | currencySymbol, currencyCode, commissionPercent, deliveryFee{base, perKm, baseKm, freeAbove}, deliveryPartnerPayout{base, perKm, tipSharePercent}, taxPercent, taxLabel, packagingFee, platformFee, minOrderValue, maxTipPercent, tipPresets[], surgePricing{enabled, multiplier, reason}, radiusKm, cancellationWindowMinutes, cancellationPenaltyPercent, referralBonus, refereeBonus, walletMaxUsePercent, otpLogin, otpLength, autoAssignDelivery, vendorAcceptTimeoutMinutes, deliverySlots[{id,label,start,end,enabled}], paymentMethods{card, upi, wallet, cod, netbanking}, codMaxAmount, minPayoutAmount |
+| businessRules | Object | currencySymbol, currencyCode, commissionPercent, deliveryFee{base, perKm, baseKm, freeAbove}, deliveryPartnerPayout{base, perKm, tipSharePercent}, taxPercent, taxLabel, packagingFee, platformFee, minOrderValue, maxTipPercent, tipPresets[], surgePricing{enabled, multiplier, reason}, radiusKm, cancellationWindowMinutes, cancellationPenaltyPercent, referralBonus, refereeBonus, walletMaxUsePercent, otpLogin, otpLength, autoAssignDelivery, vendorAcceptTimeoutMinutes, paymentTimeoutMinutes, etaBufferMinutes, etaMinutesPerKm, deliveryOtpLength, deliverySlots[{id,label,start,end,enabled}], paymentMethods{card, upi, wallet, cod, netbanking}, codMaxAmount, minPayoutAmount |
 | legal | Object | privacyPolicy, termsAndConditions, refundPolicy, aboutUs (HTML) |
 | languages / defaultLanguage | [String] / String | Enabled language codes |
-| maintenance | Object | appInMaintenance, maintenanceMessage, maintenanceImageUrl, allowAdmins, affectedApps[] |
+| maintenance | Object | appInMaintenance, maintenanceMessage, maintenanceImageUrl, affectedApps[] |
 | appVersions | Object | customer/vendor/delivery → {minVersion, latestVersion, forceUpdate, storeUrlAndroid, storeUrlIos} |
 | updatedBy | → users | |
 
@@ -28,7 +30,7 @@ Keys are dotted (`cart.view`); because Mongoose maps cannot store `.`, keys are 
 `title, subtitle, imageUrl*, placement (home|offers|restaurant|cart), linkType (none|restaurant|category|cuisine|url|coupon), linkValue, order, startDate, endDate, isActive, backgroundColor, clicks`.
 
 ## users
-`name, email (unique sparse), phone (unique sparse), password (bcrypt, hidden), role (customer|vendor|delivery|admin|superadmin), adminRole → adminroles, avatar, addresses[{label, fullAddress, landmark, city, state, pincode, contactName, contactPhone, location GeoJSON Point, isDefault}], favorites → restaurants[], walletBalance, referralCode (unique), referredBy → users, referralRewarded, language, fcmTokens[], isVerified, isBanned, banReason, googleId, appleId, otp/otpExpires (hashed, hidden), resetPasswordToken/Expires (hashed, hidden), refreshTokens[] (hashed, hidden), notificationPrefs{push,email,sms}, lastLoginAt`.
+`name, email (unique sparse), phone (unique sparse), password (bcrypt, hidden), role (customer|vendor|delivery|admin|superadmin), adminRole → adminroles, avatar, addresses[{label, fullAddress, landmark, city, state, pincode, contactName, contactPhone, location GeoJSON Point, isDefault}], favorites → restaurants[], walletBalance, referralCode (unique), referredBy → users, referralRewarded, language, fcmTokens[], isVerified, isBanned, banReason, googleId, appleId, otp/otpExpires/otpAttempts/otpSentAt (hashed/hidden), resetAttempts (hidden), resetPasswordToken/Expires (hashed, hidden), refreshTokens[] (hashed, hidden), notificationPrefs{push,email,sms}, lastLoginAt`.
 
 ## adminroles
 `name (unique), description, permissions[]` from: dashboard, users, vendors, restaurants, categories, orders, transactions, coupons, delivery, notifications, reports, config, banners, translations, legal, roles, settings.

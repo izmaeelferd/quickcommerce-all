@@ -25,6 +25,7 @@ export const NAV = [
       { to: '/vendors', key: 'admin.nav.vendors', icon: '✅', perm: 'vendors' },
       { to: '/restaurants', key: 'admin.nav.restaurants', icon: '🍽️', perm: 'restaurants' },
       { to: '/categories', key: 'admin.nav.categories', icon: '🗂️', perm: 'categories' },
+      { to: '/reviews', key: 'admin.nav.reviews', icon: '⭐', perm: 'restaurants' },
       { to: '/delivery-partners', key: 'admin.nav.delivery', icon: '🛵', perm: 'delivery' },
       { to: '/users', key: 'admin.nav.users', icon: '👥', perm: 'users' },
     ],
@@ -54,7 +55,7 @@ export default function Sidebar({ open, onClose }) {
   const logo = config?.theme?.adminLogoUrl || config?.theme?.appIconUrl;
   return (
     <>
-      {open && <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={onClose} />}
+      {open && <div className="fixed inset-0 z-30 bg-scrim/40 lg:hidden" onClick={onClose} />}
       <aside className={`fixed inset-y-0 z-40 w-64 transform overflow-y-auto border-e border-content/10 bg-background transition lg:static lg:translate-x-0 ${open ? 'translate-x-0' : '-translate-x-full rtl:translate-x-full'}`}>
         <div className="flex items-center gap-3 px-5 py-5">
           {logo ? <img src={logo} alt="" className="h-9 w-9 rounded-btn object-cover" /> : <div className="h-9 w-9 rounded-btn bg-primary" />}

@@ -65,7 +65,11 @@ export default function BusinessRules() {
         <Card title={t('rules.group.cancellation')}>
           {num('cancellationWindowMinutes')}
           {num('cancellationPenaltyPercent')}
-          {num('vendorAcceptTimeoutMinutes')}
+          {num('vendorAcceptTimeoutMinutes', { hint: true })}
+          {num('paymentTimeoutMinutes', { hint: true })}
+          {num('etaBufferMinutes')}
+          {num('etaMinutesPerKm')}
+          {num('deliveryOtpLength')}
           <div className="flex items-end"><Toggle label={t('rules.autoAssignDelivery')} checked={!!draft.autoAssignDelivery} onChange={(v) => set('autoAssignDelivery', v)} /></div>
         </Card>
         <Card title={t('rules.group.wallet')}>

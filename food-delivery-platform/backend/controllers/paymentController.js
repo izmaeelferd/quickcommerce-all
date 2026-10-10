@@ -46,7 +46,9 @@ const createIntent = asyncHandler(async (req, res) => {
 });
 
 async function markOrderPaid(order, paymentId) {
-  if (order.payment.status === 'paid') return loadFull(order._id);
+  // Idempotent: atomically flip pending → paid so webhook + /verify can't double-process.
+  const flipped = await Order.findOneAndUpdate({ _id: order._id, 'payment.status': { $ne: 'paid' } }, { 'payment.status': 'paid' });
+  if (!flipped) return loadFull(order._id);
   const cfg = await getConfig();
   order.payment.status = 'paid';
   order.payment.paymentId = paymentId;
@@ -63,11 +65,36 @@ async function markOrderPaid(order, paymentId) {
     provider: order.payment.provider,
     providerRef: paymentId,
   });
+  // Payment arrived after the order was cancelled (e.g. payment timeout): refund it, never fulfil it.
+  if (order.status !== 'placed') {
+    const amount = order.pricing.payable;
+    try {
+      const r = await gateway.refund({ paymentId, amount });
+      await Transaction.create({ user: order.customer, order: order._id, type: 'refund', direction: 'credit', amount, currencyCode: cfg.businessRules.currencyCode, provider: gateway.provider(), providerRef: r.id, description: 'payment.lateRefund' });
+    } catch (e) {
+      await User.updateOne({ _id: order.customer }, { $inc: { walletBalance: amount } });
+      await Transaction.create({ user: order.customer, order: order._id, type: 'refund', direction: 'credit', amount, currencyCode: cfg.businessRules.currencyCode, description: 'payment.lateRefund' });
+    }
+    order.payment.status = 'refunded';
+    order.refundAmount = round2((order.refundAmount || 0) + amount);
+    await order.save();
+    return loadFull(order._id);
+  }
   const full = await loadFull(order._id);
   events.orderNew(full);
   const r = await Restaurant.findById(order.restaurant).select('owner');
   if (r) notifyUser(r.owner, { titleKey: 'notif.vendorNewOrder', bodyKey: 'notif.vendorNewOrderBody', vars: { order: full.orderNumber }, type: 'order', data: { orderId: full._id.toString() } }).catch(() => {});
   return full;
+}
+
+/** Credits a pending wallet top-up exactly once (used by both /verify and webhooks). */
+async function creditWalletTopup(intentId, paymentId, userId) {
+  const q = { providerRef: intentId, status: 'pending', type: 'wallet_credit' };
+  if (userId) q.user = userId;
+  const txn = await Transaction.findOneAndUpdate(q, { status: 'success', meta: { paymentId } }, { new: true });
+  if (!txn) return null;
+  await User.updateOne({ _id: txn.user }, { $inc: { walletBalance: txn.amount } });
+  return txn;
 }
 
 /** POST /api/payments/verify { orderId?, intentId, paymentId, signature } */
@@ -84,12 +111,8 @@ const verify = asyncHandler(async (req, res) => {
     const full = await markOrderPaid(order, result.paymentId);
     return ok(res, full, 'payment.success');
   }
-  const txn = await Transaction.findOne({ user: req.user._id, providerRef: intentId, status: 'pending', type: 'wallet_credit' });
-  if (!txn) throw new ApiError(404, 'payment.notFound');
-  txn.status = 'success';
-  txn.meta = { paymentId: result.paymentId };
-  await txn.save();
-  await User.updateOne({ _id: req.user._id }, { $inc: { walletBalance: txn.amount } });
+  const txn = await creditWalletTopup(intentId, result.paymentId, req.user._id);
+  if (!txn && !(await Transaction.exists({ user: req.user._id, providerRef: intentId, status: 'success' }))) throw new ApiError(404, 'payment.notFound');
   return ok(res, { walletBalance: (await User.findById(req.user._id)).walletBalance }, 'wallet.toppedUp');
 });
 
@@ -109,19 +132,24 @@ const webhook = asyncHandler(async (req, res) => {
       const intent = event.data.object;
       const order = await Order.findOne({ 'payment.intentId': intent.id });
       if (order) await markOrderPaid(order, intent.latest_charge || intent.id);
+      else await creditWalletTopup(intent.id, intent.latest_charge || intent.id);
     }
     return res.json({ received: true });
   }
   if (provider === 'razorpay') {
-    const sig = req.headers['x-razorpay-signature'];
-    const expected = crypto.createHmac('sha256', env.payments.razorpay.keySecret).update(req.rawBody || '').digest('hex');
-    if (sig !== expected) return res.status(400).send('invalid signature');
+    // Razorpay signs webhooks with the dashboard *webhook secret* (not the API key secret).
+    const secret = env.payments.razorpay.webhookSecret;
+    if (!secret) return res.status(503).send('webhook secret not configured');
+    const sig = String(req.headers['x-razorpay-signature'] || '');
+    const expected = crypto.createHmac('sha256', secret).update(req.rawBody || '').digest('hex');
+    if (sig.length !== expected.length || !crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expected))) return res.status(400).send('invalid signature');
     const body = req.body;
     if (body.event === 'payment.captured' || body.event === 'order.paid') {
       const pay = body.payload.payment && body.payload.payment.entity;
       if (pay && pay.order_id) {
         const order = await Order.findOne({ 'payment.intentId': pay.order_id });
         if (order) await markOrderPaid(order, pay.id);
+        else await creditWalletTopup(pay.order_id, pay.id);
       }
     }
     return res.json({ received: true });

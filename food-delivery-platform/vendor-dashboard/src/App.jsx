@@ -10,6 +10,7 @@ import Categories from './pages/Categories.jsx';
 import Payouts from './pages/Payouts.jsx';
 import Timings from './pages/Timings.jsx';
 import Settings from './pages/Settings.jsx';
+import Reviews from './pages/Reviews.jsx';
 
 export default function App() {
   const { config, error, t } = useConfig();
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="categories" element={<ProtectedRoute><Categories /></ProtectedRoute>} />
         <Route path="payouts" element={<ProtectedRoute><Payouts /></ProtectedRoute>} />
         <Route path="timings" element={<ProtectedRoute><Timings /></ProtectedRoute>} />
+        <Route path="reviews" element={<ProtectedRoute><Reviews /></ProtectedRoute>} />
         <Route path="settings" element={<Settings />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

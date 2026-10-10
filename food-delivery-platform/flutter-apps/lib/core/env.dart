@@ -4,7 +4,8 @@
 enum AppFlavor { customer, vendor, delivery }
 
 class Env {
-  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL', defaultValue: 'http://10.0.2.2:5000');
+  /// Required. No fallback is compiled in, so a build can never silently point at a dev server.
+  static const String apiBaseUrl = String.fromEnvironment('API_BASE_URL');
   static const String apiPrefix = String.fromEnvironment('API_PREFIX', defaultValue: '/api');
   static const String googleMapsKey = String.fromEnvironment('GOOGLE_MAPS_KEY', defaultValue: '');
   static const String googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID', defaultValue: '');
@@ -22,6 +23,8 @@ class Env {
         return AppFlavor.customer;
     }
   }
+
+  static bool get isConfigured => apiBaseUrl.startsWith('http');
 
   static String get apiUrl => '$apiBaseUrl$apiPrefix';
 

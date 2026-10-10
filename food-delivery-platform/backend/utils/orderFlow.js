@@ -20,6 +20,7 @@ const TRANSITIONS = {
     picked: ['delivered', 'cancelled'],
   },
   customer: { placed: ['cancelled'], accepted: ['cancelled'] },
+  system: { placed: ['rejected', 'cancelled'] },
 };
 
 function canTransition(actor, from, to) {
@@ -147,7 +148,9 @@ async function transition(order, to, { actor, by, note, extra = {} }) {
   Object.assign(order, extra);
   if (to === 'accepted') {
     const r = await Restaurant.findById(order.restaurant._id || order.restaurant).select('avgPrepTimeMinutes');
-    order.estimatedDeliveryAt = new Date(Date.now() + ((r && r.avgPrepTimeMinutes) || 0) * 60000 + 20 * 60000);
+    const rules = (await getConfig()).businessRules;
+    const travel = (rules.etaBufferMinutes || 0) + (order.distanceKm || 0) * (rules.etaMinutesPerKm || 0);
+    order.estimatedDeliveryAt = new Date(Date.now() + (((r && r.avgPrepTimeMinutes) || 0) + travel) * 60000);
   }
   if (to === 'delivered') {
     order.deliveredAt = new Date();

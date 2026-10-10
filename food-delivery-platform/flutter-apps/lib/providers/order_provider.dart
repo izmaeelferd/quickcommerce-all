@@ -37,6 +37,9 @@ class OrderTracker extends StateNotifier<TrackingState> {
     _subs.add(SocketService.instance.on('order:status-update').listen((d) {
       if (toStr(toMap(d)['orderId']) == orderId) _load();
     }));
+    _subs.add(SocketService.instance.on('order:accepted').listen((d) {
+      if (toStr(toMap(d)['_id']) == orderId) _load();
+    }));
     _subs.add(SocketService.instance.on('delivery:assigned').listen((d) {
       if (toStr(toMap(d)['orderId']) == orderId) _load();
     }));

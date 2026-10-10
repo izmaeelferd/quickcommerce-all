@@ -12,6 +12,8 @@ Base URL: `{PUBLIC_BASE_URL}{API_PREFIX}` (default `http://localhost:5000/api`).
 | Error envelope | `{ "success": false, "message": "<translation key>", "details": … }` |
 | Pagination | `?page=1&limit=20` → `data: { items, pagination: { page, limit, total, pages } }` |
 | Messages | Every `message` is a **translation key** (e.g. `coupon.expired`). Clients render it with the active language from `/api/config/translations/:lang`. |
+| Validation | Every mutating route validates its input (express-validator) → `422 validation.failed` with `details: [{field, message}]`. Keys starting with `$` or containing `.` are stripped from body/query/params (NoSQL-injection guard); query strings are parsed flat |
+| Rate limits | API-wide (`RATE_LIMIT_MAX` per window) and stricter on `/auth/*` (`AUTH_RATE_LIMIT_MAX`) → `429` |
 
 Roles: `customer`, `vendor`, `delivery`, `admin`, `superadmin`. Admins can be restricted by an **AdminRole** (permission list); `superadmin` and admins without a role have every permission.
 
@@ -31,7 +33,7 @@ Roles: `customer`, `vendor`, `delivery`, `admin`, `superadmin`. Admins can be re
 | PUT | `/admin/config/features` | `config` | e.g. `{ "wallet": false }` |
 | PUT | `/admin/config/business` | `config` | Business rules (partial) |
 | PUT | `/admin/config/legal` | `legal` | `{ privacyPolicy, termsAndConditions, refundPolicy, aboutUs }` (HTML) |
-| PUT | `/admin/config/maintenance` | `config` | `{ appInMaintenance, maintenanceMessage, maintenanceImageUrl, affectedApps[], allowAdmins }` |
+| PUT | `/admin/config/maintenance` | `config` | `{ appInMaintenance, maintenanceMessage, maintenanceImageUrl, affectedApps[] }` (admin and `/config` routes always stay reachable) |
 | PUT | `/admin/config/onboarding` | `config` | `{ enabled, pages:[{title, description, imageUrl, order}] }` |
 | PUT | `/admin/config/app-versions` | `config` | Per app `{ minVersion, latestVersion, forceUpdate, storeUrlAndroid, storeUrlIos }` |
 | PUT | `/admin/config/languages` | `translations` | `{ languages: ["en","hi"], defaultLanguage: "en" }` |
@@ -50,10 +52,10 @@ Every config write increments `version`, invalidates the server cache and emits 
 |---|---|---|---|
 | POST | `/auth/register` | `name, email?, phone?, password, role (customer\|vendor\|delivery), referralCode?, language?` | Returns `{ user, accessToken, refreshToken, restaurant?, deliveryProfile? }` |
 | POST | `/auth/login` | `identifier (email or phone), password, role?` | `role` makes the app reject accounts of another type (`auth.wrongApp`) |
-| POST | `/auth/send-otp` | `phone, role?` | Requires `features.otpLogin` and `businessRules.otpLogin`. In non-production the response includes `devOtp` |
-| POST | `/auth/verify-otp` | `phone, otp, name?, referralCode?` | Creates the user on first login (`isNewUser`) |
+| POST | `/auth/send-otp` | `phone, role?` | Requires `features.otpLogin` and `businessRules.otpLogin`. Resend cooldown `OTP_RESEND_SECONDS` → `429 auth.otpTooSoon`. In non-production the response includes `devOtp` |
+| POST | `/auth/verify-otp` | `phone, otp, name?, referralCode?` | Creates the user on first login (`isNewUser`). After `OTP_MAX_ATTEMPTS` wrong codes the OTP is burned → `auth.otpAttemptsExceeded` |
 | POST | `/auth/forgot-password` | `identifier` | Sends reset code by email/SMS |
-| POST | `/auth/reset-password` | `identifier, code, password` | Revokes all refresh tokens |
+| POST | `/auth/reset-password` | `identifier, code, password` | Revokes all refresh tokens; the code is burned after `OTP_MAX_ATTEMPTS` wrong tries |
 | POST | `/auth/refresh-token` | `refreshToken` | Rotates refresh token |
 | POST | `/auth/google-signin` | `idToken, role?` | Verified against `GOOGLE_CLIENT_IDS`; gated by `features.googleSignIn` |
 | POST | `/auth/apple-signin` | `identityToken, name?, role?` | Verified against Apple JWKS; gated by `features.appleSignIn` |
@@ -107,6 +109,8 @@ Status flow: `placed → accepted → preparing → ready → picked → deliver
 | GET | `/orders/vendor/stats` | vendor | Today, pending, totals, daily series, top items, effective commission % |
 | GET | `/orders/vendor/payouts` | vendor | Payout history + settlements |
 
+Background jobs (every minute, from `businessRules`): orders not accepted within `vendorAcceptTimeoutMinutes` are auto-rejected and refunded; online orders unpaid after `paymentTimeoutMinutes` are auto-cancelled (wallet and coupon restored). `0` disables a job. ETA = prep time + `etaBufferMinutes` + km × `etaMinutesPerKm`; delivery OTP length = `deliveryOtpLength`.
+
 Bill formula (all values from `businessRules`):
 ```
 deliveryFee = (subtotal ≥ freeAbove or free-delivery coupon) ? 0 : base + max(0, km − baseKm) × perKm
@@ -126,7 +130,7 @@ deliveryEarning = payout.base + km × payout.perKm + tip × tipSharePercent / 10
 |---|---|---|
 | POST | `/payments/create-intent` | 🔒 `{ orderId }` or `{ purpose: "wallet_topup", amount }` → Razorpay order or Stripe PaymentIntent (provider = `PAYMENT_PROVIDER`) with `publicKey`, branding and prefill |
 | POST | `/payments/verify` | 🔒 `{ orderId?, intentId, paymentId?, signature? }` — HMAC (Razorpay) or intent status (Stripe). Marks paid and emits `order:new` to the vendor |
-| POST | `/payments/webhook/:provider` | Gateway webhooks (`stripe`, `razorpay`) with signature verification |
+| POST | `/payments/webhook/:provider` | Gateway webhooks. Razorpay: HMAC-SHA256 of the raw body with `RAZORPAY_WEBHOOK_SECRET` (timing-safe); Stripe: `STRIPE_WEBHOOK_SECRET`. Confirms orders and wallet top-ups idempotently; a payment that arrives after the order was cancelled is refunded automatically |
 | POST | `/payments/refund` · `/admin/orders/:orderId/refund` | admin `{ orderId, amount?, toWallet? }` |
 | GET | `/payments/history` | 🔒 user transactions |
 
@@ -157,6 +161,7 @@ Orders [orders]: `GET /admin/orders`, `PATCH /admin/orders/:id/assign {partnerUs
 Finance [transactions]: `GET /admin/transactions?type=&from=&to=`, `POST /admin/payouts {kind: vendor|delivery, id, amount, reference}` ·
 Delivery [delivery]: `GET /admin/delivery-partners?status=&online=`, `PATCH /admin/delivery-partners/:id/status` ·
 Notifications [notifications]: `POST /admin/notifications/send {audience: all|customer|vendor|delivery, userIds?, title, body, imageUrl, channels:[push,inapp,email,sms], data}`, `GET /admin/notifications` ·
+Reviews [restaurants]: `GET /admin/reviews?maxRating=&visible=&restaurant=` (moderation; toggle with `PATCH /reviews/:id/visibility`) ·
 Reports [reports]: `GET /admin/reports?type=orders|restaurants|delivery|reviews&from&to&format=csv` ·
 Roles [roles]: `GET/POST /admin/roles`, `PUT/DELETE /admin/roles/:id`.
 

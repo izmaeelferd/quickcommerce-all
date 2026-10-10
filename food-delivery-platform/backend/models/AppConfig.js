@@ -154,6 +154,10 @@ const appConfigSchema = new Schema(
       otpLength: Number,
       autoAssignDelivery: Boolean,
       vendorAcceptTimeoutMinutes: Number,
+      paymentTimeoutMinutes: Number,
+      etaBufferMinutes: Number,
+      etaMinutesPerKm: Number,
+      deliveryOtpLength: Number,
       deliverySlots: [deliverySlotSchema],
       paymentMethods: {
         card: Boolean,
@@ -177,7 +181,6 @@ const appConfigSchema = new Schema(
       appInMaintenance: Boolean,
       maintenanceMessage: String,
       maintenanceImageUrl: String,
-      allowAdmins: Boolean,
       affectedApps: [String],
     },
     appVersions: {

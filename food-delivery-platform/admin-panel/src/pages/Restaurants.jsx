@@ -8,7 +8,7 @@ import ImageUpload from '../components/ImageUpload.jsx';
 import { TextField, TextArea, SelectField } from '../components/Field.jsx';
 import { useConfig } from '../context/ConfigContext.jsx';
 import { useToast } from '../components/Toast.jsx';
-import { get, put, post, errorKey } from '../services/api';
+import { get, put, post, del, errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
 
 const EMPTY = { name: '', description: '', cuisines: [], phone: '', email: '', address: { fullAddress: '', city: '' }, priceForTwo: 0, avgPrepTimeMinutes: 25, isPureVeg: false, isFeatured: false, offerText: '', logo: '', coverImage: '', commissionPercent: null, status: 'approved', owner: '' };
@@ -57,7 +57,7 @@ export default function Restaurants() {
           { key: 'status', label: t('common.status'), render: (r) => <StatusBadge status={r.status} /> },
         ]}
       />
-      <Modal open={!!form} onClose={() => setForm(null)} title={form?._id ? form.name : t('admin.addRestaurant')} size="xl" footer={<><button type="button" className="btn-ghost" onClick={() => setForm(null)}>{t('common.cancel')}</button><button type="button" className="btn-primary" onClick={save}>{t('common.save')}</button></>}>
+      <Modal open={!!form} onClose={() => setForm(null)} title={form?._id ? form.name : t('admin.addRestaurant')} size="xl" footer={<>{form?._id && <button type="button" className="btn-danger me-auto" onClick={async () => { if (!window.confirm(t('admin.deactivateRestaurantConfirm'))) return; try { await del(`/admin/restaurants/${form._id}`); toast('restaurant.deleted'); setForm(null); reload(); } catch (e) { toast(errorKey(e), 'error'); } }}>{t('admin.deactivateRestaurant')}</button>}<button type="button" className="btn-ghost" onClick={() => setForm(null)}>{t('common.cancel')}</button><button type="button" className="btn-primary" onClick={save}>{t('common.save')}</button></>}>
         {form && (
           <div className="grid gap-4 md:grid-cols-3">
             <ImageUpload label={t('vendor.logo')} value={form.logo} onChange={(v) => setForm({ ...form, logo: v })} folder="restaurants" aspect="aspect-square" />

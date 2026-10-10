@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const base = import.meta.env.VITE_API_BASE_URL || '';
+// VITE_API_URL is the backend origin (e.g. https://api.example.com). VITE_API_BASE_URL is accepted as a legacy alias.
+const base = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').replace(/\/+$/, '');
 const prefix = import.meta.env.VITE_API_PREFIX || '/api';
 export const API_URL = `${base}${prefix}`;
 export const SOCKET_URL = base || window.location.origin;

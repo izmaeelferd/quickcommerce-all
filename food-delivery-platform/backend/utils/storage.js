@@ -20,7 +20,7 @@ if (!fs.existsSync(uploadRoot)) fs.mkdirSync(uploadRoot, { recursive: true });
 
 /** Persists a multer memory file and returns its public URL. */
 async function saveFile(file, folder = 'misc') {
-  const ext = path.extname(file.originalname || '').toLowerCase() || '.bin';
+  const ext = (path.extname(file.originalname || '').toLowerCase().match(/^\.[a-z0-9]{1,5}$/) || ['.bin'])[0];
   const name = `${Date.now()}-${crypto.randomBytes(6).toString('hex')}${ext}`;
   const safeFolder = folder.replace(/[^a-z0-9_-]/gi, '') || 'misc';
 

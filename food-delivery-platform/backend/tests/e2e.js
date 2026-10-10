@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /**
  * End-to-end smoke test against a running API seeded with `npm run seed:reset`.
- *   API_URL=http://localhost:5000/api node tests/e2e.js
+ *   ADMIN_DEFAULT_PASSWORD=... API_URL=http://localhost:5000/api node tests/e2e.js
  * Exercises: dynamic config, translations, admin config edits, customer ordering,
  * vendor status flow, rider dispatch with OTP + photo proof, settlement, reviews, reports.
  */
@@ -10,7 +10,11 @@ const { io } = require('socket.io-client');
 
 const API = process.env.API_URL || 'http://localhost:5000/api';
 const PASSWORD = process.env.SEED_SAMPLE_PASSWORD || 'Password@123';
-const ADMIN = { id: process.env.SEED_ADMIN_EMAIL || 'admin@example.com', pw: process.env.SEED_ADMIN_PASSWORD || 'Admin@123' };
+const ADMIN = { id: process.env.ADMIN_DEFAULT_EMAIL || 'admin@yourapp.com', pw: process.env.ADMIN_DEFAULT_PASSWORD };
+if (!ADMIN.pw) {
+  console.error('Set ADMIN_DEFAULT_PASSWORD to the password the seeder used.');
+  process.exit(2);
+}
 
 let passed = 0;
 async function step(name, fn) {
@@ -82,6 +86,7 @@ const login = async (identifier, password, role) => (await call('POST', '/auth/l
   await step('admin edits theme, layout, features, business rules and they are live', async () => {
     const socket = io(API.replace(/\/api$/, ''), { transports: ['websocket'] });
     const got = new Promise((resolve) => socket.on('config:updated', resolve));
+    await new Promise((r) => socket.on('connect', r));
     await call('PUT', '/admin/config/theme', { token: admin, body: { primaryColor: '#123456' } });
     await Promise.race([got, new Promise((_, rej) => setTimeout(() => rej(new Error('no config:updated socket event')), 4000))]);
     socket.disconnect();
@@ -158,7 +163,8 @@ const login = async (identifier, password, role) => (await call('POST', '/auth/l
   });
 
   await step('vendor moves order accepted → preparing → ready; invalid transitions rejected', async () => {
-    await assert.rejects(() => call('PATCH', `/orders/vendor/${order._id}/status`, { token: vendor, body: { status: 'delivered' } }), /order.invalidTransition/);
+    await assert.rejects(() => call('PATCH', `/orders/vendor/${order._id}/status`, { token: vendor, body: { status: 'delivered' } }), /validation.failed/);
+    await assert.rejects(() => call('PATCH', `/orders/vendor/${order._id}/status`, { token: vendor, body: { status: 'ready' } }), /order.invalidTransition/);
     for (const s of ['accepted', 'preparing', 'ready']) await call('PATCH', `/orders/vendor/${order._id}/status`, { token: vendor, body: { status: s } });
     const o = await call('GET', `/orders/${order._id}`, { token: customer });
     assert.strictEqual(o.status, 'ready');
@@ -254,6 +260,57 @@ const login = async (identifier, password, role) => (await call('POST', '/auth/l
     pub = await call('GET', '/config');
     assert.ok(pub.banners.find((x) => x._id === b._id));
     await call('DELETE', `/admin/config/banners/${b._id}`, { token: admin });
+  });
+
+  await step('security: operator injection, validation, OTP limits, CORS-safe headers', async () => {
+    // NoSQL operator payloads are stripped before reaching Mongo.
+    await assert.rejects(() => call('POST', '/auth/login', { body: { identifier: { $ne: null }, password: { $ne: null } } }), /validation.failed|auth.invalidCredentials/);
+    await assert.rejects(() => call('POST', '/auth/verify-otp', { body: { phone: { $gt: '' }, otp: '123456' } }), /validation.failed|auth.invalidOtp/);
+    const nested = await call('GET', '/restaurants?status[$ne]=approved', { raw: true });
+    assert.strictEqual(nested.status, 200);
+    // Validation returns 422 with field details.
+    const bad = await call('POST', '/orders/quote', { token: customer, body: { restaurantId: 'nope', items: [] }, raw: true });
+    assert.strictEqual(bad.status, 422);
+    // OTP: resend cooldown and attempt limit burn the code.
+    const phone = `+9199${Date.now().toString().slice(-8)}`;
+    await call('POST', '/auth/send-otp', { body: { phone } });
+    await assert.rejects(() => call('POST', '/auth/send-otp', { body: { phone } }), /auth.otpTooSoon/);
+    for (let i = 0; i < 4; i += 1) await assert.rejects(() => call('POST', '/auth/verify-otp', { body: { phone, otp: '000000' } }), /auth.invalidOtp/);
+    await assert.rejects(() => call('POST', '/auth/verify-otp', { body: { phone, otp: '000000' } }), /auth.otpAttemptsExceeded/);
+    // SVG uploads are refused.
+    const fd = new FormData();
+    fd.append('image', new Blob(['<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>'], { type: 'image/svg+xml' }), 'x.svg');
+    const up = await fetch(`${API}/upload/image`, { method: 'POST', headers: { Authorization: `Bearer ${customer}` }, body: fd });
+    assert.strictEqual(up.status, 400);
+    // Helmet headers present.
+    const h = await call('GET', '/health', { raw: true });
+    assert.ok(h.headers.get('x-content-type-options'));
+  });
+
+  await step('wallet debit is atomic under concurrent orders', async () => {
+    const me = (await call('GET', '/auth/me', { token: customer })).user;
+    await call('POST', `/admin/users/${me._id}/wallet`, { token: admin, body: { amount: 1000 - me.walletBalance, reason: 'test' } });
+    const list = await call('GET', '/restaurants?q=Green');
+    const r = list.items[0];
+    const m = await call('GET', `/restaurants/${r._id}/menu`);
+    const item = m.categories.flatMap((c) => c.items).find((i) => i.name === 'Quinoa Buddha Bowl');
+    const body2 = { restaurantId: r._id, items: [{ menuItemId: item._id, quantity: 2 }], addressId: me.addresses[0]._id, paymentMethod: 'wallet' };
+    const q = await call('POST', '/orders/quote', { token: customer, body: body2 });
+    const n = Math.floor(1000 / q.bill.total) + 2; // more orders than the balance can cover
+    const results = await Promise.allSettled(Array.from({ length: n }, () => call('POST', '/orders', { token: customer, body: body2 })));
+    const okCount = results.filter((x) => x.status === 'fulfilled').length;
+    assert.strictEqual(okCount, Math.floor(1000 / q.bill.total), `expected exactly ${Math.floor(1000 / q.bill.total)} orders, got ${okCount}`);
+    const after = (await call('GET', '/auth/me', { token: customer })).user.walletBalance;
+    assert.ok(after >= 0, 'wallet must never go negative');
+  });
+
+  await step('admin cannot demote itself; password change works', async () => {
+    const me = (await call('GET', '/auth/me', { token: admin })).user;
+    const updated = await call('PUT', `/admin/users/${me._id}`, { token: admin, body: { name: me.name, role: 'customer' } });
+    assert.strictEqual(updated.role, 'superadmin');
+    await call('PUT', '/users/change-password', { token: admin, body: { currentPassword: ADMIN.pw, newPassword: 'Temp#Pass2026' } });
+    const t2 = await login(ADMIN.id, 'Temp#Pass2026', 'admin');
+    await call('PUT', '/users/change-password', { token: t2, body: { currentPassword: 'Temp#Pass2026', newPassword: ADMIN.pw } });
   });
 
   console.log(`\n${passed} steps passed`);

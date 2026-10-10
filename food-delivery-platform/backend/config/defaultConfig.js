@@ -109,6 +109,10 @@ module.exports = {
     otpLength: 6,
     autoAssignDelivery: true,
     vendorAcceptTimeoutMinutes: 5,
+    paymentTimeoutMinutes: 15,
+    etaBufferMinutes: 10,
+    etaMinutesPerKm: 3,
+    deliveryOtpLength: 4,
     deliverySlots: [
       { id: 'slot_lunch', label: 'Lunch (12:00 - 14:00)', start: '12:00', end: '14:00', enabled: true },
       { id: 'slot_snacks', label: 'Snacks (16:00 - 18:00)', start: '16:00', end: '18:00', enabled: true },
@@ -130,7 +134,6 @@ module.exports = {
     appInMaintenance: false,
     maintenanceMessage: 'We are upgrading our systems. Please check back shortly.',
     maintenanceImageUrl: '',
-    allowAdmins: true,
     affectedApps: ['customer', 'vendor', 'delivery'],
   },
   appVersions: {

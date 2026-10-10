@@ -26,6 +26,7 @@ import Reports from './pages/Reports.jsx';
 import Notifications from './pages/Notifications.jsx';
 import AdminRoles from './pages/AdminRoles.jsx';
 import Settings from './pages/Settings.jsx';
+import Reviews from './pages/Reviews.jsx';
 
 const guarded = (perm, el) => <ProtectedRoute permission={perm}>{el}</ProtectedRoute>;
 
@@ -51,6 +52,7 @@ export default function App() {
         <Route path="vendors" element={guarded('vendors', <Vendors />)} />
         <Route path="restaurants" element={guarded('restaurants', <Restaurants />)} />
         <Route path="categories" element={guarded('categories', <Categories />)} />
+        <Route path="reviews" element={guarded('restaurants', <Reviews />)} />
         <Route path="delivery-partners" element={guarded('delivery', <DeliveryPartners />)} />
         <Route path="users" element={guarded('users', <Users />)} />
         <Route path="transactions" element={guarded('transactions', <Transactions />)} />

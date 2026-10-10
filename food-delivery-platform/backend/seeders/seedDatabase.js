@@ -15,7 +15,11 @@ const { uploadRoot } = require('../utils/storage');
 
 const { AppConfig, Translation, User, AdminRole, Restaurant, Category, MenuCategory, MenuItem, Coupon, Banner, DeliveryPartner } = models;
 
+const crypto = require('crypto');
+
 const RESET = process.argv.includes('--reset');
+// Demo accounts/restaurants are never created in production unless explicitly requested.
+const WITH_DEMO = !env.isProd || process.argv.includes('--demo');
 const CONFIG_ONLY = process.argv.includes('--config-only');
 const CENTER = [Number(process.env.SEED_LNG || 77.5946), Number(process.env.SEED_LAT || 12.9716)];
 const SAMPLE_PASSWORD = process.env.SEED_SAMPLE_PASSWORD || 'Password@123';
@@ -63,8 +67,15 @@ async function seedTranslations() {
 async function seedAdmins() {
   let admin = await User.findOne({ email: env.seed.adminEmail.toLowerCase() });
   if (!admin) {
-    admin = await User.create({ name: 'Super Admin', email: env.seed.adminEmail, password: env.seed.adminPassword, role: 'superadmin', isVerified: true });
-    console.log(`✓ superadmin ${env.seed.adminEmail}`);
+    let password = env.seed.adminPassword;
+    if (!password) {
+      if (env.isProd) throw new Error('Set ADMIN_DEFAULT_PASSWORD in backend/.env before seeding production');
+      password = crypto.randomBytes(9).toString('base64url');
+      console.log(`! ADMIN_DEFAULT_PASSWORD not set — generated one for this run: ${password}`);
+    }
+    if (password.length < 8) throw new Error('ADMIN_DEFAULT_PASSWORD must be at least 8 characters');
+    admin = await User.create({ name: 'Super Admin', email: env.seed.adminEmail, password, role: 'superadmin', isVerified: true });
+    console.log(`✓ superadmin ${env.seed.adminEmail} — log in and CHANGE THIS PASSWORD IMMEDIATELY`);
   }
   const roles = [
     { name: 'Operations', description: 'Orders, vendors, delivery and support', permissions: ['dashboard', 'orders', 'vendors', 'restaurants', 'delivery', 'users', 'notifications'] },
@@ -74,20 +85,24 @@ async function seedAdmins() {
   for (const r of roles) await AdminRole.updateOne({ name: r.name }, { $setOnInsert: r }, { upsert: true });
 }
 
+/** Starter categories, cuisines and coupons (safe for production; existing ones are left untouched). */
+async function seedCategories() {
+  for (const [i, c] of sample.categories.entries()) {
+    await Category.updateOne({ name: c.name, type: 'category' }, { $setOnInsert: { image: image(`cat-${c.name}`, c.colors, 256, 256), order: i + 1, isActive: true } }, { upsert: true });
+  }
+  for (const [i, c] of sample.cuisines.entries()) {
+    await Category.updateOne({ name: c.name, type: 'cuisine' }, { $setOnInsert: { image: image(`cuisine-${c.name}`, c.colors, 320, 320), order: i + 1, isActive: true } }, { upsert: true });
+  }
+  for (const c of sample.coupons) await Coupon.updateOne({ code: c.code }, { $setOnInsert: { ...c, isActive: true, showInOffers: true } }, { upsert: true });
+  console.log('✓ categories, cuisines & coupons');
+}
+
 async function seedCatalog() {
   if (!RESET && (await Restaurant.estimatedDocumentCount()) > 0) {
     console.log('• sample catalog exists — skipping (use --reset to recreate)');
     return;
   }
-  const catMap = {};
-  for (const [i, c] of sample.categories.entries()) {
-    const doc = await Category.findOneAndUpdate({ name: c.name, type: 'category' }, { $set: { image: image(`cat-${c.name}`, c.colors, 256, 256), order: i + 1, isActive: true } }, { upsert: true, new: true });
-    catMap[c.name] = doc._id;
-  }
-  for (const [i, c] of sample.cuisines.entries()) {
-    await Category.findOneAndUpdate({ name: c.name, type: 'cuisine' }, { $set: { image: image(`cuisine-${c.name}`, c.colors, 320, 320), order: i + 1, isActive: true } }, { upsert: true });
-  }
-  console.log('✓ categories & cuisines');
+  const catMap = Object.fromEntries((await Category.find({ type: 'category' }).select('name')).map((c) => [c.name, c._id]));
 
   for (const [i, b] of sample.banners.entries()) {
     const linkValue = b.linkType === 'category' ? String(catMap[b.linkValue] || '') : b.linkValue || '';
@@ -137,9 +152,6 @@ async function seedCatalog() {
     console.log(`✓ restaurant ${r.name}`);
   }
 
-  for (const c of sample.coupons) await Coupon.updateOne({ code: c.code }, { $setOnInsert: { ...c, isActive: true, showInOffers: true } }, { upsert: true });
-  console.log('✓ coupons');
-
   if (!(await User.exists({ email: 'customer@example.com' }))) {
     await User.create({
       name: 'Demo Customer',
@@ -168,7 +180,9 @@ async function run() {
   await seedConfig();
   await seedTranslations();
   await seedAdmins();
-  if (!CONFIG_ONLY) await seedCatalog();
+  if (!CONFIG_ONLY) await seedCategories();
+  if (!CONFIG_ONLY && WITH_DEMO) await seedCatalog();
+  else if (!CONFIG_ONLY) console.log('• production: demo restaurants/accounts skipped (pass --demo to include them)');
   console.log('Seeding complete.');
 }
 

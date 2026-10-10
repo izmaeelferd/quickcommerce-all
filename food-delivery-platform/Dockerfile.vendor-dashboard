@@ -5,9 +5,9 @@ COPY vendor-dashboard/package*.json ./
 RUN npm ci
 COPY vendor-dashboard/ ./
 # The API location is the only build-time setting; everything else comes from /api/config at runtime.
-ARG VITE_API_BASE_URL=
+ARG VITE_API_URL=
 ARG VITE_API_PREFIX=/api
-ENV VITE_API_BASE_URL=$VITE_API_BASE_URL VITE_API_PREFIX=$VITE_API_PREFIX
+ENV VITE_API_URL=$VITE_API_URL VITE_API_PREFIX=$VITE_API_PREFIX
 RUN npm run build
 
 # ---- serve ----

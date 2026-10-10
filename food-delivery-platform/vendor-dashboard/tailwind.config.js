@@ -19,6 +19,7 @@ export default {
         veg: v('veg'),
         nonveg: v('nonveg'),
         onprimary: v('on-primary'),
+        scrim: v('scrim'),
       },
       borderRadius: {
         card: 'var(--radius-card)',

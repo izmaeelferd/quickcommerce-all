@@ -70,6 +70,20 @@ const reply = asyncHandler(async (req, res) => {
   return ok(res, review, 'review.replied');
 });
 
+/** Admin moderation list: GET /admin/reviews?restaurant=&maxRating=&visible= */
+const adminList = asyncHandler(async (req, res) => {
+  const p = paginate(req.query);
+  const q = {};
+  if (req.query.restaurant) q.restaurant = String(req.query.restaurant);
+  if (req.query.maxRating) q.rating = { $lte: Number(req.query.maxRating) };
+  if (req.query.visible === 'true' || req.query.visible === 'false') q.isVisible = req.query.visible === 'true';
+  const [items, total] = await Promise.all([
+    Review.find(q).populate('user', 'name email').populate('restaurant', 'name').populate('order', 'orderNumber').sort({ createdAt: -1 }).skip(p.skip).limit(p.limit),
+    Review.countDocuments(q),
+  ]);
+  return ok(res, paged(items, total, p));
+});
+
 const setVisibility = asyncHandler(async (req, res) => {
   const review = await Review.findByIdAndUpdate(req.params.id, { isVisible: !!req.body.isVisible }, { new: true });
   if (!review) throw new ApiError(404, 'review.notFound');
@@ -77,4 +91,4 @@ const setVisibility = asyncHandler(async (req, res) => {
   return ok(res, review, 'review.updated');
 });
 
-module.exports = { create, listByRestaurant, myReviews, vendorReviews, reply, setVisibility };
+module.exports = { create, listByRestaurant, myReviews, vendorReviews, reply, setVisibility, adminList };

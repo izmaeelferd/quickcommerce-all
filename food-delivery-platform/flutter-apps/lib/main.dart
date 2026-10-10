@@ -21,6 +21,10 @@ final navigatorKey = GlobalKey<NavigatorState>();
 Future<void> bootstrap(AppFlavor flavor) async {
   WidgetsFlutterBinding.ensureInitialized();
   Env.flavor = flavor;
+  if (!Env.isConfigured) {
+    runApp(const _MissingApiUrlApp());
+    return;
+  }
   await StorageService.instance.init();
   SocketService.instance.connect();
   // Push setup must never block startup (e.g. Firebase not configured or unreachable).
@@ -29,6 +33,16 @@ Future<void> bootstrap(AppFlavor flavor) async {
 }
 
 Future<void> main() => bootstrap(Env.flavor);
+
+/// Shown only for a mis-built binary (no --dart-define=API_BASE_URL). Translations are
+/// unavailable without the API, so the key renders through the translator's fallback.
+class _MissingApiUrlApp extends StatelessWidget {
+  const _MissingApiUrlApp();
+  @override
+  Widget build(BuildContext context) => MaterialApp(
+        home: Scaffold(body: Center(child: Padding(padding: const EdgeInsets.all(24), child: Text(tr('error.apiBaseUrlMissing'), textAlign: TextAlign.center)))),
+      );
+}
 
 class FoodApp extends ConsumerStatefulWidget {
   const FoodApp({super.key});
@@ -69,6 +83,13 @@ class _FoodAppState extends ConsumerState<FoodApp> {
 
   @override
   Widget build(BuildContext context) {
+    // Maintenance switched on while the app is open → leave whatever screen is showing.
+    ref.listen<ConfigState>(configProvider, (prev, next) {
+      final was = prev?.config.maintenance.affects(Env.appType) ?? false;
+      if (next.loaded && !was && next.config.maintenance.affects(Env.appType)) {
+        navigatorKey.currentState?.pushNamedAndRemoveUntil(Routes.maintenance, (_) => false);
+      }
+    });
     final state = ref.watch(configProvider);
     final cfg = state.config;
     final title = switch (Env.flavor) {

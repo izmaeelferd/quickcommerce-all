@@ -5,9 +5,7 @@ const { ApiError, asyncHandler } = require('../utils/helpers');
 
 const extractToken = (req) => {
   const h = req.headers.authorization || '';
-  if (h.startsWith('Bearer ')) return h.slice(7);
-  if (req.cookies && req.cookies.accessToken) return req.cookies.accessToken;
-  return null;
+  return h.startsWith('Bearer ') ? h.slice(7) : null;
 };
 
 const protect = asyncHandler(async (req, res, next) => {

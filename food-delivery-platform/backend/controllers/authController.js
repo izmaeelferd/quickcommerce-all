@@ -80,16 +80,21 @@ const sendOtp = asyncHandler(async (req, res) => {
   const cfg = await getConfig();
   if (!cfg.features.otpLogin || !cfg.businessRules.otpLogin) throw new ApiError(403, 'feature.disabled');
   const { phone, role = 'customer' } = req.body;
-  let user = await User.findOne({ phone }).select('+otp +otpExpires');
+  let user = await User.findOne({ phone: String(phone) }).select('+otp +otpExpires +otpSentAt +otpAttempts');
+  if (user && user.otpSentAt && Date.now() - user.otpSentAt.getTime() < env.otpResendSeconds * 1000) {
+    throw new ApiError(429, 'auth.otpTooSoon', { retryAfterSeconds: env.otpResendSeconds });
+  }
   if (!user) {
     if (!SELF_REGISTER_ROLES.includes(role)) throw new ApiError(400, 'auth.invalidRole');
-    user = new User({ phone, role });
-    if (role === 'delivery') await DeliveryPartner.create({ user: user._id });
+    user = new User({ phone: String(phone), role });
   }
   const otp = generateOtp(cfg.businessRules.otpLength || 6);
   user.otp = hashToken(otp);
   user.otpExpires = new Date(Date.now() + env.otpExpiryMinutes * 60 * 1000);
+  user.otpSentAt = new Date();
+  user.otpAttempts = 0;
   await user.save();
+  if (user.role === 'delivery') await DeliveryPartner.updateOne({ user: user._id }, { $setOnInsert: { user: user._id } }, { upsert: true });
   const t = await getTranslator(user.language);
   await sendSms({ to: phone, body: t('sms.otp', { otp, app: cfg.branding.appName, minutes: env.otpExpiryMinutes }), force: true });
   return ok(res, { phone, expiresInMinutes: env.otpExpiryMinutes, ...(env.isProd ? {} : { devOtp: otp }) }, 'auth.otpSent');
@@ -97,10 +102,21 @@ const sendOtp = asyncHandler(async (req, res) => {
 
 const verifyOtp = asyncHandler(async (req, res) => {
   const { phone, otp, name, referralCode } = req.body;
-  const user = await User.findOne({ phone }).select('+otp +otpExpires');
-  if (!user || !user.otp || user.otpExpires < new Date() || user.otp !== hashToken(String(otp))) throw new ApiError(400, 'auth.invalidOtp');
+  const user = await User.findOne({ phone: String(phone) }).select('+otp +otpExpires +otpAttempts');
+  if (!user || !user.otp || user.otpExpires < new Date()) throw new ApiError(400, 'auth.invalidOtp');
+  if (user.otp !== hashToken(String(otp))) {
+    user.otpAttempts = (user.otpAttempts || 0) + 1;
+    // Too many wrong guesses burns the code; the user must request a new one.
+    if (user.otpAttempts >= env.otpMaxAttempts) {
+      user.otp = undefined;
+      user.otpExpires = undefined;
+    }
+    await user.save({ validateBeforeSave: false });
+    throw new ApiError(400, user.otp ? 'auth.invalidOtp' : 'auth.otpAttemptsExceeded');
+  }
   user.otp = undefined;
   user.otpExpires = undefined;
+  user.otpAttempts = 0;
   user.isVerified = true;
   const isNew = !user.name;
   if (name && !user.name) user.name = name;
@@ -145,6 +161,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
     const code = generateOtp(cfg.businessRules.otpLength || 6);
     user.resetPasswordToken = hashToken(code);
     user.resetPasswordExpires = new Date(Date.now() + env.otpExpiryMinutes * 60 * 1000);
+    user.resetAttempts = 0;
     await user.save({ validateBeforeSave: false });
     const t = await getTranslator(user.language);
     if (user.email) await sendEmail({ to: user.email, subject: t('email.resetSubject'), text: t('email.resetBody', { code, minutes: env.otpExpiryMinutes }) });
@@ -158,8 +175,15 @@ const resetPassword = asyncHandler(async (req, res) => {
   const { identifier, code, password } = req.body;
   if (!password || password.length < 6) throw new ApiError(422, 'validation.passwordMin');
   const id = String(identifier || '').trim();
-  const user = await User.findOne({ $or: [{ email: id.toLowerCase() }, { phone: id }] }).select('+resetPasswordToken +resetPasswordExpires');
-  if (!user || !user.resetPasswordToken || user.resetPasswordExpires < new Date() || user.resetPasswordToken !== hashToken(String(code))) {
+  const user = await User.findOne({ $or: [{ email: id.toLowerCase() }, { phone: id }] }).select('+resetPasswordToken +resetPasswordExpires +resetAttempts');
+  if (!user || !user.resetPasswordToken || user.resetPasswordExpires < new Date()) throw new ApiError(400, 'auth.invalidResetCode');
+  if (user.resetPasswordToken !== hashToken(String(code))) {
+    user.resetAttempts = (user.resetAttempts || 0) + 1;
+    if (user.resetAttempts >= env.otpMaxAttempts) {
+      user.resetPasswordToken = undefined;
+      user.resetPasswordExpires = undefined;
+    }
+    await user.save({ validateBeforeSave: false });
     throw new ApiError(400, 'auth.invalidResetCode');
   }
   user.password = password;

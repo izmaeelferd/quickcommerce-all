@@ -104,7 +104,11 @@ export default function Users() {
             <TextField label={t('auth.email')} value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
             <TextField label={t('auth.phone')} value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
             <TextField label={t(form._id ? 'auth.newPassword' : 'auth.password')} type="password" value={form.password} onChange={(v) => setForm({ ...form, password: v })} />
-            <SelectField label={t('admin.role')} value={form.role} onChange={(v) => setForm({ ...form, role: v })} options={ROLES.filter((r) => r !== 'superadmin').map((r) => ({ value: r, label: t(`role.${r}`) }))} />
+            {form.role === 'superadmin' ? (
+              <TextField label={t('admin.role')} value={t('role.superadmin')} onChange={() => {}} disabled />
+            ) : (
+              <SelectField label={t('admin.role')} value={form.role} onChange={(v) => setForm({ ...form, role: v })} options={ROLES.filter((r) => r !== 'superadmin').map((r) => ({ value: r, label: t(`role.${r}`) }))} />
+            )}
             {form.role === 'admin' && <SelectField label={t('admin.adminRole')} value={form.adminRole} onChange={(v) => setForm({ ...form, adminRole: v })} options={[{ value: '', label: t('admin.fullAccess') }, ...(roles.data?.roles || []).map((r) => ({ value: r._id, label: r.name }))]} />}
           </div>
         )}

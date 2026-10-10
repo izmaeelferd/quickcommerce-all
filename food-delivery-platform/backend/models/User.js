@@ -52,6 +52,9 @@ const userSchema = new Schema(
     appleId: { type: String, sparse: true },
     otp: { type: String, select: false },
     otpExpires: { type: Date, select: false },
+    otpAttempts: { type: Number, default: 0, select: false },
+    otpSentAt: { type: Date, select: false },
+    resetAttempts: { type: Number, default: 0, select: false },
     resetPasswordToken: { type: String, select: false },
     resetPasswordExpires: { type: Date, select: false },
     refreshTokens: { type: [String], select: false, default: [] },
@@ -91,6 +94,9 @@ userSchema.methods.toJSON = function toJSON() {
   delete obj.password;
   delete obj.otp;
   delete obj.otpExpires;
+  delete obj.otpAttempts;
+  delete obj.otpSentAt;
+  delete obj.resetAttempts;
   delete obj.resetPasswordToken;
   delete obj.resetPasswordExpires;
   delete obj.refreshTokens;

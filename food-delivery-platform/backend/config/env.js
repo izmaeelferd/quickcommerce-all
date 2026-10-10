@@ -6,21 +6,26 @@ const list = (v, fallback = []) =>
 const num = (v, fallback) => (v === undefined || v === '' ? fallback : Number(v));
 const bool = (v, fallback = false) => (v === undefined || v === '' ? fallback : String(v) === 'true');
 
+/** First non-empty env var among `names` (canonical name first, legacy aliases after). */
+const pickEnv = (...names) => names.map((n) => process.env[n]).find((v) => v !== undefined && v !== '');
+
 const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   isProd: process.env.NODE_ENV === 'production',
   port: num(process.env.PORT, 5000),
   apiPrefix: process.env.API_PREFIX || '/api',
   publicBaseUrl: process.env.PUBLIC_BASE_URL || `http://localhost:${process.env.PORT || 5000}`,
-  corsOrigins: list(process.env.CORS_ORIGINS, ['*']),
-  mongoUri: process.env.MONGO_URI || 'mongodb://localhost:27017/food_delivery',
+  corsOrigins: list(pickEnv('CLIENT_URLS', 'CORS_ORIGINS'), ['*']),
+  mongoUri: pickEnv('MONGODB_URI', 'MONGO_URI') || 'mongodb://localhost:27017/food_delivery',
   jwt: {
-    secret: process.env.JWT_SECRET || 'dev_access_secret',
-    expiresIn: process.env.JWT_EXPIRES_IN || '15m',
+    secret: pickEnv('JWT_ACCESS_SECRET', 'JWT_SECRET') || 'dev_access_secret',
+    expiresIn: pickEnv('JWT_ACCESS_EXPIRES_IN', 'JWT_EXPIRES_IN') || '15m',
     refreshSecret: process.env.JWT_REFRESH_SECRET || 'dev_refresh_secret',
     refreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN || '30d',
   },
   otpExpiryMinutes: num(process.env.OTP_EXPIRY_MINUTES, 10),
+  otpMaxAttempts: num(process.env.OTP_MAX_ATTEMPTS, 5),
+  otpResendSeconds: num(process.env.OTP_RESEND_SECONDS, 30),
   bcryptRounds: num(process.env.BCRYPT_ROUNDS, 10),
   google: { clientIds: list(process.env.GOOGLE_CLIENT_IDS) },
   apple: { clientId: process.env.APPLE_CLIENT_ID || '' },
@@ -29,6 +34,7 @@ const env = {
     razorpay: {
       keyId: process.env.RAZORPAY_KEY_ID || '',
       keySecret: process.env.RAZORPAY_KEY_SECRET || '',
+      webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET || '',
     },
     stripe: {
       secretKey: process.env.STRIPE_SECRET_KEY || '',
@@ -45,9 +51,9 @@ const env = {
     from: process.env.EMAIL_FROM || '',
   },
   twilio: {
-    accountSid: process.env.TWILIO_ACCOUNT_SID || '',
-    authToken: process.env.TWILIO_AUTH_TOKEN || '',
-    from: process.env.TWILIO_FROM_NUMBER || '',
+    accountSid: pickEnv('TWILIO_SID', 'TWILIO_ACCOUNT_SID') || '',
+    authToken: pickEnv('TWILIO_TOKEN', 'TWILIO_AUTH_TOKEN') || '',
+    from: pickEnv('TWILIO_PHONE', 'TWILIO_FROM_NUMBER') || '',
   },
   firebase: {
     serviceAccountPath: process.env.FIREBASE_SERVICE_ACCOUNT_PATH || '',
@@ -71,9 +77,26 @@ const env = {
     authMax: num(process.env.AUTH_RATE_LIMIT_MAX, 30),
   },
   seed: {
-    adminEmail: process.env.SEED_ADMIN_EMAIL || 'admin@example.com',
-    adminPassword: process.env.SEED_ADMIN_PASSWORD || 'Admin@123',
+    adminEmail: pickEnv('ADMIN_DEFAULT_EMAIL', 'SEED_ADMIN_EMAIL') || 'admin@yourapp.com',
+    adminPassword: pickEnv('ADMIN_DEFAULT_PASSWORD', 'SEED_ADMIN_PASSWORD') || '',
   },
+};
+
+/**
+ * Fail fast on unsafe production settings instead of booting with dev defaults.
+ * Returns the list of problems (empty when OK).
+ */
+env.productionProblems = () => {
+  if (!env.isProd) return [];
+  const problems = [];
+  if (!pickEnv('MONGODB_URI', 'MONGO_URI')) problems.push('MONGODB_URI is required');
+  const weak = (v) => !v || v.length < 32 || /^dev_|change_me/.test(v);
+  if (weak(env.jwt.secret)) problems.push('JWT_ACCESS_SECRET must be a random string of 32+ characters');
+  if (weak(env.jwt.refreshSecret)) problems.push('JWT_REFRESH_SECRET must be a random string of 32+ characters');
+  if (env.jwt.secret === env.jwt.refreshSecret) problems.push('JWT_ACCESS_SECRET and JWT_REFRESH_SECRET must differ');
+  if (env.corsOrigins.includes('*')) problems.push('CLIENT_URLS must list the admin/vendor web origins (no "*") in production');
+  if (!process.env.PUBLIC_BASE_URL) problems.push('PUBLIC_BASE_URL is required (used for uploaded file URLs)');
+  return problems;
 };
 
 module.exports = env;

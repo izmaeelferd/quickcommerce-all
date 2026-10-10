@@ -163,12 +163,20 @@ const createOrder = asyncHandler(async (req, res) => {
     scheduledFor: scheduledFor ? new Date(scheduledFor) : null,
     deliverySlot: deliverySlot || '',
     instructions: instructions || '',
-    deliveryOtp: cfg.features.deliveryOtp ? generateOtp(4) : undefined,
+    deliveryOtp: cfg.features.deliveryOtp ? generateOtp(rules.deliveryOtpLength || 4) : undefined,
   });
-  await order.save();
-
+  // Atomic, conditional wallet debit: concurrent orders can never overdraw the balance.
   if (walletUsed > 0) {
-    await User.updateOne({ _id: req.user._id }, { $inc: { walletBalance: -walletUsed } });
+    const debited = await User.updateOne({ _id: req.user._id, walletBalance: { $gte: walletUsed } }, { $inc: { walletBalance: -walletUsed } });
+    if (!debited.modifiedCount) throw new ApiError(400, 'wallet.insufficient');
+  }
+  try {
+    await order.save();
+  } catch (e) {
+    if (walletUsed > 0) await User.updateOne({ _id: req.user._id }, { $inc: { walletBalance: walletUsed } });
+    throw e;
+  }
+  if (walletUsed > 0) {
     await Transaction.create({ user: req.user._id, order: order._id, type: 'wallet_debit', direction: 'debit', amount: walletUsed, currencyCode: rules.currencyCode, description: 'order.payment' });
   }
   if (coupon) {

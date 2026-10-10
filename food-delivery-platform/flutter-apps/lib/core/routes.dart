@@ -26,6 +26,7 @@ import '../screens/vendor/vendor_menu_screens.dart';
 import '../screens/vendor/vendor_order_screens.dart';
 import '../screens/vendor/vendor_settings_screens.dart';
 import '../screens/vendor/vendor_shell.dart';
+import '../widgets/common/feature_route.dart';
 import 'env.dart';
 
 class Routes {
@@ -84,6 +85,16 @@ class Routes {
         AppFlavor.delivery => deliveryHome,
       };
 
+  /// Screens that only exist while a feature flag is on (checked by [FeatureRoute]).
+  static const featureForRoute = {
+    wallet: 'wallet',
+    referral: 'referral',
+    favorites: 'favorites',
+    review: 'reviews',
+    offers: 'coupons',
+    onboarding: 'onboarding',
+  };
+
   static Route<dynamic> generate(RouteSettings s) {
     final a = s.arguments;
     Widget page = switch (s.name) {
@@ -130,6 +141,8 @@ class Routes {
       deliveryProfile => const DeliveryProfileScreen(),
       _ => const MaintenanceScreen(),
     };
+    final feature = featureForRoute[s.name];
+    if (feature != null) page = FeatureRoute(feature: feature, child: page);
     return MaterialPageRoute(builder: (_) => page, settings: s);
   }
 }

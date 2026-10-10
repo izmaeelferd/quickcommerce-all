@@ -14,7 +14,8 @@ async function sendSms({ to, body, force = false }) {
   if (!force && !cfg.features.smsNotifications) return { skipped: 'feature_disabled' };
   const c = getClient();
   if (!c) {
-    console.log(`[sms:dev] to=${to} body="${body}"`);
+    // Never log message bodies in production: they can contain OTPs.
+    console.log(env.isProd ? `[sms] not configured, dropped message to ${String(to).slice(-4).padStart(8, '*')}` : `[sms:dev] to=${to} body="${body}"`);
     return { skipped: 'not_configured' };
   }
   return c.messages.create({ to, from: env.twilio.from, body });

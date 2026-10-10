@@ -22,4 +22,6 @@ export const vendorApi = {
   updateItem: (id, b) => put(`/menu/items/${id}`, b),
   deleteItem: (id) => del(`/menu/items/${id}`),
   toggleItem: (id, isAvailable) => patch(`/menu/items/${id}/availability`, { isAvailable }),
+  reviews: (page) => get('/reviews/vendor', { page }),
+  replyReview: (id, text) => post(`/reviews/${id}/reply`, { text }),
 };

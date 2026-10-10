@@ -156,9 +156,16 @@ const createAdmin = asyncHandler(async (req, res) => {
 
 const updateUser = asyncHandler(async (req, res) => {
   const data = pick(req.body, ['name', 'email', 'phone', 'role', 'adminRole', 'isVerified']);
+  const target = await User.findById(req.params.id);
+  if (!target) throw new ApiError(404, 'user.notFound');
   if (data.role === 'superadmin' && req.user.role !== 'superadmin') throw new ApiError(403, 'auth.forbidden');
+  if (target.role === 'superadmin' && req.user.role !== 'superadmin') throw new ApiError(403, 'auth.forbidden');
+  // Nobody changes their own role/permissions (prevents accidental self-demotion or escalation).
+  if (target._id.equals(req.user._id)) {
+    delete data.role;
+    delete data.adminRole;
+  }
   const user = await User.findByIdAndUpdate(req.params.id, data, { new: true, runValidators: true });
-  if (!user) throw new ApiError(404, 'user.notFound');
   if (req.body.password) {
     user.password = req.body.password;
     await user.save();

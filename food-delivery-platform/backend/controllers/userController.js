@@ -14,6 +14,10 @@ const updateProfile = asyncHandler(async (req, res) => {
 });
 
 const deleteAccount = asyncHandler(async (req, res) => {
+  const Order = require('../models/Order');
+  const active = ['placed', 'accepted', 'preparing', 'ready', 'picked'];
+  if (await Order.exists({ $or: [{ customer: req.user._id }, { deliveryPartner: req.user._id }], status: { $in: active } })) throw new ApiError(400, 'profile.hasActiveOrders');
+  if (['admin', 'superadmin'].includes(req.user.role)) throw new ApiError(400, 'profile.adminCannotDelete');
   await User.deleteOne({ _id: req.user._id });
   return ok(res, null, 'profile.deleted');
 });

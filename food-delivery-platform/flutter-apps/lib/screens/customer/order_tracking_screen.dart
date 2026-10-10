@@ -146,7 +146,7 @@ class _Timeline extends StatelessWidget {
       return ListTile(
         leading: Icon(Icons.cancel, color: scheme.error),
         title: Text(tr('status.${order.status}')),
-        subtitle: order.cancelReason.isNotEmpty ? Text(order.cancelReason) : null,
+        subtitle: order.cancelReason.isNotEmpty ? Text(TranslationManager.instance.has(order.cancelReason) ? tr(order.cancelReason) : order.cancelReason) : null,
       );
     }
     final current = trackingSteps.indexOf(order.status);

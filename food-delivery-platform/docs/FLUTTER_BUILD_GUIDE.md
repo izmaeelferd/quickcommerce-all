@@ -6,9 +6,10 @@
 | vendor | `lib/main_vendor.dart` | `${APP_ID_BASE}.vendor` | Restaurant partner app |
 | delivery | `lib/main_delivery.dart` | `${APP_ID_BASE}.delivery` | Rider app |
 
-`APP_ID_BASE` defaults to `com.fooddelivery` (`-PAPP_ID_BASE=com.yourco` or env var). The launcher name comes from `CUSTOMER_APP_NAME` / `VENDOR_APP_NAME` / `DELIVERY_APP_NAME`; the **in-app** name, logo, colors and every string are loaded at runtime from `/api/config`.
+Each flavor has its own placeholder launcher icon in `android/app/src/<flavor>/res/mipmap-*/ic_launcher.png` (plus a 512 px `ic_launcher-playstore.png`) — replace them with your brand icons. `APP_ID_BASE` defaults to `com.fooddelivery` (`-PAPP_ID_BASE=com.yourco` or env var). The launcher name comes from `CUSTOMER_APP_NAME` / `VENDOR_APP_NAME` / `DELIVERY_APP_NAME`; the **in-app** name, logo, colors and every string are loaded at runtime from `/api/config`.
 
 ## 1. Setup
+Install the Flutter SDK (https://docs.flutter.dev/get-started/install), then `flutter doctor` until Android toolchain (and Xcode on macOS) are ✓. Android SDK 34+, JDK 17.
 ```bash
 cd flutter-apps
 flutter pub get
@@ -18,7 +19,7 @@ flutter analyze && flutter test
 ## 2. Build-time defines (the only compile-time values)
 | Define | Example |
 |---|---|
-| `API_BASE_URL` | `https://api.example.com` (Android emulator → `http://10.0.2.2:5000`) |
+| `API_BASE_URL` | **Required** — no URL is compiled in; without it the app shows an error screen. `https://api.example.com` (Android emulator → `http://10.0.2.2:5000`) |
 | `API_PREFIX` | `/api` |
 | `GOOGLE_MAPS_KEY` | Maps SDK key (also pass as Gradle property/env for the Android manifest) |
 | `GOOGLE_SERVER_CLIENT_ID` | Web OAuth client id for Google sign-in |
@@ -27,6 +28,15 @@ Keep them in a file and pass `--dart-define-from-file=env/prod.json`:
 ```json
 { "API_BASE_URL": "https://api.example.com", "GOOGLE_MAPS_KEY": "AIza...", "GOOGLE_SERVER_CLIENT_ID": "xxx.apps.googleusercontent.com" }
 ```
+
+## 2b. Per-flavor build commands
+| Flavor | Android APK | Android AAB (Play Store) | iOS (App Store) |
+|---|---|---|---|
+| customer | `flutter build apk --release --flavor customer -t lib/main_customer.dart --dart-define-from-file=env/prod.json` | `flutter build appbundle --flavor customer -t lib/main_customer.dart --dart-define-from-file=env/prod.json` | `flutter build ipa --flavor customer -t lib/main_customer.dart --dart-define-from-file=env/prod.json` |
+| vendor | `… apk … --flavor vendor -t lib/main_vendor.dart …` | `… appbundle --flavor vendor -t lib/main_vendor.dart …` | `… ipa --flavor vendor -t lib/main_vendor.dart …` |
+| delivery | `… apk … --flavor delivery -t lib/main_delivery.dart …` | `… appbundle --flavor delivery -t lib/main_delivery.dart …` | `… ipa --flavor delivery -t lib/main_delivery.dart …` |
+
+Outputs: `build/app/outputs/flutter-apk/app-<flavor>-release.apk`, `build/app/outputs/bundle/<flavor>Release/app-<flavor>-release.aab`, `build/ios/ipa/*.ipa`.
 
 ## 3. Run
 ```bash

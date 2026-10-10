@@ -7,7 +7,7 @@ Repeat for each flavor (customer, vendor, delivery) — they are separate Play l
 - [ ] Release keystore + `android/key.properties` (enrol in **Play App Signing**)
 - [ ] Bump `version: x.y.z+build` in `pubspec.yaml` for every upload
 - [ ] Production `env/prod.json` (HTTPS API URL)
-- [ ] Launcher icons per flavor in `android/app/src/<flavor>/res/mipmap-*` (create the folders; they override `main`)
+- [ ] Replace the placeholder launcher icons in `android/app/src/<flavor>/res/mipmap-*` and the 512 px `ic_launcher-playstore.png` per flavor
 - [ ] Privacy policy URL — serve the Admin-edited policy, e.g. `https://example.com/privacy` or link to `GET /api/config` content
 
 ## 2. Build

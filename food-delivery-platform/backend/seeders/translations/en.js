@@ -75,7 +75,7 @@ const en = {
   'legal.title': 'Legal', 'legal.about': 'About us', 'legal.terms': 'Terms & Conditions', 'legal.privacy': 'Privacy Policy', 'legal.refund': 'Refund Policy', 'legal.empty': 'Content coming soon', 'legal.page.privacyPolicy': 'Privacy Policy', 'legal.page.termsAndConditions': 'Terms & Conditions', 'legal.page.refundPolicy': 'Refund Policy', 'legal.page.aboutUs': 'About Us',
   'support.call': 'Call support', 'support.email': 'Email support', 'support.whatsapp': 'Chat on WhatsApp',
   'social.facebook': 'Facebook', 'social.instagram': 'Instagram', 'social.twitter': 'X / Twitter', 'social.youtube': 'YouTube', 'social.linkedin': 'LinkedIn',
-  'maintenance.title': "We'll be back soon", 'maintenance.defaultMessage': 'We are performing scheduled maintenance.', 'maintenance.active': 'The app is under maintenance', 'maintenance.toggle': 'Maintenance mode', 'maintenance.toggleDesc': 'Blocks the selected apps and shows the message below', 'maintenance.message': 'Message shown to users', 'maintenance.affectedApps': 'Apps affected', 'maintenance.allowAdmins': 'Admins keep access', 'maintenance.image': 'Illustration',
+  'maintenance.title': "We'll be back soon", 'maintenance.defaultMessage': 'We are performing scheduled maintenance.', 'maintenance.active': 'The app is under maintenance', 'maintenance.toggle': 'Maintenance mode', 'maintenance.toggleDesc': 'Blocks the selected apps and shows the message below', 'maintenance.message': 'Message shown to users', 'maintenance.affectedApps': 'Apps affected', 'maintenance.image': 'Illustration',
   'update.title': 'Update available', 'update.message': 'A newer version is available. Please update to continue.', 'update.action': 'Update now',
   'onboarding.getStarted': 'Get started',
   'day.0': 'Sunday', 'day.1': 'Monday', 'day.2': 'Tuesday', 'day.3': 'Wednesday', 'day.4': 'Thursday', 'day.5': 'Friday', 'day.6': 'Saturday',
@@ -107,6 +107,12 @@ const en = {
   'role.created': 'Role created', 'role.updated': 'Role updated', 'role.saved': 'Role saved', 'role.deleted': 'Role deleted', 'role.notFound': 'Role not found', 'role.inUse': 'Role is assigned to users', 'role.add': 'Add role', 'role.edit': 'Edit role', 'role.deleteConfirm': 'Delete this role?',
   'payout.recorded': 'Payout recorded', 'payout.invalidKind': 'Invalid payout type', 'payout.vendor': 'Vendor payout', 'payout.delivery': 'Delivery payout',
   'translation.notFound': 'Language not found', 'translation.created': 'Language added', 'translation.updated': 'Translations updated', 'translation.saved': 'Translations saved', 'translation.deleted': 'Language deleted', 'translation.cannotDeleteDefault': 'The default language cannot be deleted', 'translation.keyRequired': 'Key is required', 'translation.keySaved': 'Key saved',
+  // ---------- added in deployment audit ----------
+  'error.apiBaseUrlMissing': 'This build has no API_BASE_URL. Rebuild with --dart-define=API_BASE_URL=https://your-api', 'feature.unavailableTitle': 'Unavailable',
+  'auth.otpTooSoon': 'Please wait a few seconds before requesting another code', 'auth.otpAttemptsExceeded': 'Too many wrong attempts. Request a new code.',
+  'order.autoRejected': 'The restaurant did not respond in time', 'order.paymentTimeout': 'Payment was not completed in time', 'vendor.acceptTimeout': 'Not accepted in time', 'payment.timeout': 'Payment timed out', 'payment.lateRefund': 'Refund for late payment',
+  'profile.hasActiveOrders': 'Finish or cancel your active orders before deleting your account', 'profile.adminCannotDelete': 'Admin accounts cannot be deleted from the app',
+  'vendor.reviewsSubtitle': 'Reply to customers to build trust', 'vendor.yourReply': 'Your reply:', 'vendor.writeReply': 'Write a reply…', 'vendor.reply': 'Reply',
 };
 
 module.exports = en;

@@ -16,7 +16,7 @@ Nothing a user sees is compiled into an app. Colors, texts, layout, feature visi
 | Branding (names, contacts, socials) | `appconfigs.branding` | Branding | Splash, login, settings, emails |
 | Home layout | `appconfigs.homeLayout[]` | Home Layout Builder | Flutter `SectionRenderer` iterates enabled sections by `order` |
 | Banners | `banners` collection | Banner Manager | `BannerWidget` (only active & in schedule window) |
-| Features | `appconfigs.features` | Feature Flags | `FeatureGate`, `cfg.feature('x')` in every screen; enforced server-side too |
+| Features | `appconfigs.features` | Feature Flags | `FeatureGate`, `cfg.feature('x')` in every screen, router guard `FeatureRoute` (deep links to a disabled screen show *unavailable*); enforced server-side too |
 | Business rules | `appconfigs.businessRules` | Business Rules / Commission | **Server** pricing (`utils/pricing.js`), cart UI, payouts, cancellation |
 | Strings | `translations` collection | Language Manager | `tr('key')` in Flutter, `t('key')` on the web |
 | Legal pages | `appconfigs.legal` (HTML) | Legal Pages | `LegalScreen` (`HtmlWidget`) |
@@ -32,7 +32,7 @@ Nothing a user sees is compiled into an app. Colors, texts, layout, feature visi
 2. Theme is built from `theme`, strings are loaded into `TranslationManager`, currency into `Fmt`.
 3. Maintenance (`maintenance.affectedApps` contains this app) → maintenance screen. Version below `appVersions.<app>.minVersion` → update dialog.
 4. Admin saves a section → server updates MongoDB with a dot-path `$set` (partial updates never wipe sibling keys), bumps `version`, clears the cache, emits `config:updated`.
-5. Apps listening on the socket call `/api/config` again and rebuild: colors, layout and texts change without a store release.
+5. Apps listening on the socket call `/api/config` again and rebuild: colors, layout and texts change without a store release. If maintenance is switched on while an app is open, it jumps straight to the maintenance screen.
 
 ## 3. Home layout sections
 
@@ -77,6 +77,8 @@ Unknown types are ignored by older app builds, so new section types can be intro
 Prices are always recomputed on the server (`POST /orders/quote` and `POST /orders`), never trusted from the client. See the formula in `API_DOCUMENTATION.md §5`. Each order stores a snapshot of fees, commission and payouts, so changing rules affects only new orders.
 
 Commission precedence: `restaurant.commissionPercent` (Commission page override) → `businessRules.commissionPercent`.
+
+Operational rules (also in Business Rules → *Cancellations & dispatch*): `vendorAcceptTimeoutMinutes` (auto-reject unaccepted orders), `paymentTimeoutMinutes` (auto-cancel unpaid online orders), `etaBufferMinutes` + `etaMinutesPerKm` (ETA shown to customers), `deliveryOtpLength`.
 
 ## 7. Adding a new configurable thing (developer checklist)
 

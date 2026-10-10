@@ -31,7 +31,6 @@ export default function Maintenance() {
               ))}
             </div>
           </div>
-          <Toggle label={t('maintenance.allowAdmins')} checked={!!draft.allowAdmins} onChange={(v) => set('allowAdmins', v)} />
         </div>
         <div className="card space-y-4">
           <ImageUpload label={t('maintenance.image')} value={draft.maintenanceImageUrl} onChange={(v) => set('maintenanceImageUrl', v)} folder="branding" />
