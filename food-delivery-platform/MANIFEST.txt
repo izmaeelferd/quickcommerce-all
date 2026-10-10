@@ -1,8 +1,12 @@
 # File manifest (bytes  path) — generated at packaging time
+      2965  .claude/commands/build-apks.md
+       976  .claude/commands/install-apks.md
+      2474  .claude/commands/setup-demo.md
        122  .dockerignore
        427  .env.example
        548  .gitignore
      13092  AUDIT_REPORT.md
+      2083  CLAUDE.md
        514  Dockerfile.admin
        347  Dockerfile.backend
        529  Dockerfile.vendor-dashboard
