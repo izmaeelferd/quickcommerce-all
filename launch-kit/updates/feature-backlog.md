@@ -8,7 +8,7 @@ Ideas for after v1.0.0, grounded in what the codebase already has. Each item lis
 
 Every item follows the conventions: new tunables in CFG, new text in TR, validators on new routes, e2e step in `tests/e2e.js`.
 
-> Already in v1.0 (don't rebuild): scheduled orders with delivery slots (`scheduleOrder` flag + `businessRules.deliverySlots`), coupons engine, banners with scheduling, referral, wallet, featured restaurants flag, call-restaurant button (`chatWithVendor`), dark mode toggle, delivery OTP + photo proof, reports with CSV, RBAC.
+> Already in v1.0 (don't rebuild): scheduled orders with delivery slots (`scheduleOrder` flag + `businessRules.deliverySlots`), coupons engine, banners with scheduling, referral, wallet, featured restaurants flag, call-restaurant button (`chatWithVendor`), dark mode toggle, delivery OTP + photo proof, reports with CSV, RBAC, payment webhooks allowed during maintenance (OPS-07), `RUN_SCHEDULER` single-scheduler flag (INF-02).
 
 ---
 
@@ -144,8 +144,8 @@ Every item follows the conventions: new tunables in CFG, new text in TR, validat
 | OPS-03 | Metrics & alerting endpoint | P1 | M | BE `/api/metrics` (protected) or OpenTelemetry; dashboards ([Grafana]) | Latency, 5xx, socket connections, scheduler runs, queue depth. |
 | OPS-04 | Admin audit log | P0 | M | BE M AuditLog written by admin routes (who/what/before/after), C/R; AP Audit page (perm `roles`) | Accountability for refunds, wallet adjustments, config changes. |
 | OPS-05 | Bulk actions in Orders/Users | P2 | S | AP DataTable selection, BE batch endpoints with validators | Bulk cancel/reassign/notify. |
-| OPS-06 | Stuck-order & refund-failure alerts | P1 | S | BE scheduler checks (orders stuck per status, cancelled+paid), notify admins room/email; CFG thresholds; AP Dashboard widget | Automates the manual checks in the daily runbook. |
-| OPS-07 | Maintenance allow-list for payment webhooks | P0 | S | BE middleware/maintenance.js `ALLOW_PREFIXES` add `/payments/webhook`; e2e step | Today maintenance mode returns 503 to gateway webhooks. |
+| OPS-06 | Stuck-order & refund-failure alerts | P1 | S | BE scheduler checks (orders stuck per status, cancelled+paid, wallet-fallback refunds after a failed gateway refund), notify admins room/email; CFG thresholds; AP Dashboard widget | Automates the manual checks in the daily runbook. |
+| OPS-07 | ~~Maintenance allow-list for payment webhooks~~ **Done in v1.0.0** | — | — | BE middleware/maintenance.js `ALLOW_PREFIXES` includes `/payments/webhook` | Gateway webhooks keep working during maintenance mode. |
 | OPS-08 | Config change history & rollback | P2 | M | BE M ConfigRevision on every `updateSection`, restore endpoint; AP "History" drawer on config pages | Undo a bad Business Rules save in one click. |
 | OPS-09 | Vendor/rider document expiry reminders | P3 | S | BE scheduler + notify; AP flags | FSSAI/licence/insurance expiry tracking. |
 
@@ -154,7 +154,7 @@ Every item follows the conventions: new tunables in CFG, new text in TR, validat
 | ID | Feature | Pri | Effort | Modules touched | Description |
 |---|---|---|---|---|---|
 | INF-01 | **Redis** integration | P1 | M | BE `utils/redis.js`, `@socket.io/redis-adapter` in server.js, `rate-limit-redis` in middleware/rateLimiter.js, config-cache invalidation pub/sub, read caches; env `REDIS_URL`; docker-compose `redis` service; docs | Prerequisite for multiple API instances. Not used anywhere today. |
-| INF-02 | Single-instance scheduler guard / worker | P0 (before scaling) | S | BE server.js `RUN_SCHEDULER` env or lease lock, atomic state transition in scheduler; `.env.example`; docs; tests/scheduler.js | Scheduler currently runs in every API process (see scaling roadmap Stage 4). |
+| INF-02 | ~~Single-instance scheduler guard~~ **Done in v1.0.0** (`RUN_SCHEDULER` env) | P2 (hardening) remainder | S | Done: BE server.js starts the scheduler only when `RUN_SCHEDULER` ≠ `false`; `.env.example`; ENVIRONMENT_SETUP; DEPLOYMENT_GUIDE. Remaining idea: MongoDB/Redis lease lock or separate worker + atomic state transition in scheduler; tests/scheduler.js | Set `RUN_SCHEDULER=false` on every API instance except one. The lock would only protect against misconfiguration (see scaling roadmap Stage 4). |
 | INF-03 | Background job queue | P1 | M | BE queue (BullMQ on Redis) for broadcasts, emails, SMS, webhooks retries; worker entrypoint; compose service | Moves slow work out of HTTP requests (broadcasts to "all" currently run inline). |
 | INF-04 | Graceful shutdown & readiness probe | P1 | S | BE server.js SIGTERM handler (close HTTP, sockets, Mongo), `/api/health/ready` checks DB | Zero-downtime deploys, k8s readiness. |
 | INF-05 | Migrate local uploads to S3 + CDN | P1 | S | Script to copy `uploads/` to bucket and rewrite stored URLs; env `UPLOAD_DRIVER=s3`; docs | Enables multi-instance and CDN delivery. |
@@ -176,10 +176,10 @@ Every item follows the conventions: new tunables in CFG, new text in TR, validat
 
 ## Suggested sequencing
 
-1. **Hardening sprint (P0):** FIN-01, OPS-07, INF-02, OPS-01, OPS-02, OPS-04, INF-07, SEC-01, DLV-03, FIN-04.
+1. **Hardening sprint (P0):** FIN-01, OPS-01, OPS-02, OPS-04, INF-07, SEC-01, DLV-03, FIN-04.
 2. **Retention & ops (P1):** COM-06, ORD-05, VND-04, VND-05, OPS-06, GRW-02, VND-01, GRW-03, COM-01, COM-02, ORD-01, ORD-08.
-3. **Scale-out:** INF-01, INF-03, INF-04, INF-05, GEO-01, DLV-01, FIN-02.
+3. **Scale-out:** INF-01, INF-02 (lease lock, optional hardening), INF-03, INF-04, INF-05, GEO-01, DLV-01, FIN-02.
 4. **New revenue lines (P2):** MON-01, VND-02, GRW-04, GRW-05, DIN-01.
 5. **Differentiators (P2–P3):** AI-01, AI-02, ORD-02, APP-01, DIN-02.
 
-Count: 90 items across 14 areas.
+Count: 90 items across 14 areas (OPS-07 and the `RUN_SCHEDULER` part of INF-02 already done in v1.0.0).

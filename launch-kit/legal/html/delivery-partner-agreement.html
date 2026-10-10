@@ -1,0 +1,327 @@
+<h1 id="feastflow-delivery-partner-agreement">FeastFlow Delivery Partner
+Agreement</h1>
+<blockquote>
+<p><strong>TEMPLATE — NOT LEGAL ADVICE.</strong> This is a
+starting-point template for engaging delivery partners ("riders") on
+FeastFlow. It is not legal advice. <strong>Worker classification is a
+high-risk area.</strong> Whether riders can be treated as independent
+contractors depends on local law and on how you actually operate. In
+India, review the <strong>Code on Social Security, 2020</strong> (gig
+and platform worker provisions, including any aggregator contribution to
+social-security funds) and any <strong>state platform-worker
+laws</strong> (e.g. Rajasthan Platform Based Gig Workers (Registration
+and Welfare) Act, 2023, and Karnataka/other state laws as enacted); in
+the EU review the <strong>Platform Work Directive</strong> and national
+law; in the UK/US review worker/employee status case law and local
+rules. <strong>Have qualified labour/employment counsel review this
+agreement before use.</strong> Replace every
+<code>[BRACKETED PLACEHOLDER]</code>.</p>
+<p><strong>Configured values:</strong> Numbers marked <em>"configured
+value"</em> are set in <strong>Admin Panel → Config → Business
+Rules</strong> and can be changed at runtime. The shipped default and
+config key are shown, e.g.
+<code>businessRules.deliveryPartnerPayout.base</code> = 25.
+<strong>Before use, make sure each number matches your live Admin Panel
+settings.</strong></p>
+</blockquote>
+<p><strong>Agreement No.:</strong> [AGREEMENT NUMBER] <strong>Effective
+Date:</strong> [EFFECTIVE DATE]</p>
+<p><strong>BETWEEN</strong></p>
+<p><strong>(1) [COMPANY LEGAL NAME]</strong>, a [COMPANY TYPE]
+incorporated under the laws of [COUNTRY], registration number
+[REGISTRATION NUMBER], with its registered office at [REGISTERED
+ADDRESS] ("<strong>FeastFlow</strong>"); and</p>
+<p><strong>(2) [DELIVERY PARTNER FULL NAME]</strong>, aged [AGE],
+residing at [ADDRESS], mobile [PHONE], [ID TYPE] No. [ID NUMBER]
+("<strong>Delivery Partner</strong>", "<strong>you</strong>").</p>
+<p>This Agreement is accepted electronically in the FeastFlow Rider app
+at registration [and/or signed below].</p>
+<hr />
+<h2 id="1-services-and-relationship">1. Services and relationship</h2>
+<p>1.1 FeastFlow operates a technology platform that connects customers,
+restaurants and independent delivery partners. Through the
+<strong>FeastFlow Rider</strong> app, you may receive offers to pick up
+orders from restaurants and deliver them to customers ("<strong>Delivery
+Services</strong>").</p>
+<p>1.2 <strong>Independent contractor [COUNSEL TO CONFIRM].</strong> You
+provide Delivery Services as an independent contractor on a
+principal-to-principal basis. You are not an employee, worker, agent or
+partner of FeastFlow. Subject to Clause 1.3, you:</p>
+<ul>
+<li>decide <strong>whether and when to go Online</strong>, and for how
+long;</li>
+<li>may <strong>decline</strong> delivery offers [CONFIRM — the app
+records riders who decline orders];</li>
+<li>provide and maintain your own vehicle, smartphone, data plan and
+equipment;</li>
+<li>may provide services to other platforms or businesses at the same
+time, unless doing so would be unsafe or conflict with an active
+FeastFlow delivery.</li>
+</ul>
+<p>1.3 Nothing in this Agreement requires minimum hours or shifts. [IF
+YOU INTRODUCE SHIFTS, INCENTIVE TARGETS OR EXCLUSIVITY, COUNSEL MUST
+REVIEW THE IMPACT ON CLASSIFICATION.]</p>
+<p>1.4 <strong>Social security and welfare [PLACEHOLDER].</strong> Where
+the law provides social-security, welfare or registration schemes for
+gig/platform workers (e.g. under the Code on Social Security, 2020 or
+state laws), FeastFlow will comply with its obligations as an
+aggregator/platform, including [REGISTRATION ON THE e-SHRAM / STATE
+PORTAL, AGGREGATOR CONTRIBUTIONS, WELFARE CESS — COUNSEL TO SPECIFY].
+You agree to provide information reasonably required for this.</p>
+<h2 id="2-eligibility-and-documents">2. Eligibility and documents</h2>
+<p>2.1 To register, you must:</p>
+<ul>
+<li>be at least <strong>[18]</strong> years old and legally permitted to
+work in [COUNTRY];</li>
+<li>hold a valid <strong>driving licence</strong> for your vehicle class
+(not required for bicycles) [CONFIRM LOCAL RULE];</li>
+<li>for motorised vehicles, hold a valid <strong>vehicle
+registration</strong>, <strong>insurance</strong> (at least third-party,
+as required by the Motor Vehicles Act, 1988 or local law) and
+<strong>pollution certificate</strong> where applicable;</li>
+<li>own a smartphone that can run the Rider app with GPS;</li>
+<li>pass identity and background verification [DESCRIBE — e.g. police
+verification, where lawful and with consent].</li>
+</ul>
+<p>2.2 In the Rider app you will provide: name, phone, email, photo,
+<strong>vehicle type</strong> (bicycle, bike, scooter or car),
+<strong>vehicle number</strong>, <strong>driving licence
+number</strong>, uploaded <strong>documents</strong> ([ID PROOF, DRIVING
+LICENCE, VEHICLE RC, INSURANCE, PAN, OTHER]), and <strong>bank account /
+UPI details</strong> for payouts.</p>
+<p>2.3 Your account is activated only after <strong>FeastFlow approves
+it</strong> (Admin → Delivery Partners). FeastFlow may reject an
+application or request further documents. You must keep your documents
+valid and inform FeastFlow of changes within <strong>[7]
+days</strong>.</p>
+<h2 id="3-how-deliveries-work">3. How deliveries work</h2>
+<p>3.1 <strong>Going Online.</strong> When you toggle
+<strong>Online</strong>, you are available for delivery offers. When you
+toggle <strong>Offline</strong>, you will receive no offers.</p>
+<p>3.2 <strong>Assignment.</strong> Orders are offered automatically to
+nearby online Delivery Partners when auto-assignment is enabled
+(configured value <code>businessRules.autoAssignDelivery</code> = true).
+The app shows the pickup and drop locations and the estimated earning
+before you accept.</p>
+<p>3.3 <strong>Pickup.</strong> Go to the restaurant, verify the order
+number, collect the sealed order and mark it <strong>picked up</strong>.
+Do not open or tamper with the packaging.</p>
+<p>3.4 <strong>Delivery and handover.</strong> Navigate to the customer,
+hand over the order and complete the delivery in the app by:</p>
+<ul>
+<li>entering the customer's <strong>delivery OTP</strong> (configured
+value <code>businessRules.deliveryOtpLength</code> = 4 digits; feature
+flag <code>deliveryOtp</code>), and</li>
+<li>taking a <strong>photo proof</strong> of the delivered order at the
+drop point, when required (feature flag
+<code>deliveryPhotoProof</code>). Photos should show the package at the
+door/handover point and <strong>must not</strong> show customers' faces
+or the inside of their homes.</li>
+</ul>
+<p><strong>You must never mark an order as delivered before physically
+handing it over, and must never ask a customer to share the OTP before
+handover.</strong></p>
+<p>3.5 <strong>Problems.</strong> If the customer is unreachable, the
+address is wrong, or the order is damaged, contact support through the
+app [CONFIRM PATH] and follow instructions. Do not abandon orders.</p>
+<p>3.6 <strong>Cash on Delivery.</strong> For COD orders (up to
+configured value <code>businessRules.codMaxAmount</code> = ₹2,000), you
+collect the payable amount in cash on behalf of [FeastFlow / the
+Restaurant Partner] and must deposit/settle it [WITHIN [X] HOURS / BY
+[METHOD]] [OPERATOR: the current FeastFlow software does not track rider
+cash-in-hand; define a manual process]. Cash collected remains the
+property of [FeastFlow] until settled.</p>
+<h2 id="4-location-tracking">4. Location tracking</h2>
+<p>4.1 <strong>While you are Online</strong>, the Rider app collects
+your <strong>precise GPS location continuously, including when the app
+is in the background or your screen is off</strong>. This is necessary
+to: offer you nearby orders; navigate to pickup and drop; show your live
+location to the customer and restaurant for the order you are
+delivering; calculate distance-based earnings; verify deliveries and
+resolve disputes; and support your safety.</p>
+<p>4.2 <strong>Location collection stops when you go Offline.</strong>
+FeastFlow stores your latest location and the time it was recorded. See
+the FeastFlow Privacy Policy [PRIVACY POLICY URL] for retention and your
+rights.</p>
+<p>4.3 You consent to this processing by granting the location
+permission and going Online (while you are Online and the app is in the
+background, your device shows a notification or location indicator that
+your location is being shared). You may withdraw consent by going
+Offline or revoking the permission, but you cannot receive orders
+without it. You must not use GPS-spoofing or location-masking tools.</p>
+<h2 id="5-earnings">5. Earnings</h2>
+<p>5.1 For each <strong>delivered</strong> order you earn:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Component</th>
+<th>Default (configured value)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Base pay per delivery</td>
+<td>₹25 (<code>businessRules.deliveryPartnerPayout.base</code>)</td>
+</tr>
+<tr class="even">
+<td>Distance pay</td>
+<td>₹6 per km of the restaurant-to-customer distance
+(<code>businessRules.deliveryPartnerPayout.perKm</code>)</td>
+</tr>
+<tr class="odd">
+<td>Customer tips</td>
+<td><strong>100%</strong> of the tip
+(<code>businessRules.deliveryPartnerPayout.tipSharePercent</code> = 100;
+feature flag <code>deliveryPartnerTips</code>)</td>
+</tr>
+<tr class="even">
+<td>Incentives / bonuses</td>
+<td>[OPTIONAL — e.g. peak-hour, rain or weekly incentives: DESCRIBE OR
+DELETE. Not built into the software by default.]</td>
+</tr>
+</tbody>
+</table>
+<p><em>Example:</em> a 4 km delivery with a ₹20 tip = ₹25 + (4 × ₹6) +
+₹20 = <strong>₹69</strong>.</p>
+<p>5.2 The earning for an order is calculated when the order is placed
+and shown in the app; it is credited to your Rider balance when the
+order is marked <strong>delivered</strong>. No earning is due for orders
+cancelled before pickup [COUNSEL/OPERATOR: decide compensation for
+orders cancelled after you have travelled to the restaurant or picked up
+— e.g. [₹X] or base pay].</p>
+<p>5.3 FeastFlow may change the earning rates on <strong>[7/15]
+days'</strong> notice in the app. Rates shown at the time you accept an
+order apply to that order.</p>
+<p>5.4 <strong>Taxes.</strong> You are responsible for your own income
+tax and, if applicable, GST. FeastFlow may deduct tax at source (TDS)
+where required by law and will issue certificates [CA TO CONFIRM].</p>
+<h2 id="6-payouts">6. Payouts</h2>
+<p>6.1 Your Rider balance is paid to your registered bank account / UPI
+ID <strong>[WEEKLY on [DAY] / every [X] days]</strong> by bank transfer,
+recorded with a reference you can see in the Earnings section.</p>
+<p>6.2 Minimum payout: <strong>₹[500]</strong> [configured value
+<code>businessRules.minPayoutAmount</code> = 500 is shown to restaurant
+partners in the app; CONFIRM WHETHER THE SAME MINIMUM APPLIES TO
+RIDERS]. Smaller balances roll over.</p>
+<p>6.3 <strong>Deductions:</strong> FeastFlow may deduct from payouts:
+(a) unsettled COD cash; (b) taxes required by law; (c) amounts for
+orders proven to be lost, tampered with or falsely marked delivered
+through your fault, after a fair review; (d) [EQUIPMENT/BAG DEPOSITS IF
+ANY — CONFIRM LEGALITY]. You will be notified of any deduction with
+reasons and can dispute it within <strong>[15] days</strong>.</p>
+<p>6.4 On deactivation or termination, your remaining balance (less
+permitted deductions) is paid within <strong>[15/30] days</strong>.</p>
+<h2 id="7-conduct-and-standards">7. Conduct and standards</h2>
+<p>You agree to:</p>
+<ul>
+<li>follow all <strong>traffic laws</strong>, wear a helmet
+(two-wheelers) and seatbelt (cars), and <strong>never use your phone
+while riding</strong>;</li>
+<li>never ride under the influence of alcohol or drugs;</li>
+<li>treat customers, restaurant staff and other riders with respect; no
+harassment, discrimination, abuse or violence;</li>
+<li>keep customer personal data (name, phone, address, OTP)
+<strong>confidential</strong>, use it only to complete the delivery, and
+not contact customers afterwards;</li>
+<li>not tamper with, consume or open orders;</li>
+<li>not ask customers for extra payment beyond the order amount (COD) —
+tips are voluntary and are added in the app;</li>
+<li>maintain food hygiene: use a clean, insulated delivery bag; keep hot
+and cold food separated where possible;</li>
+<li>not let any other person use your account; your account is personal
+and non-transferable;</li>
+<li>not use GPS spoofing, emulators, modified apps, or create multiple
+accounts;</li>
+<li>not wear FeastFlow branding in a misleading way or speak for
+FeastFlow to the media.</li>
+</ul>
+<h2 id="8-safety">8. Safety</h2>
+<p>8.1 Your safety comes first. You may refuse or abandon a delivery if
+you reasonably believe it is unsafe (e.g. severe weather, threatening
+behaviour) — inform support immediately.</p>
+<p>8.2 <strong>Emergency:</strong> In an accident or emergency, call
+local emergency services ([EMERGENCY NUMBER, e.g. 112]) first, then
+FeastFlow support at [RIDER SUPPORT PHONE]. [ADD AN IN-APP SOS FEATURE
+IF BUILT — NOT INCLUDED IN THE SOFTWARE BY DEFAULT.]</p>
+<p>8.3 FeastFlow does not set delivery deadlines that require unsafe
+riding. ETAs shown to customers are estimates.</p>
+<h2 id="9-insurance-placeholder">9. Insurance [PLACEHOLDER]</h2>
+<p>9.1 You must maintain the vehicle insurance required by law.</p>
+<p>9.2 [OPTIONAL: FeastFlow provides / facilitates <strong>accident and
+health insurance</strong> for active Delivery Partners through [INSURER
+NAME], policy [POLICY NUMBER], covering [ACCIDENTAL DEATH / DISABILITY /
+HOSPITALISATION up to ₹AMOUNT] while Online / on an active delivery.
+Premium paid by [FeastFlow / shared]. Details: [LINK].] [COUNSEL: check
+whether insurance or welfare contributions are mandatory under
+applicable gig-worker law.]</p>
+<h2 id="10-ratings-and-quality">10. Ratings and quality</h2>
+<p>Customers may rate their delivery (1–5 stars). Your average rating is
+visible to you. Persistently low ratings, repeated complaints, frequent
+order abandonment or late deliveries may lead to a review, coaching,
+temporary suspension or deactivation under Clause 11. Ratings alone will
+not be the sole basis for deactivation without human review
+[RECOMMENDED].</p>
+<h2 id="11-suspension-and-deactivation">11. Suspension and
+deactivation</h2>
+<p>11.1 <strong>Immediate suspension</strong> (status "suspended")
+pending investigation may occur for: safety incidents; harassment or
+violence; fraud (false delivery marking, GPS spoofing, account sharing);
+theft or tampering with orders; riding under the influence; expired
+licence, registration or insurance; serious legal violations.</p>
+<p>11.2 <strong>Deactivation after review</strong> may occur for
+repeated breaches of Clauses 3, 4 or 7, or persistently low quality
+after warning.</p>
+<p>11.3 <strong>Fair process:</strong> FeastFlow will (except where
+unsafe or unlawful) tell you the reason, give you an opportunity to
+respond within <strong>[7] days</strong>, review your response with a
+human reviewer, and inform you of the outcome. You may appeal to [RIDER
+APPEALS EMAIL]. [COUNSEL: align with any statutory notice/grievance
+requirements for platform workers.]</p>
+<p>11.4 You may stop using the app at any time and terminate this
+Agreement by notice in the app or to [RIDER SUPPORT EMAIL]. Deleting
+your login (Profile → Settings → Delete account) does not delete records
+needed for settlement and tax; contact support for full closure.</p>
+<h2 id="12-data-protection">12. Data protection</h2>
+<p>FeastFlow processes your personal data (identity, documents, vehicle
+details, bank details, location while Online, delivery photos, ratings
+and earnings) as described in the <strong>FeastFlow Privacy
+Policy</strong> [PRIVACY POLICY URL], including under India's Digital
+Personal Data Protection Act, 2023. You can exercise your rights or
+raise a grievance with <strong>[GRIEVANCE OFFICER NAME], [GRIEVANCE
+EMAIL]</strong>.</p>
+<h2 id="13-liability-and-indemnity">13. Liability and indemnity</h2>
+<p>13.1 You are responsible for your vehicle, your conduct and
+compliance with law. You will indemnify FeastFlow against third-party
+claims arising from your wilful misconduct, gross negligence, or breach
+of law or this Agreement.</p>
+<p>13.2 FeastFlow's liability to you is limited to unpaid earnings due
+under this Agreement plus [OTHER], except for liability that cannot be
+limited by law (including death or personal injury caused by FeastFlow's
+negligence).</p>
+<h2 id="14-general">14. General</h2>
+<p>14.1 <strong>Governing law:</strong> [GOVERNING LAW]. 14.2
+<strong>Disputes:</strong> first through the rider grievance process
+([RIDER SUPPORT EMAIL] → [GRIEVANCE OFFICER NAME]); then [ARBITRATION /
+CONCILIATION / LABOUR AUTHORITY AS REQUIRED BY LAW] at
+<strong>[JURISDICTION CITY]</strong>; courts at <strong>[JURISDICTION
+CITY]</strong> have jurisdiction subject to any mandatory forum. 14.3
+<strong>Changes:</strong> FeastFlow may amend this Agreement on
+<strong>[15] days'</strong> notice in the app; continued use after the
+effective date means acceptance; you may terminate if you do not agree.
+14.4 <strong>Language:</strong> a translation in [HINDI / LOCAL
+LANGUAGE] is available; [the English version prevails / both versions
+are equally authoritative]. 14.5 <strong>Entire agreement:</strong> this
+Agreement and the FeastFlow Terms of Service Part D form the entire
+agreement; this Agreement prevails on conflict. 14.6 <strong>Electronic
+acceptance:</strong> acceptance in the app is a valid signature under
+the Information Technology Act, 2000 [or local e-signature law].</p>
+<hr />
+<h2 id="signatures">Signatures</h2>
+<p><strong>For [COMPANY LEGAL NAME] (FeastFlow)</strong></p>
+<p>Signature: ______________________________ Name: [AUTHORISED SIGNATORY
+NAME] Designation: [DESIGNATION] Date: [DATE]</p>
+<p><strong>Delivery Partner</strong></p>
+<p>Signature: ______________________________ Name: [DELIVERY PARTNER
+FULL NAME] Rider ID / Phone: [RIDER ID / PHONE] Date: [DATE]</p>
+<p><em>Or accepted electronically in the FeastFlow Rider app on
+[DATE/TIME], from device [DEVICE ID].</em></p>

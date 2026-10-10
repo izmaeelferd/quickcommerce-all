@@ -158,8 +158,8 @@ The app shows the exact amount to collect (cash orders are limited to ₹[2,000]
 **Can I choose my working hours?**
 Yes. Go online and offline whenever you like. Lunch and dinner peaks have the most orders.
 
-**Why does the app need my location all the time?**
-While you're online, your location is used to offer you nearby orders and to show the customer live tracking. Go offline to stop sharing.
+**Why does the app need my location while I'm online?**
+While you're online, your location is used to offer you nearby orders and to show the customer live tracking, even if the app is in the background (your phone shows a "You are online" notification on Android while it is shared). Go offline to stop sharing.
 
 **What if the customer isn't reachable or the restaurant is late?**
 Use the customer contact details shown on the order, or contact rider support at [RIDER SUPPORT PHONE]. Don't leave the order without instructions from support.

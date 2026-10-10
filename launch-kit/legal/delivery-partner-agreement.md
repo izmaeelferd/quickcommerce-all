@@ -68,7 +68,7 @@ This Agreement is accepted electronically in the FeastFlow Rider app at registra
 
 4.2 **Location collection stops when you go Offline.** FeastFlow stores your latest location and the time it was recorded. See the FeastFlow Privacy Policy [PRIVACY POLICY URL] for retention and your rights.
 
-4.3 You consent to this processing by granting the location permission ("Allow all the time" / background location) and going Online. You may withdraw consent by going Offline or revoking the permission, but you cannot receive orders without it. You must not use GPS-spoofing or location-masking tools.
+4.3 You consent to this processing by granting the location permission and going Online (while you are Online and the app is in the background, your device shows a notification or location indicator that your location is being shared). You may withdraw consent by going Offline or revoking the permission, but you cannot receive orders without it. You must not use GPS-spoofing or location-masking tools.
 
 ## 5. Earnings
 

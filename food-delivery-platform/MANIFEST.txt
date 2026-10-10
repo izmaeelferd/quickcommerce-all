@@ -70,10 +70,10 @@
       1995  admin-panel/src/utils/useConfigSection.js
        938  admin-panel/tailwind.config.js
        694  admin-panel/vite.config.js
-      3384  backend/.env.example
+      3558  backend/.env.example
       1087  backend/config/database.js
       6002  backend/config/defaultConfig.js
-      4683  backend/config/env.js
+      4841  backend/config/env.js
       3636  backend/config/payments.js
      23717  backend/controllers/adminController.js
      12326  backend/controllers/authController.js
@@ -90,7 +90,7 @@
       6226  backend/controllers/userController.js
       1228  backend/middleware/auth.js
       1111  backend/middleware/errorHandler.js
-      1059  backend/middleware/maintenance.js
+      1080  backend/middleware/maintenance.js
        561  backend/middleware/rateLimiter.js
        939  backend/middleware/roles.js
       1336  backend/middleware/sanitize.js
@@ -134,9 +134,9 @@
       7408  backend/seeders/sampleData.js
       9808  backend/seeders/seedDatabase.js
      19439  backend/seeders/translations/en-admin.js
-     34766  backend/seeders/translations/en.js
+     34896  backend/seeders/translations/en.js
      17601  backend/seeders/translations/others.js
-      2968  backend/server.js
+      2990  backend/server.js
       5589  backend/sockets/orderTracking.js
      19923  backend/tests/e2e.js
       2608  backend/tests/scheduler.js
@@ -146,7 +146,7 @@
       2864  backend/utils/helpers.js
       1053  backend/utils/i18n.js
       1849  backend/utils/notify.js
-      8567  backend/utils/orderFlow.js
+      8904  backend/utils/orderFlow.js
       3050  backend/utils/pricing.js
       2298  backend/utils/push.js
       2147  backend/utils/scheduler.js
@@ -158,9 +158,9 @@
       2179  docs/APP_STORE_DEPLOYMENT.md
       6773  docs/CONFIGURATION_GUIDE.md
       7692  docs/DATABASE_SCHEMA.md
-      7065  docs/DEPLOYMENT_GUIDE.md
-      7601  docs/ENVIRONMENT_SETUP.md
-      6071  docs/FLUTTER_BUILD_GUIDE.md
+      7187  docs/DEPLOYMENT_GUIDE.md
+      7844  docs/ENVIRONMENT_SETUP.md
+      7280  docs/FLUTTER_BUILD_GUIDE.md
       2244  docs/PLAY_STORE_DEPLOYMENT.md
        216  flutter-apps/.gitignore
        262  flutter-apps/analysis_options.yaml
@@ -173,14 +173,15 @@
       2693  flutter-apps/android/app/src/customer/res/mipmap-xhdpi/ic_launcher.png
       3907  flutter-apps/android/app/src/customer/res/mipmap-xxhdpi/ic_launcher.png
       5145  flutter-apps/android/app/src/customer/res/mipmap-xxxhdpi/ic_launcher.png
-       378  flutter-apps/android/app/src/debug/AndroidManifest.xml
+       625  flutter-apps/android/app/src/debug/AndroidManifest.xml
+       564  flutter-apps/android/app/src/delivery/AndroidManifest.xml
      24160  flutter-apps/android/app/src/delivery/ic_launcher-playstore.png
       3325  flutter-apps/android/app/src/delivery/res/mipmap-hdpi/ic_launcher.png
       2189  flutter-apps/android/app/src/delivery/res/mipmap-mdpi/ic_launcher.png
       4515  flutter-apps/android/app/src/delivery/res/mipmap-xhdpi/ic_launcher.png
       6615  flutter-apps/android/app/src/delivery/res/mipmap-xxhdpi/ic_launcher.png
       8914  flutter-apps/android/app/src/delivery/res/mipmap-xxxhdpi/ic_launcher.png
-      3624  flutter-apps/android/app/src/main/AndroidManifest.xml
+      3380  flutter-apps/android/app/src/main/AndroidManifest.xml
        226  flutter-apps/android/app/src/main/kotlin/com/fooddelivery/food_delivery_apps/MainActivity.kt
        438  flutter-apps/android/app/src/main/res/drawable-v21/launch_background.xml
        434  flutter-apps/android/app/src/main/res/drawable/launch_background.xml
@@ -191,7 +192,7 @@
       1443  flutter-apps/android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
       1003  flutter-apps/android/app/src/main/res/values-night/styles.xml
       1004  flutter-apps/android/app/src/main/res/values/styles.xml
-       378  flutter-apps/android/app/src/profile/AndroidManifest.xml
+       625  flutter-apps/android/app/src/profile/AndroidManifest.xml
      10855  flutter-apps/android/app/src/vendor/ic_launcher-playstore.png
       2053  flutter-apps/android/app/src/vendor/res/mipmap-hdpi/ic_launcher.png
       1531  flutter-apps/android/app/src/vendor/res/mipmap-mdpi/ic_launcher.png
@@ -251,13 +252,13 @@
        336  flutter-apps/ios/Runner/Assets.xcassets/LaunchImage.imageset/README.md
       2377  flutter-apps/ios/Runner/Base.lproj/LaunchScreen.storyboard
       1605  flutter-apps/ios/Runner/Base.lproj/Main.storyboard
-      3135  flutter-apps/ios/Runner/Info.plist
+      2958  flutter-apps/ios/Runner/Info.plist
         38  flutter-apps/ios/Runner/Runner-Bridging-Header.h
         76  flutter-apps/ios/Runner/SceneDelegate.swift
        285  flutter-apps/ios/RunnerTests/RunnerTests.swift
       5541  flutter-apps/lib/core/api_client.dart
       6418  flutter-apps/lib/core/dynamic_theme.dart
-      1440  flutter-apps/lib/core/env.dart
+      1724  flutter-apps/lib/core/env.dart
       1311  flutter-apps/lib/core/formatters.dart
       6262  flutter-apps/lib/core/routes.dart
       1706  flutter-apps/lib/core/translation_manager.dart
@@ -301,7 +302,7 @@
       5615  flutter-apps/lib/screens/customer/search_screen.dart
       4294  flutter-apps/lib/screens/customer/wallet_screen.dart
      30690  flutter-apps/lib/screens/delivery/delivery_screens.dart
-      3022  flutter-apps/lib/screens/delivery/delivery_shell.dart
+      3156  flutter-apps/lib/screens/delivery/delivery_shell.dart
      15443  flutter-apps/lib/screens/shared/auth_screens.dart
       1412  flutter-apps/lib/screens/shared/legal_screen.dart
       1921  flutter-apps/lib/screens/shared/maintenance_screen.dart
@@ -315,7 +316,7 @@
       8546  flutter-apps/lib/services/api_service.dart
       3740  flutter-apps/lib/services/auth_service.dart
       1450  flutter-apps/lib/services/config_service.dart
-      1009  flutter-apps/lib/services/location_service.dart
+      2463  flutter-apps/lib/services/location_service.dart
       3097  flutter-apps/lib/services/notification_service.dart
       3015  flutter-apps/lib/services/payment_service.dart
       1874  flutter-apps/lib/services/socket_service.dart

@@ -1,0 +1,472 @@
+<h1 id="feastflow-restaurant-partner-agreement">FeastFlow Restaurant
+Partner Agreement</h1>
+<blockquote>
+<p><strong>TEMPLATE — NOT LEGAL ADVICE.</strong> This is a
+starting-point template for onboarding restaurants onto FeastFlow. It is
+not legal advice. Commission, tax (GST, TCS/TDS), food-safety (e.g.
+FSSAI), competition-law (pricing parity) and contract rules vary by
+jurisdiction. <strong>Have qualified legal counsel and a chartered
+accountant / tax adviser review this agreement before use.</strong>
+Replace every <code>[BRACKETED PLACEHOLDER]</code>.</p>
+<p><strong>Configured values:</strong> Numbers marked <em>"configured
+value"</em> are set in <strong>Admin Panel → Config → Business
+Rules</strong> (global) or <strong>Admin Panel → Finance →
+Commission</strong> (per-restaurant override) and can be changed at
+runtime. The shipped default and config key are shown, e.g.
+<code>businessRules.commissionPercent</code> = 18. <strong>Before
+signing, make sure each number matches what is configured for this
+restaurant in the Admin Panel.</strong></p>
+</blockquote>
+<p><strong>Agreement No.:</strong> [AGREEMENT NUMBER] <strong>Effective
+Date:</strong> [EFFECTIVE DATE]</p>
+<p><strong>BETWEEN</strong></p>
+<p><strong>(1) [COMPANY LEGAL NAME]</strong>, a [COMPANY TYPE]
+incorporated under the laws of [COUNTRY], registration number
+[REGISTRATION NUMBER], GSTIN [GSTIN], with its registered office at
+[REGISTERED ADDRESS] ("<strong>FeastFlow</strong>"); and</p>
+<p><strong>(2) [RESTAURANT LEGAL ENTITY NAME]</strong>, a [sole
+proprietorship / partnership / LLP / company], trading as
+<strong>[RESTAURANT BRAND NAME]</strong>, with its principal place of
+business at [RESTAURANT ADDRESS], PAN [PAN], GSTIN [RESTAURANT GSTIN or
+"Not registered"], FSSAI Licence/Registration No. [FSSAI NUMBER]
+("<strong>Restaurant Partner</strong>").</p>
+<p>Each a "<strong>Party</strong>", together the
+"<strong>Parties</strong>".</p>
+<hr />
+<h2 id="1-definitions">1. Definitions</h2>
+<ul>
+<li><strong>Platform</strong> — the FeastFlow customer app, FeastFlow
+Partner app, vendor web dashboard, website and related systems.</li>
+<li><strong>Customer</strong> — an end user who places an Order through
+the Platform.</li>
+<li><strong>Order</strong> — a request by a Customer through the
+Platform for food and beverages from the Restaurant Partner.</li>
+<li><strong>Order Value / Subtotal</strong> — the menu price of items
+and add-ons in an Order, before taxes, fees and tips.</li>
+<li><strong>Net Order Value</strong> — Subtotal minus any coupon
+discount applied to the Order.</li>
+<li><strong>Delivery Partner</strong> — an independent rider who
+delivers Orders via the FeastFlow Rider app.</li>
+<li><strong>Business Rules</strong> — the configurable settings in the
+FeastFlow Admin Panel that govern fees, timings and limits.</li>
+<li><strong>Partner Balance</strong> — the running balance of the
+Restaurant Partner's earnings held in the Platform pending payout.</li>
+</ul>
+<h2 id="2-appointment-and-scope">2. Appointment and scope</h2>
+<p>2.1 FeastFlow grants the Restaurant Partner a non-exclusive right to
+list its restaurant and menu on the Platform and to receive Orders from
+Customers, and provides order management tools (FeastFlow Partner app
+and vendor web dashboard: Orders, Menu, Categories, Timings, Reviews,
+Payouts, Settings).</p>
+<p>2.2 FeastFlow acts as [a technology platform / e-commerce operator
+and limited agent of the Restaurant Partner for the purpose of
+collecting payment from Customers] [COUNSEL TO CONFIRM]. The contract
+for the sale of food is between the Restaurant Partner and the
+Customer.</p>
+<p>2.3 This Agreement is non-exclusive. [OPTIONAL EXCLUSIVITY CLAUSE —
+COUNSEL TO REVIEW FOR COMPETITION-LAW RISK.]</p>
+<h2 id="3-onboarding-and-kyc">3. Onboarding and KYC</h2>
+<p>3.1 Before listing, the Restaurant Partner must submit through the
+Partner app / dashboard, and keep up to date:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Business details</td>
+<td>Legal name, brand name, description, cuisines, contact phone and
+email</td>
+</tr>
+<tr class="even">
+<td>Address &amp; location</td>
+<td>Full address, city, state, PIN, map location</td>
+</tr>
+<tr class="odd">
+<td><strong>Food-safety licence</strong></td>
+<td>FSSAI licence/registration number [OR EQUIVALENT LOCAL FOOD BUSINESS
+LICENCE] and expiry date; copy of licence</td>
+</tr>
+<tr class="even">
+<td><strong>Tax registration</strong></td>
+<td>GSTIN (if registered), PAN; [state if composition scheme]</td>
+</tr>
+<tr class="odd">
+<td><strong>Bank details</strong></td>
+<td>Account holder name, account number, IFSC [or local routing code],
+UPI ID (optional); cancelled cheque or bank letter</td>
+</tr>
+<tr class="even">
+<td>Owner KYC</td>
+<td>[ID PROOF OF OWNER / AUTHORISED SIGNATORY]</td>
+</tr>
+<tr class="odd">
+<td>Other</td>
+<td>[SHOP &amp; ESTABLISHMENT LICENCE / TRADE LICENCE / HEALTH
+CERTIFICATE / OTHER LOCAL PERMITS]</td>
+</tr>
+<tr class="even">
+<td>Menu</td>
+<td>Items, prices, descriptions, veg/non-veg markers, add-ons, photos,
+opening hours</td>
+</tr>
+</tbody>
+</table>
+<p>3.2 The restaurant goes live only after FeastFlow
+<strong>approves</strong> the application (Admin → Vendors). FeastFlow
+may reject or request further documents at its discretion.</p>
+<p>3.3 The Restaurant Partner must notify FeastFlow within <strong>[7]
+days</strong> of any change to its licences, ownership, bank details or
+tax registration, and must not operate on the Platform with an expired
+or suspended food-safety licence.</p>
+<h2 id="4-commission-and-fees">4. Commission and fees</h2>
+<p>4.1 <strong>Commission.</strong> FeastFlow charges a commission on
+the <strong>Net Order Value</strong> of each delivered Order at the rate
+of:</p>
+<blockquote>
+<p><strong>[18]%</strong> — default (configured value
+<code>businessRules.commissionPercent</code> = 18), <strong>or</strong>
+a restaurant-specific rate of <strong>[__]%</strong> agreed with the
+Restaurant Partner and set as a per-restaurant override in Admin →
+Finance → Commission.</p>
+</blockquote>
+<p>4.2 Commission is calculated and recorded per Order when it is
+placed, and settled when the Order is delivered. GST at the applicable
+rate is charged on the commission [COUNSEL/CA TO CONFIRM].</p>
+<p>4.3 <strong>Other fees</strong> [OPTIONAL — DELETE IF NONE]:
+[ONBOARDING FEE], [PHOTOGRAPHY FEE], [FEATURED LISTING / BANNER FEES —
+FeastFlow can mark restaurants as featured and run banners; any paid
+placement must be agreed in writing], [PAYMENT GATEWAY CHARGES
+PASS-THROUGH].</p>
+<p>4.4 FeastFlow may change the default commission or fees on
+<strong>[30] days'</strong> written notice. If the Restaurant Partner
+does not accept the change, it may terminate under Clause 15.</p>
+<h2 id="5-customer-pricing-and-charges">5. Customer pricing and
+charges</h2>
+<p>5.1 The Restaurant Partner sets its own menu prices. <strong>Pricing
+parity</strong> [OPTIONAL — COUNSEL TO REVIEW FOR COMPETITION-LAW
+COMPLIANCE, e.g. under the Indian Competition Act, 2002, EU/UK law]:
+[The Restaurant Partner agrees that menu prices on the Platform will not
+be higher than its dine-in menu prices by more than [X]% / Delete this
+clause].</p>
+<p>5.2 FeastFlow sets and collects Customer-side charges according to
+the Business Rules, including delivery fees, surge fees, platform fee
+and taxes. The <strong>packaging fee</strong> (configured value
+<code>businessRules.packagingFee</code> = ₹15 per Order) is collected
+from the Customer and <strong>passed to the Restaurant
+Partner</strong>.</p>
+<p>5.3 <strong>Coupons:</strong> Platform coupons may be applied to
+Orders, including restaurant-specific coupons. <strong>Under the current
+settlement logic, coupon discounts reduce the Net Order Value and
+therefore the Restaurant Partner's earnings.</strong> [CHOOSE: (a)
+Restaurant Partner bears all coupon discounts; (b) Restaurant Partner
+bears discounts only on coupons it has approved, and FeastFlow
+reimburses Platform-funded coupons via [MECHANISM]; COUNSEL/CA TO
+CONFIRM AND, IF (b), ADJUST THE SETTLEMENT PROCESS.]</p>
+<h2 id="6-earnings-and-payouts">6. Earnings and payouts</h2>
+<p>6.1 <strong>Earnings per delivered Order:</strong></p>
+<blockquote>
+<p>Restaurant earning = Subtotal − coupon discount − commission +
+packaging fee</p>
+</blockquote>
+<p>Taxes collected from the Customer, delivery fees, surge fees,
+platform fees and tips are <strong>not</strong> part of the Restaurant
+Partner's earnings. [CA: set out GST treatment, including whether
+FeastFlow pays GST on restaurant services as an e-commerce operator
+under Section 9(5) of the CGST Act, and TCS/TDS deductions under GST and
+the Income-tax Act.]</p>
+<p>6.2 Earnings are credited to the <strong>Partner Balance</strong>
+when the Order is marked delivered and are visible in the Partner app /
+dashboard under <strong>Payouts</strong>.</p>
+<p>6.3 <strong>Payout cycle:</strong> FeastFlow will pay the Partner
+Balance to the registered bank/UPI account <strong>[WEEKLY / EVERY [X]
+DAYS / MONTHLY] on [DAY]</strong>, by bank transfer, recorded with a
+payment reference.</p>
+<p>6.4 <strong>Minimum payout:</strong> a payout is made only when the
+Partner Balance is at least <strong>₹500</strong> (configured value
+<code>businessRules.minPayoutAmount</code> = 500); smaller balances roll
+over to the next cycle.</p>
+<p>6.5 <strong>Deductions and set-off.</strong> FeastFlow may deduct
+from payouts: (a) commission and agreed fees (and GST on them); (b)
+taxes required to be withheld or collected by law (e.g. TCS/TDS) [CA TO
+CONFIRM]; (c) refunds given to Customers for issues attributable to the
+Restaurant Partner (missing/wrong items, quality, post-acceptance
+cancellation by the restaurant); (d) penalties agreed in a schedule
+[OPTIONAL SCHEDULE]; (e) any amounts owed to FeastFlow under this
+Agreement.</p>
+<p>6.6 <strong>Cash on Delivery:</strong> For COD Orders, the Delivery
+Partner collects cash on FeastFlow's behalf [CONFIRM]; the Restaurant
+Partner's earning is credited to the Partner Balance in the same way as
+prepaid Orders.</p>
+<p>6.7 <strong>Statements and disputes:</strong> FeastFlow will make
+transaction-level statements available in the dashboard. The Restaurant
+Partner must raise any discrepancy within <strong>[30] days</strong> of
+the payout date, failing which the statement is deemed accepted (except
+for manifest error).</p>
+<h2 id="7-restaurant-partner-responsibilities">7. Restaurant Partner
+responsibilities</h2>
+<p>7.1 <strong>Food safety and quality.</strong> Prepare all food in
+compliance with applicable food-safety law (e.g. Food Safety and
+Standards Act, 2006 and FSSAI regulations), in hygienic conditions,
+using fresh and safe ingredients, at proper temperatures, in
+tamper-evident, food-grade, spill-proof packaging.</p>
+<p>7.2 <strong>Menu accuracy.</strong> Keep item names, descriptions,
+prices, add-ons, images, veg/non-veg markers, and <strong>allergen,
+nutritional and other information required by law</strong> accurate and
+complete. Images must fairly represent the food. Use the
+<strong>item-availability toggle</strong> for unavailable items and the
+<strong>open/close toggle</strong> and <strong>Timings</strong> for
+hours.</p>
+<p>7.3 <strong>Order acceptance.</strong> Accept or reject each Order
+promptly. <strong>Orders not accepted within the configured time are
+automatically rejected by the system and the Customer is fully
+refunded</strong> (configured value
+<code>businessRules.vendorAcceptTimeoutMinutes</code> = 5 minutes; the
+timer starts when the Order is placed for COD, or when payment succeeds
+for online payments). Repeated auto-rejections, rejections or
+post-acceptance cancellations may lead to reduced visibility, temporary
+closure or suspension.</p>
+<p>7.4 <strong>Preparation time.</strong> Maintain an accurate average
+preparation time in the restaurant profile (used for Customer ETAs).
+Update Order status to <em>preparing</em> and <em>ready</em> promptly,
+and have Orders ready for pickup on time.</p>
+<p>7.5 <strong>Handover.</strong> Hand the Order only to the assigned
+Delivery Partner, verify the Order number, and treat Delivery Partners
+with courtesy.</p>
+<p>7.6 <strong>Customer contact.</strong> Customers may call the
+restaurant via the in-app "call restaurant" button. Respond
+professionally. Use Customer data only to fulfil the Order (Clause
+11).</p>
+<p>7.7 <strong>Compliance.</strong> Comply with all applicable laws,
+including consumer protection, labour, tax, weights-and-measures/legal
+metrology, and display of licence numbers where required. Do not sell
+items that are illegal or require age verification (e.g. alcohol,
+tobacco) unless expressly agreed in writing and permitted by law.</p>
+<h2 id="8-taxes">8. Taxes</h2>
+<p>8.1 Each Party is responsible for its own taxes. The Restaurant
+Partner is responsible for the accuracy of its GST registration status
+and for any tax on its supplies except where the law places the
+obligation on FeastFlow as e-commerce operator.</p>
+<p>8.2 FeastFlow will issue tax invoices for its commission and fees,
+and [tax invoices to Customers on behalf of the Restaurant Partner / in
+its own name under Section 9(5)] [CA TO CONFIRM].</p>
+<p>8.3 The Restaurant Partner indemnifies FeastFlow for taxes, interest
+and penalties arising from incorrect information it provides.</p>
+<h2 id="9-ratings-and-reviews">9. Ratings and reviews</h2>
+<p>9.1 Customers may rate and review the restaurant after a delivered
+Order. The restaurant's rating is the average of visible review
+ratings.</p>
+<p>9.2 The Restaurant Partner may reply to reviews publicly via the
+Reviews section. Replies must be professional, must not disclose
+Customers' personal data, and must not harass or threaten reviewers.</p>
+<p>9.3 The Restaurant Partner must not post or procure fake reviews,
+offer incentives for positive reviews without disclosure, or manipulate
+ratings. FeastFlow may hide reviews that violate its content rules but
+will not remove genuine reviews merely because they are negative.</p>
+<h2 id="10-intellectual-property-and-listing-content">10. Intellectual
+property and listing content</h2>
+<p>10.1 The Restaurant Partner grants FeastFlow a non-exclusive,
+royalty-free, worldwide licence during the term (and for a reasonable
+wind-down period) to use its name, trademarks, logos, images and menu
+content on the Platform and in marketing of the Platform, including
+featured listings and banners.</p>
+<p>10.2 The Restaurant Partner warrants it owns or has rights to all
+content it uploads and that it does not infringe third-party rights.</p>
+<p>10.3 FeastFlow's trademarks may be used by the Restaurant Partner
+only as approved in writing (e.g. "Order on FeastFlow" stickers).</p>
+<h2 id="11-data-protection-and-confidentiality">11. Data protection and
+confidentiality</h2>
+<p>11.1 Customer personal data (name, address, phone, order details)
+made available to the Restaurant Partner is to be used <strong>only to
+prepare and fulfil the relevant Order</strong> and to handle related
+complaints. The Restaurant Partner must not use it for marketing,
+contact Customers outside the Order context, retain it longer than
+necessary, or share it with third parties.</p>
+<p>11.2 Each Party will comply with applicable data-protection law,
+including India's Digital Personal Data Protection Act, 2023 [and GDPR
+where applicable], and implement reasonable security safeguards. The
+Restaurant Partner must notify FeastFlow within <strong>[24]
+hours</strong> of becoming aware of any breach involving Customer
+data.</p>
+<p>11.3 FeastFlow processes the Restaurant Partner's data (including
+bank details, KYC and order data) in accordance with the FeastFlow
+Privacy Policy [PRIVACY POLICY URL].</p>
+<p>11.4 Each Party will keep confidential the other's non-public
+business information, including commission rates and this Agreement's
+terms, except as required by law.</p>
+<h2 id="12-customer-complaints-and-refunds">12. Customer complaints and
+refunds</h2>
+<p>12.1 FeastFlow handles Customer support and decides on Customer
+refunds in accordance with its Refund &amp; Cancellation Policy. The
+Restaurant Partner will cooperate in investigations and respond to
+FeastFlow queries within <strong>[24] hours</strong>.</p>
+<p>12.2 Where a refund is attributable to the Restaurant Partner (e.g.
+missing/wrong items, food quality, cancellation after acceptance),
+FeastFlow may recover the refunded item value from the Partner Balance
+under Clause 6.5.</p>
+<p>12.3 Customer cancellation fees (configured value
+<code>businessRules.cancellationPenaltyPercent</code> = 10% after the
+<code>cancellationWindowMinutes</code> = 5 window) are [retained by
+FeastFlow / shared with the Restaurant Partner as follows: [__]]
+[CONFIRM].</p>
+<h2 id="13-representations-warranties-and-indemnity">13.
+Representations, warranties and indemnity</h2>
+<p>13.1 Each Party represents that it has authority to enter into this
+Agreement.</p>
+<p>13.2 The Restaurant Partner warrants that it holds and will maintain
+all licences required to operate, and that its food complies with
+applicable law.</p>
+<p>13.3 The Restaurant Partner will indemnify and hold harmless
+FeastFlow, its affiliates and personnel against all claims, losses,
+fines, penalties and costs (including reasonable legal fees) arising
+from: (a) food prepared or supplied by it, including illness, injury,
+allergic reactions or contamination; (b) inaccurate menu, allergen or
+pricing information; (c) breach of this Agreement or law; (d)
+infringement of third-party IP by its content.</p>
+<p>13.4 <strong>Insurance:</strong> The Restaurant Partner will maintain
+[PUBLIC/PRODUCT LIABILITY INSURANCE of at least [AMOUNT]]
+[OPTIONAL].</p>
+<h2 id="14-limitation-of-liability">14. Limitation of liability</h2>
+<p>14.1 Neither Party is liable for indirect or consequential losses,
+loss of profit, revenue or goodwill.</p>
+<p>14.2 FeastFlow's total liability under this Agreement in any 12-month
+period is limited to the <strong>commission received from the Restaurant
+Partner in the [3] months</strong> preceding the claim.</p>
+<p>14.3 Nothing limits liability for fraud, death or personal injury
+caused by negligence, the indemnities in Clause 13.3, or liability that
+cannot be limited by law.</p>
+<p>14.4 FeastFlow does not guarantee any minimum number of Orders,
+visibility or revenue, or uninterrupted availability of the
+Platform.</p>
+<h2 id="15-suspension-term-and-termination">15. Suspension, term and
+termination</h2>
+<p>15.1 <strong>Term:</strong> This Agreement starts on the Effective
+Date and continues until terminated.</p>
+<p>15.2 <strong>Termination for convenience:</strong> Either Party may
+terminate on <strong>[30] days'</strong> written notice.</p>
+<p>15.3 <strong>Suspension:</strong> FeastFlow may temporarily suspend
+the listing (status "suspended", hidden from Customers) with or without
+notice where: food-safety or licence concerns arise; there are repeated
+customer complaints, high rejection or auto-rejection rates, or low
+ratings below [THRESHOLD]; fraud or manipulation is suspected; required
+documents expire; or required by law or authority. FeastFlow will notify
+the reason and, where appropriate, give an opportunity to remedy within
+[7] days.</p>
+<p>15.4 <strong>Termination for cause:</strong> Either Party may
+terminate immediately on written notice if the other materially breaches
+this Agreement and (where curable) fails to cure within <strong>[15]
+days</strong> of notice, or becomes insolvent.</p>
+<p>15.5 <strong>Effect:</strong> On termination, the listing is
+deactivated; Orders already accepted must be fulfilled; FeastFlow pays
+the remaining Partner Balance (after permitted deductions) within
+<strong>[30] days</strong>, irrespective of the minimum payout; Clauses
+6.5, 8, 11, 13, 14 and 16 survive.</p>
+<h2 id="16-general">16. General</h2>
+<p>16.1 <strong>Governing law:</strong> [GOVERNING LAW, e.g. the laws of
+India]. 16.2 <strong>Disputes:</strong> The Parties will first try to
+resolve disputes amicably within [30] days; failing which, disputes will
+be referred to arbitration by a sole arbitrator under [the Arbitration
+and Conciliation Act, 1996 / RULES], seated at <strong>[JURISDICTION
+CITY]</strong>, in English. Subject to arbitration, the courts at
+<strong>[JURISDICTION CITY]</strong> have exclusive jurisdiction. 16.3
+<strong>Relationship:</strong> The Parties are independent contractors;
+nothing creates a partnership, joint venture or employment. 16.4
+<strong>Changes:</strong> FeastFlow may update operational policies
+(e.g. Business Rules, acceptance timeouts) on notice through the
+dashboard; changes to commission follow Clause 4.4. 16.5
+<strong>Assignment:</strong> The Restaurant Partner may not assign
+without FeastFlow's consent. 16.6 <strong>Notices:</strong> in writing
+to the addresses above or by email to [FEASTFLOW PARTNER EMAIL] /
+[RESTAURANT EMAIL]. 16.7 <strong>Entire agreement:</strong> This
+Agreement (with its Schedules and the FeastFlow Terms of Service Part C)
+is the entire agreement; this Agreement prevails in case of conflict.
+16.8 <strong>Counterparts / e-signature:</strong> may be executed
+electronically and in counterparts.</p>
+<hr />
+<h2 id="schedule-1--commercial-terms">Schedule 1 — Commercial terms</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Term</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Commission rate</td>
+<td>[__]% of Net Order Value (default 18%,
+<code>businessRules.commissionPercent</code>; per-restaurant override in
+Admin → Finance → Commission)</td>
+</tr>
+<tr class="even">
+<td>Packaging fee passed through</td>
+<td>₹[15] per Order (<code>businessRules.packagingFee</code>)</td>
+</tr>
+<tr class="odd">
+<td>Payout cycle</td>
+<td>[WEEKLY / ___]</td>
+</tr>
+<tr class="even">
+<td>Minimum payout</td>
+<td>₹[500] (<code>businessRules.minPayoutAmount</code>)</td>
+</tr>
+<tr class="odd">
+<td>Acceptance timeout</td>
+<td>[5] minutes
+(<code>businessRules.vendorAcceptTimeoutMinutes</code>)</td>
+</tr>
+<tr class="even">
+<td>Coupon funding</td>
+<td>[AS AGREED IN CLAUSE 5.3]</td>
+</tr>
+<tr class="odd">
+<td>Other fees</td>
+<td>[NONE / LIST]</td>
+</tr>
+<tr class="even">
+<td>Restaurant-specific notes</td>
+<td>[ ]</td>
+</tr>
+</tbody>
+</table>
+<h2 id="schedule-2--bank-details-for-payouts">Schedule 2 — Bank details
+for payouts</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Account holder name</td>
+<td>[ ]</td>
+</tr>
+<tr class="even">
+<td>Account number</td>
+<td>[ ]</td>
+</tr>
+<tr class="odd">
+<td>IFSC / routing code</td>
+<td>[ ]</td>
+</tr>
+<tr class="even">
+<td>UPI ID (optional)</td>
+<td>[ ]</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="signatures">Signatures</h2>
+<p><strong>For [COMPANY LEGAL NAME] (FeastFlow)</strong></p>
+<p>Signature: ______________________________ Name: [AUTHORISED SIGNATORY
+NAME] Designation: [DESIGNATION] Date: [DATE] Place: [PLACE]</p>
+<p><strong>For [RESTAURANT LEGAL ENTITY NAME] (Restaurant
+Partner)</strong></p>
+<p>Signature: ______________________________ Name: [AUTHORISED SIGNATORY
+NAME] Designation: [DESIGNATION] Date: [DATE] Place: [PLACE]</p>
+<p>[Company seal, if applicable]</p>

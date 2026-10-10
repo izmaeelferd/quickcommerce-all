@@ -1,0 +1,250 @@
+<h1 id="feastflow-cookie--browser-storage-policy">FeastFlow Cookie &amp;
+Browser Storage Policy</h1>
+<blockquote>
+<p><strong>TEMPLATE — NOT LEGAL ADVICE.</strong> This is a
+starting-point template. It is not legal advice. Cookie and tracking
+rules (e.g. the EU ePrivacy Directive, GDPR, UK PECR, India's DPDP Act,
+2023, US state laws) differ by jurisdiction. <strong>Have qualified
+legal counsel review it before publishing.</strong> Replace every
+<code>[BRACKETED PLACEHOLDER]</code>.</p>
+<p><strong>Configured values:</strong> This policy has few configurable
+numbers. Where it refers to settings controlled in the Admin Panel (e.g.
+<strong>Config → Theme → dark mode default</strong>, <strong>Config →
+Languages</strong>), make sure the description matches your live
+configuration. <strong>Accuracy check before publishing:</strong> this
+policy describes the FeastFlow web dashboards <strong>as
+shipped</strong>. If you add analytics, chat widgets, ads, A/B testing,
+error-tracking or any other third-party script, or put a marketing
+website on the same domain, you <strong>must</strong> update Section 5
+(and, in the EU/UK, add a consent banner) before going live.</p>
+</blockquote>
+<p><strong>Last updated:</strong> [EFFECTIVE DATE]</p>
+<p>This policy explains how <strong>[COMPANY LEGAL NAME]</strong>
+("FeastFlow", "we") uses cookies and similar browser storage
+technologies on:</p>
+<ul>
+<li>the <strong>FeastFlow Admin Panel</strong> — [ADMIN PANEL URL] —
+used by FeastFlow staff; and</li>
+<li>the <strong>FeastFlow Vendor Dashboard</strong> — [VENDOR DASHBOARD
+URL] — used by restaurant partners.</li>
+</ul>
+<p>The FeastFlow <strong>mobile apps</strong> (customer, Partner and
+Rider) do not use browser cookies; how they store data on your device is
+covered by the <a href="privacy-policy.md">Privacy Policy</a>. If you
+run a separate marketing website at [WEBSITE URL], publish a separate
+cookie notice for it describing the tools used there.</p>
+<hr />
+<h2 id="1-what-are-cookies-and-local-storage">1. What are cookies and
+local storage?</h2>
+<p><strong>Cookies</strong> are small text files a website stores in
+your browser and sends back to the server with each request.
+<strong>Local storage</strong> (<code>localStorage</code>) is a similar
+browser feature that lets a website save small pieces of data in your
+browser; unlike cookies, it is <strong>not</strong> sent automatically
+to the server with every request and is only readable by the same
+website. The law generally treats both the same way: storage that is
+<strong>strictly necessary</strong> to provide a service you asked for
+does not require consent, while non-essential storage (e.g. analytics or
+advertising) generally does.</p>
+<h2 id="2-summary">2. Summary</h2>
+<ul>
+<li>The Admin Panel and Vendor Dashboard <strong>do not set tracking
+cookies</strong>.</li>
+<li>They store a <strong>small number of items in your browser's local
+storage</strong>: your login tokens (so you stay signed in) and your
+language and dark-mode preferences.</li>
+<li><strong>No third-party analytics, advertising or social-media
+trackers are included by default.</strong></li>
+<li>All of the items below are <strong>strictly necessary</strong> or
+<strong>functional preferences</strong> you choose yourself.</li>
+</ul>
+<h2 id="3-what-we-store-in-your-browser">3. What we store in your
+browser</h2>
+<h3 id="31-admin-panel">3.1 Admin Panel</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Key (localStorage)</th>
+<th>Purpose</th>
+<th>Category</th>
+<th>Contents</th>
+<th>How long it lasts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>admin_access_token</code></td>
+<td>Keeps you signed in; sent by our app (not automatically by the
+browser) as an authorization header to the FeastFlow API</td>
+<td>Strictly necessary</td>
+<td>Short-lived signed access token (JWT)</td>
+<td>Until you log out, the token is cleared after a failed refresh, or
+you clear browser data. The token itself expires after [15 MINUTES —
+default of the <code>JWT_ACCESS_EXPIRES_IN</code> server setting;
+confirm yours].</td>
+</tr>
+<tr class="even">
+<td><code>admin_refresh_token</code></td>
+<td>Obtains a new access token when the old one expires, so you don't
+have to log in repeatedly</td>
+<td>Strictly necessary</td>
+<td>Signed refresh token</td>
+<td>Until logout / browser data cleared; expires after [30 DAYS —
+default of the <code>JWT_REFRESH_EXPIRES_IN</code> server setting;
+confirm yours]</td>
+</tr>
+<tr class="odd">
+<td><code>admin_language</code></td>
+<td>Remembers the dashboard language you selected</td>
+<td>Functional (preference)</td>
+<td>Language code, e.g. <code>en</code>, <code>hi</code></td>
+<td>Until changed or browser data cleared</td>
+</tr>
+<tr class="even">
+<td><code>admin_dark_mode</code></td>
+<td>Remembers whether you chose dark mode</td>
+<td>Functional (preference)</td>
+<td><code>true</code> / <code>false</code></td>
+<td>Until changed or browser data cleared</td>
+</tr>
+</tbody>
+</table>
+<h3 id="32-vendor-dashboard">3.2 Vendor Dashboard</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Key (localStorage)</th>
+<th>Purpose</th>
+<th>Category</th>
+<th>Contents</th>
+<th>How long it lasts</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>vendor_access_token</code></td>
+<td>Keeps you signed in to your restaurant dashboard</td>
+<td>Strictly necessary</td>
+<td>Short-lived signed access token (JWT)</td>
+<td>Until logout / browser data cleared; token expiry as above</td>
+</tr>
+<tr class="even">
+<td><code>vendor_refresh_token</code></td>
+<td>Renews your session without re-entering your password</td>
+<td>Strictly necessary</td>
+<td>Signed refresh token</td>
+<td>Until logout / browser data cleared; token expiry as above</td>
+</tr>
+<tr class="odd">
+<td><code>vendor_language</code></td>
+<td>Remembers your selected language</td>
+<td>Functional (preference)</td>
+<td>Language code</td>
+<td>Until changed or browser data cleared</td>
+</tr>
+<tr class="even">
+<td><code>vendor_dark_mode</code></td>
+<td>Remembers your dark-mode choice</td>
+<td>Functional (preference)</td>
+<td><code>true</code> / <code>false</code></td>
+<td>Until changed or browser data cleared</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Logging out</strong> removes the access and refresh tokens
+from your browser and invalidates the refresh token on our server.
+Language and dark-mode preferences remain until you change them or clear
+your browser data.</p>
+<p><strong>Security tip:</strong> Because login tokens are stored in
+your browser, do not use the dashboards on shared or public computers,
+always log out when finished, and keep your browser and extensions up to
+date.</p>
+<h3 id="33-cookies-set-by-infrastructure">3.3 Cookies set by
+infrastructure</h3>
+<p>Our servers, reverse proxy (Nginx) and hosting/CDN provider
+[HOSTING/CDN PROVIDER] <strong>do not set cookies by default</strong>.
+If you place the dashboards behind a CDN, firewall or load balancer that
+sets its own cookies (e.g. for bot protection or load balancing), list
+them here: [COOKIE NAME — PROVIDER — PURPOSE — DURATION].</p>
+<h3 id="34-real-time-connection">3.4 Real-time connection</h3>
+<p>The dashboards open a real-time (WebSocket / Socket.io) connection to
+receive live order and configuration updates. This connection uses your
+access token for authentication and does not store tracking data in your
+browser. [CONFIRM: if your deployment enables Socket.io sticky-session
+cookies, e.g. <code>io</code>, list them here as strictly
+necessary.]</p>
+<h2 id="4-legal-basis">4. Legal basis</h2>
+<p>Strictly necessary storage (login tokens) is used because it is
+essential to provide the secure dashboard you requested; consent is not
+required for this under the ePrivacy Directive/PECR exemption, and it is
+processed under our contract with you / legitimate interests (security).
+Preference storage (language, dark mode) is set only when you choose
+those options and is used solely to remember your choice. [COUNSEL:
+confirm whether preference storage requires consent in your target
+jurisdictions.]</p>
+<h2 id="5-analytics-and-third-party-tools-only-if-you-add-them">5.
+Analytics and third-party tools (only if you add them)</h2>
+<p><em>[OPTIONAL — The FeastFlow dashboards ship without analytics. If
+you add any, fill in and keep this section; otherwise state "We do not
+use analytics or advertising cookies on the dashboards." and delete the
+table.]</em></p>
+<table>
+<thead>
+<tr class="header">
+<th>Tool / Provider</th>
+<th>Purpose</th>
+<th>Cookies / storage set</th>
+<th>Duration</th>
+<th>Data shared / transfer</th>
+<th>Opt-out</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>[e.g. ANALYTICS TOOL]</td>
+<td>[Usage analytics]</td>
+<td>[COOKIE NAMES]</td>
+<td>[DURATION]</td>
+<td>[PROVIDER, COUNTRY]</td>
+<td>[LINK]</td>
+</tr>
+<tr class="even">
+<td>[e.g. ERROR TRACKING TOOL]</td>
+<td>[Crash/error reporting]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+</tr>
+<tr class="odd">
+<td>[e.g. SUPPORT CHAT WIDGET]</td>
+<td>[Customer support]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+<td>[ ]</td>
+</tr>
+</tbody>
+</table>
+<p>If you add non-essential cookies or storage and have users in the
+EU/UK (or elsewhere where consent is required), you must: show a consent
+banner <strong>before</strong> setting them; allow users to accept or
+reject as easily; record consent; and provide a way to change choices
+later (e.g. a "Cookie settings" link in the footer: [COOKIE SETTINGS
+LINK]).</p>
+<h2 id="6-how-to-control-or-delete-browser-storage">6. How to control or
+delete browser storage</h2>
+<p>You can clear local storage and cookies at any time in your browser
+settings — usually under <strong>Settings → Privacy → Clear browsing
+data / Cookies and site data</strong> (Chrome, Edge), <strong>Settings →
+Privacy &amp; Security → Cookies and Site Data</strong> (Firefox), or
+<strong>Settings → Privacy → Manage Website Data</strong> (Safari).
+Clearing site data for the dashboard will <strong>sign you out</strong>
+and reset your language and theme preferences. Blocking site storage
+entirely will prevent you from logging in.</p>
+<h2 id="7-changes">7. Changes</h2>
+<p>We may update this policy when we change how the dashboards work or
+add tools. The "Last updated" date shows when it last changed.</p>
+<h2 id="8-contact">8. Contact</h2>
+<p>[COMPANY LEGAL NAME], [REGISTERED ADDRESS] · [PRIVACY EMAIL] ·
+Grievance Officer: [GRIEVANCE OFFICER NAME], [GRIEVANCE EMAIL]</p>

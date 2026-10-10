@@ -46,7 +46,8 @@ Initial production release. Platform version 1.0.0 (`backend/package.json` 1.0.0
 
 #### Delivery app (FeastFlow Rider)
 - Registration with admin approval; online/offline toggle; auto-assigned and available orders.
-- Navigation to pickup and drop; pickup → deliver with OTP and optional photo proof; background location.
+- Navigation to pickup and drop; pickup → deliver with OTP and optional photo proof.
+- Location sharing while online, including in the background: on Android via a location foreground service with a persistent "You are online" notification (stops when the rider goes offline); on iOS when the Rider target is built with its own Info.plist (`location` background mode + Always usage string) and `--dart-define=IOS_BACKGROUND_LOCATION=true`, otherwise only while the app is open.
 - Earnings (base + per-km + tip share) and delivery history.
 
 #### Admin Panel
@@ -59,8 +60,10 @@ Initial production release. Platform version 1.0.0 (`backend/package.json` 1.0.0
 #### Backend
 - Node.js/Express API (~152 routes) with MongoDB/Mongoose, Socket.io realtime (order, delivery and config events), JWT access + rotating refresh tokens.
 - Server-side pricing (`utils/pricing.js`) with pricing snapshot per order; order state machine (`utils/orderFlow.js`) with settlement and refunds.
-- Background scheduler: vendor accept timeout (auto-reject + refund) and payment timeout (auto-cancel unpaid online orders).
+- Background scheduler: vendor accept timeout (auto-reject + refund) and payment timeout (auto-cancel unpaid online orders). New env `RUN_SCHEDULER` (default `true`); set it to `false` on every API instance except one (`backend/.env.example`, `docs/ENVIRONMENT_SETUP.md`, `docs/DEPLOYMENT_GUIDE.md`).
 - Payments: Razorpay and Stripe with verified webhooks, idempotent confirmation, automatic refund of late payments, atomic wallet debits.
+- Cancellation refunds to source (wallet flag off) fall back to a wallet credit if the gateway refund fails (logged as `[refund] gateway refund failed, crediting wallet`; payment marked `refunded`/`partially_refunded`), so paid cancelled orders are never left unrefunded.
+- Maintenance mode allows payment gateway webhooks (`/api/payments/webhook/*` in `middleware/maintenance.js` `ALLOW_PREFIXES`), so payments keep confirming during maintenance.
 - Notifications: FCM HTTP v1 push, SMTP email, Twilio SMS. Uploads to local disk or S3-compatible storage.
 - Seeder: default config, translations, categories, cuisines, coupons `WELCOME50`, `FLAT100`, `FREEDEL`, super admin; demo data in development only.
 
@@ -73,6 +76,8 @@ Initial production release. Platform version 1.0.0 (`backend/package.json` 1.0.0
 - Production start-up refuses weak or identical JWT secrets, wildcard CORS and missing public URL.
 - Validation on every mutating route; NoSQL operator sanitisation; rate limits on API, auth and refresh; OTP attempt limit and resend cooldown.
 - Upload hardening (no SVG, MIME + extension checks); Helmet headers; no OTPs in production logs.
+- Android release builds block cleartext HTTP (`usesCleartextTraffic="false"` in the main manifest; only debug/profile manifests allow it for local development).
+- Least-privilege location permissions: the shared Android manifest and iOS Info.plist declare foreground (when-in-use) location only. Only the Rider flavor adds `FOREGROUND_SERVICE` + `FOREGROUND_SERVICE_LOCATION` (`android/app/src/delivery/AndroidManifest.xml`); no flavor requests `ACCESS_BACKGROUND_LOCATION`.
 - Admins cannot change their own role; non-superadmins cannot edit superadmins; no static default admin password.
 
 ---
