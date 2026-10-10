@@ -5,8 +5,8 @@ Flavor: `customer` · Build: `flutter build appbundle --flavor customer -t lib/m
 > **Before you submit:** replace every `[BRACKETED PLACEHOLDER]`. Never publish invented ratings, user counts, awards or press quotes; fill social-proof slots only with real, verifiable numbers, or delete them. The app name shown to users is set in **Admin Panel → Config → Branding**; keep it identical to the store name.
 
 ### Pre-submission technical checks (from the codebase)
-- All three flavors share `android/app/src/main/AndroidManifest.xml`, which declares `ACCESS_BACKGROUND_LOCATION` and `FOREGROUND_SERVICE_LOCATION` (needed only by the Rider app). The Customer app does **not** need background location. Remove them for this flavor (e.g. add `android/app/src/customer/AndroidManifest.xml` with `tools:node="remove"` on those permissions), or Play will require a background-location declaration and is likely to reject it.
-- `android:usesCleartextTraffic="true"` is set in the main manifest. Point production builds at an `https://` API and set it to `false` so the "data encrypted in transit" answer is true.
+- `android/app/src/main/AndroidManifest.xml` (shared by all flavors) declares only foreground location (`ACCESS_FINE_LOCATION` / `ACCESS_COARSE_LOCATION`), with no `ACCESS_BACKGROUND_LOCATION` or foreground-service permissions; those are added only by the Rider flavor's `android/app/src/delivery/AndroidManifest.xml`. The Customer app uses when-in-use location only, so no background-location or foreground-service declaration is needed in Play Console.
+- The main manifest sets `android:usesCleartextTraffic="false"` (only the debug/profile manifests re-enable it for local development). Point production builds at an `https://` API (`wss://` for sockets) so the "data encrypted in transit" answer stays true.
 
 ## App title (max 30)
 ```
@@ -100,7 +100,7 @@ Answers below reflect what the codebase does; tick only what your deployment act
 
 **Overview answers**
 - Does your app collect or share any required user data types? **Yes**
-- Is all user data encrypted in transit? **Yes** (HTTPS/TLS via Nginx + certbot; WSS for sockets). *Only true once cleartext traffic is disabled and the API URL is https.*
+- Is all user data encrypted in transit? **Yes** (HTTPS/TLS via Nginx + certbot; WSS for sockets). *Release builds block cleartext traffic; make sure the production API URL is https.*
 - Do you provide a way for users to request that their data is deleted? **Yes**: in-app via **Profile → Settings → Delete account** (calls `DELETE /api/users/profile`), and by email to [PRIVACY EMAIL]. Also provide the web deletion URL Play requires: [ACCOUNT DELETION URL].
 - Committed to Play Families Policy? **No** (not a children's app).
 - Independent security review? **No** (unless you obtain one).

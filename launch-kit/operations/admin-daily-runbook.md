@@ -65,13 +65,13 @@ On the server (`ssh deploy@[SERVER IP]`):
 | Local health | `curl -s http://127.0.0.1:5000/api/health` | same |
 | Errors in last 12 h | `docker compose logs --since 12h backend \| grep -iE "error\|failed\|unhandled" \| tail -50` | `pm2 logs food-api --lines 500 --nostream \| grep -iE "error\|failed\|unhandled" \| tail -50` |
 | Background jobs | `docker compose logs --since 12h backend \| grep "\[scheduler\]" \| tail` | `pm2 logs food-api --lines 1000 --nostream \| grep "\[scheduler\]" \| tail` |
-| Refund failures | `docker compose logs --since 24h backend \| grep "\[refund\] gateway refund failed"` | `pm2 logs food-api --lines 2000 --nostream \| grep "\[refund\] gateway refund failed"` |
+| Refunds sent to wallet instead of source | `docker compose logs --since 24h backend \| grep "\[refund\] gateway refund failed, crediting wallet"` | `pm2 logs food-api --lines 2000 --nostream \| grep "\[refund\] gateway refund failed, crediting wallet"` |
 | Disk | `df -h /` and `docker system df` | `df -h /` and `du -sh /var/lib/mongodb /opt/food-delivery/food-delivery-platform/backend/uploads` |
 | Memory | `free -h` and `docker stats --no-stream` | `free -h` and `pm2 monit` (Ctrl-C to exit) |
 | Last night's backup exists | `ls -lh /var/backups/feastflow/mongo \| tail -3` (see `backup-strategy.md`) | same |
 | TLS | `sudo certbot certificates` (days remaining > 20) | same |
 
-Act if: disk > 80 % used → see `incident-response.md` §6.2; any `[refund] gateway refund failed` lines → step 1.4; `food-api` restart count increasing → `incident-response.md` §3.
+Act if: disk > 80 % used → see `incident-response.md` §7.2; any `[refund] gateway refund failed, crediting wallet` lines → step 1.4 (those customers got a wallet credit instead of a card/UPI refund); `food-api` restart count increasing → `incident-response.md` §3.
 
 ### 1.2 Dashboard (2 min)
 
@@ -96,10 +96,12 @@ Rule of thumb: an order should never sit in one status longer than [PLACEHOLDER 
 
 ### 1.4 Money that is stuck (3 min)
 
-**Admin → Orders**, filter `cancelled`, then `rejected`: open any order whose payment column still says **paid** (online method, not COD). That means the automatic refund to the gateway failed (it is logged as `[refund] gateway refund failed`).
-→ In the order modal use **Refund to source** (or **Refund to wallet** if the customer agrees). See `support-playbook.md` §4.
+When the `wallet` feature flag is **off**, cancellation refunds go back to the card/UPI through the gateway. If that gateway refund fails, the order is not left unrefunded: it logs `[refund] gateway refund failed, crediting wallet`, credits the full refund to the customer's **wallet** and marks the payment `refunded` / `partially_refunded`. So each such log line is a customer who got wallet credit instead of a source refund (the log line carries the gateway error, not the order number — find the orders with the second query below).
+→ Optional follow-up: tell the customer the money is in their FeastFlow wallet; if they want it in the bank instead, follow `support-playbook.md` §4.3 (refund in the gateway dashboard, then debit the wallet).
 
-Faster on the server (read-only query):
+**Admin → Orders**, filter `cancelled`, then `rejected`: an order whose payment column still says **paid** (online method, not COD) should not occur. If you see one, the refund did not run at all — use **Refund to source** (or **Refund to wallet** if the customer agrees) in the order modal (`support-playbook.md` §4) and report it to engineering.
+
+Faster on the server (read-only queries; the first should return nothing):
 
 ```bash
 # Path A
@@ -108,6 +110,13 @@ db.orders.find({status:{$in:["cancelled","rejected"]},"payment.status":"paid","p
  {orderNumber:1,status:1,"pricing.payable":1,createdAt:1}).sort({createdAt:-1}).limit(50).toArray()'
 # Path B
 mongosh --quiet food_delivery --eval '<same query>'
+
+# Wallet-fallback refunds in the last 24 h (wallet-credited refunds on orders that had a successful online payment; meaningful only while the wallet flag is off)
+docker compose exec -T mongo mongosh --quiet food_delivery --eval '
+const since=new Date(Date.now()-24*3600e3);
+db.transactions.find({type:"refund",provider:"",description:"order.refund",createdAt:{$gte:since}}).toArray()
+ .filter(t=>db.transactions.findOne({order:t.order,type:"payment",status:"success"}))
+ .map(t=>({order:db.orders.findOne({_id:t.order},{orderNumber:1}).orderNumber,customer:t.user,amount:t.amount,at:t.createdAt}))'
 ```
 
 **Admin → Transactions**: set type = `payment`, date = today. Rows with status `pending` or `failed` older than ~15 min are abandoned checkouts — normal in small numbers. A spike = gateway trouble. Set type = `refund` to confirm yesterday's refunds have `success` status.
@@ -186,7 +195,7 @@ The amount cannot exceed the restaurant's balance (`wallet.insufficient`). Addin
 |---|---|
 | **Backup restore test** | Restore last night's dump into a throw-away database and verify counts — procedure in `backup-strategy.md` §7. Record the result in [RESTORE TEST LOG]. |
 | **TLS certificate check** | `sudo certbot certificates` (all three names, > 30 days left) and `sudo certbot renew --dry-run`. `systemctl list-timers \| grep certbot` shows the renewal timer. |
-| **App version gates** | **Settings → App Versions**: for each app (customer / vendor / delivery) set `latestVersion` to the newest store version, `minVersion` to the oldest version you still support, store URLs (Android/iOS) filled in. Turn on **Force update** only when an old version is broken or insecure (users below `minVersion` are blocked until they update). Keep `CHANGELOG.md` in sync (`../updates/CHANGELOG.md`). |
+| **App version gates** | **Settings → App Versions**: for each app (customer / vendor / delivery) set `latestVersion` to the newest store version, `minVersion` to the oldest version you still support, store URLs (Android/iOS) filled in. Apps compare their version with `minVersion` at start-up: below it, users see an update prompt — dismissible when **Force update** is off, blocking when it is on. Raise `minVersion` only after the new build is live in **both** stores, and turn on Force update only when an old version is broken or insecure. Keep `CHANGELOG.md` in sync (`../updates/CHANGELOG.md`). |
 | Secrets rotation review | Rotate any third-party key that a departed staff member had access to (`incident-response.md` §9). |
 | Dependency/security updates | Plan a release with `npm audit` fixes (developer task). |
 | Legal pages | **Legal Pages**: still accurate (refund policy matches Business Rules). |

@@ -12,7 +12,7 @@ Everything below is grounded in how the platform actually behaves (code in `back
 
 | Situation | What the system does by itself | Refund destination | Customer penalty |
 |---|---|---|---|
-| **Customer cancels within `cancellationWindowMinutes`** (default 5 min from order placement). Customers can only cancel while the order is `placed` or `accepted`. | Order → `cancelled`, refund runs immediately. | **Wallet** if the `wallet` feature flag is on (instant); otherwise back to the card/UPI via the gateway. Wallet amount used on the order always returns to the wallet. | None |
+| **Customer cancels within `cancellationWindowMinutes`** (default 5 min from order placement). Customers can only cancel while the order is `placed` or `accepted`. | Order → `cancelled`, refund runs immediately. | **Wallet** if the `wallet` feature flag is on (instant); otherwise back to the card/UPI via the gateway (wallet if the gateway refund fails). Wallet amount used on the order always returns to the wallet. | None |
 | **Customer cancels after the window** (still `placed`/`accepted`) | Same, minus penalty. | Same as above | `cancellationPenaltyPercent` (default 10 %) of (online amount paid + wallet used). Recorded as a `cancellation_fee` transaction. |
 | **Vendor rejects** the order | Order → `rejected`, full refund. | Same as above | None |
 | **Vendor does not accept within `vendorAcceptTimeoutMinutes`** (default 5 min; for online orders the clock starts when payment succeeds) | Scheduler auto-rejects (`order.autoRejected`), full refund. Scheduled orders (delivery slot) are excluded. | Same as above | None |
@@ -24,7 +24,7 @@ Everything below is grounded in how the platform actually behaves (code in `back
 
 Important facts:
 - Gateway refunds take **[5–7 business days]** to reach the customer's bank/card (Razorpay/Stripe timelines; UPI is often faster). Wallet refunds are instant.
-- If an automatic gateway refund **fails**, the order stays `cancelled`/`rejected` with payment status **paid**. That is the signal to refund manually (§4.1). Ops checks this every morning (`admin-daily-runbook.md` §1.4).
+- If an automatic gateway refund **fails**, the system credits the full refund to the customer's **wallet** instead (logged as `[refund] gateway refund failed, crediting wallet`) and marks the payment `refunded`/`partially_refunded`. Ops lists these customers every morning (`admin-daily-runbook.md` §1.4); if a customer wants the money in the bank, use §4.3. A cancelled/rejected order still showing **paid** means the refund did not run at all — refund manually (§4.1).
 - Refunds do not change the order status. Admin refunds are allowed only while the payment status is exactly `paid` — once an order is `refunded` or `partially_refunded`, further refunds go through the wallet adjust (§4.2) or the gateway dashboard.
 - With the `wallet` flag on, automatic cancellation refunds go to the **wallet**, not the bank. Make sure your Refund Policy (**Admin → Legal Pages → refundPolicy**) says so. If a customer insists on a bank refund see §4.3.
 
@@ -36,7 +36,7 @@ Important facts:
 
 | # | Case | Evidence to collect | Decision | Amount | Destination | Who can approve |
 |---|---|---|---|---|---|---|
-| R1 | Order cancelled/rejected but still shows **paid** | Order detail | Refund — system failed | Full payable | Source | Tier 1 |
+| R1 | Order cancelled/rejected but still shows **paid** (rare: automatic refund did not run) | Order detail | Refund — system failed | Full payable | Source | Tier 1 |
 | R2 | Charged but no order created / order auto-cancelled and money debited | UTR / bank SMS, time, amount, phone | Check gateway dashboard first (§3 T5). Usually auto-refunded by the gateway or our late-payment refund | Full | Source (via gateway dashboard if no order exists) | Tier 2 |
 | R3 | Missing item(s) | Photo of bag/receipt, item names | Refund the missing items | Item value (+ proportional tax) | Wallet (default) or source | Tier 1 up to [₹X]; Tier 2 above |
 | R4 | Wrong item delivered | Photo | Refund item; full order if main dish wrong and inedible for the customer (allergy/veg vs non-veg) | Item value; full payable for veg/non-veg or allergy mismatch | Customer's choice | Tier 1 up to [₹X]; veg/non-veg mismatch → Tier 2 always (also flag vendor) |
@@ -150,7 +150,7 @@ Agent checklist first: (1) Admin → Orders: search by customer (Users → recen
 > 4. You can also sign in with email + password{, Google or Apple}.
 > If it still doesn't work, reply with the phone number/email on your account (never the OTP itself) and I'll check it.
 
-Agent notes for T9: defaults are `OTP_EXPIRY_MINUTES=10`, `OTP_MAX_ATTEMPTS=5`, `OTP_RESEND_SECONDS=30` (server env). If many users report no SMS at once → SMS outage, escalate (incident-response §8). A banned user gets "banned" at login — only Tier 2 can unban. Account deletion requests: the app has a delete-account option in profile; follow the DPDP process for data requests.
+Agent notes for T9: defaults are `OTP_EXPIRY_MINUTES=10`, `OTP_MAX_ATTEMPTS=5`, `OTP_RESEND_SECONDS=30` (server env). If many users report no SMS at once → SMS outage, escalate (`incident-response.md` §9). A banned user gets "banned" at login — only Tier 2 can unban. Account deletion requests: the app has a delete-account option in profile; follow the DPDP process for data requests.
 
 ### T10 — Wallet / coupon didn't apply
 > Hi {name}, {coupon} {needs a minimum order of {currency}{min} / is for first orders only / has reached its usage limit / is valid only at {restaurant}}. Wallet balance can cover up to {walletMaxUsePercent}% of an order. {Goodwill if our mistake: I've added {currency}{amount} to your wallet.}
@@ -163,7 +163,7 @@ Agent notes for T9: defaults are `OTP_EXPIRY_MINUTES=10`, `OTP_MAX_ATTEMPTS=5`, 
 |---|---|
 | Vendor: "Orders get auto-rejected" | Orders must be accepted within {vendorAcceptTimeoutMinutes} min. Keep the Partner app open/notifications on, or close the restaurant when unattended. |
 | Vendor: "When do I get paid?" | Earnings (after {commissionPercent}% commission) accrue on delivered orders; visible in dashboard **Payouts**; paid [weekly on MON] once ≥ {minPayoutAmount}. |
-| Rider: "Not getting orders" | Must be **approved** and **online**; location permission "Always" for background tracking. |
+| Rider: "Not getting orders" | Must be **approved** and **online**, with location permission allowed. While online, Android shows a persistent "You are online" notification and keeps sharing location in the background; on iOS keep the app open unless the Rider build has background location enabled. |
 | Rider: "Customer didn't give OTP" | Customer sees the {deliveryOtpLength}-digit OTP in the tracking screen. Call support before leaving with the food. |
 | Rider: earnings | Base {deliveryPartnerPayout.base} + {perKm}/km + {tipSharePercent}% of tips, credited on delivery; payouts [weekly]. |
 

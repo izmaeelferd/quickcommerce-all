@@ -65,7 +65,7 @@
 - [ ] Do **not** run the sample-data seed on production unless you intend to delete demo restaurants/users afterwards; if you used it for testing, remove demo accounts (`customer@example.com`, `rider@example.com`, `vendor1-4@example.com`) before launch · owner: ___
 - [ ] Backups: cron the mongodump command (Path A `docker compose exec -T mongo mongodump --archive --gzip > backup-$(date +%F).gz`; Path B `mongodump --archive=backup.gz --gzip`), copy off-site, back up uploads; **test a restore** · owner: ___
 - [ ] Uptime monitoring on `/api/health`; disk and memory alerts · owner: ___
-- [ ] Run exactly **one** API instance with the scheduler (vendor-accept timeout, payment timeout jobs run in-process) · owner: ___
+- [ ] Run the scheduler on exactly **one** API instance (vendor-accept timeout, payment timeout jobs run in-process): keep `RUN_SCHEDULER=true` (default) there and set `RUN_SCHEDULER=false` on any additional instance · owner: ___
 
 ---
 
@@ -133,7 +133,7 @@
 
 - [ ] Build all three flavours with production API (`--dart-define=API_BASE_URL=https://api.[DOMAIN]`), per `FLUTTER_BUILD_GUIDE.md`: **FeastFlow**, **FeastFlow Partner**, **FeastFlow Rider**; set bundle IDs/package names, icons, signing keys (back up the upload keystore!) · owner: ___
 - [ ] Store listings: titles, descriptions, screenshots, privacy policy URL, data safety (Play) / privacy nutrition labels (Apple), content rating · owner: ___
-- [ ] Background-location declaration for the Rider app (Play prominent disclosure + Apple usage strings); explain delivery tracking clearly · owner: ___
+- [ ] Rider app location: Play **foreground service (location)** declaration with video of the "You are online" notification (no background-location declaration needed); iOS Rider target with its own Info.plist (`location` background mode + Always usage string) built with `--dart-define=IOS_BACKGROUND_LOCATION=true` (FLUTTER_BUILD_GUIDE §5 item 6); explain delivery tracking clearly · owner: ___
 - [ ] Create dedicated reviewer accounts → put [REVIEW DEMO EMAIL] / [REVIEW DEMO PASSWORD] in review notes; ensure a demo restaurant is open so reviewers can place an order · owner: ___
 - [ ] Submit to **Google Play** (internal → closed testing → production; new personal accounts may need a closed test period) (long lead) · owner: ___
 - [ ] Submit to **App Store** (TestFlight → review) (long lead) · owner: ___

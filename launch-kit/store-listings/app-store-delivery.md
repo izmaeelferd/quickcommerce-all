@@ -2,6 +2,8 @@
 
 > **Before you submit:** replace every `[BRACKETED PLACEHOLDER]`. Never publish invented ratings, user counts, awards or press quotes; fill social-proof slots only with real, verifiable numbers, or delete them. The app name shown to users is set in **Admin Panel → Config → Branding**; keep it identical to the store name.
 
+> **iOS build check:** the shared `ios/Runner/Info.plist` declares only when-in-use location (no `location` background mode, no Always key). For background tracking while online, the Rider target must use its own Info.plist that adds `location` to `UIBackgroundModes` and `NSLocationAlwaysAndWhenInUseUsageDescription`, and be built with `--dart-define=IOS_BACKGROUND_LOCATION=true` (see docs/FLUTTER_BUILD_GUIDE.md §5 item 6). Without both, rider tracking on iOS works only while the app is open, and the background-location justification below does not apply.
+
 ## App name (max 30)
 ```
 FeastFlow Rider
@@ -103,12 +105,12 @@ Sizes: 6.9" (1320×2868) required; 6.5" (1284×2778) optional. Copy and design n
 **Sign in with Apple:** The app offers Google sign-in, so Sign in with Apple is also offered (Guideline 4.8), controlled by the `appleSignIn` feature flag in Admin Panel → Config → Feature Flags. Keep it **ON** for the iOS submission.
 
 **How to test**
-1. Sign in and allow location "While Using", then "Always" when prompted (needed for deliveries, see below).
+1. Sign in and allow location access ("While Using" is enough; needed for deliveries, see below).
 2. Tap **Go Online**. To receive an assignment, place an order from the FeastFlow customer app ([REVIEW CUSTOMER DEMO EMAIL]/[REVIEW DEMO PASSWORD]) at [DEMO RESTAURANT NAME], or ask us to trigger one during review hours [HOURS + TIMEZONE]. Orders are auto-assigned to online riders nearby; the reviewer's location may be outside our service area, so the demo rider account is [VERIFY: configured to receive orders regardless of distance / we will assign manually].
 3. Navigate → Mark Picked Up → enter the 4-digit delivery OTP shown in the customer app → optionally take a proof photo → Delivered.
 4. Earnings and History show completed deliveries.
 
-**Background location justification (Guideline 2.5.4 / 5.1.1):** FeastFlow Rider is a delivery-partner app. While the rider is **online or on an active delivery**, the app needs continuous location even when the screen is off or another navigation app is in the foreground, so that (a) the customer sees the rider's live position and ETA, (b) the platform can auto-assign the nearest orders, and (c) distance-based earnings are calculated. Location updates stop when the rider goes offline. The `location` background mode is declared for this purpose only. The usage string reads: "Your location is shared with customers while you are delivering an order."
+**Background location justification (Guideline 2.5.4 / 5.1.1):** FeastFlow Rider is a delivery-partner app. While the rider is **online or on an active delivery**, the app needs continuous location even when the screen is off or another navigation app is in the foreground, so that (a) the customer sees the rider's live position and ETA, (b) the platform can auto-assign the nearest orders, and (c) distance-based earnings are calculated. Location updates stop when the rider goes offline. The `location` background mode is declared (in the Rider target only) for this purpose only, and iOS shows the background location indicator while it is in use. The Always usage string reads: "[RIDER NSLocationAlwaysAndWhenInUseUsageDescription TEXT — e.g. Your location is shared with customers while you are delivering an order.]"
 
 **Camera:** used to take an optional proof-of-delivery photo.
 

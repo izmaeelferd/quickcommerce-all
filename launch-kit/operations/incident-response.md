@@ -49,7 +49,7 @@ sudo tail -50 /var/log/nginx/error.log
 
 **Admin → Maintenance**: toggle *App in maintenance*, edit the message/image, pick *affected apps* (customer / vendor / delivery). Saving broadcasts `config:updated` and open apps redirect to the maintenance screen immediately.
 
-What it does on the API (`backend/middleware/maintenance.js`): non-admin requests from affected apps get HTTP 503 `maintenance.active`. Still allowed: `/api/config`, `/api/auth/login`, `/api/auth/refresh-token`, `/api/admin/*`, `/api/health`, translations. The Admin Panel keeps working.
+What it does on the API (`backend/middleware/maintenance.js`): non-admin requests from affected apps get HTTP 503 `maintenance.active`. Still allowed: `/api/config`, `/api/auth/login`, `/api/auth/refresh-token`, `/api/admin/*`, `/api/health`, translations, and payment gateway webhooks (`/api/payments/webhook/*`). The Admin Panel keeps working.
 
 If the Admin Panel itself is unreachable but MongoDB works, flip it directly:
 ```bash
@@ -95,7 +95,7 @@ Common start-up failures:
 | Log line | Fix |
 |---|---|
 | `[config] JWT_ACCESS_SECRET must be a random string of 32+ characters` (or REFRESH / CLIENT_URLS / PUBLIC_BASE_URL / MONGODB_URI) | Production safety check — fix `backend/.env`, restart |
-| `[server] failed to start ... MongoServerSelectionError` / `ECONNREFUSED 27017` | DB down → §6.1 |
+| `[server] failed to start ... MongoServerSelectionError` / `ECONNREFUSED 27017` | DB down → §7.1 |
 | `EADDRINUSE :5000` | Another process holds the port: `sudo lsof -i :5000`; stop it; Path B check `pm2 list` for duplicates |
 | `Cannot find module` | Dependencies missing after deploy: Path A `docker compose up -d --build backend`; Path B `cd backend && npm ci --omit=dev` |
 | Value truncated / auth fails after editing `.env` | Unquoted `#` in a value — quote it (`"S3cure#Pass"`) |
@@ -135,7 +135,7 @@ If the bad release changed data, restore from backup only after reading `backup-
    | 429 `rateLimit.exceeded` spikes | `RATE_LIMIT_MAX` too low for real traffic behind one NAT, or an attack | Raise `RATE_LIMIT_MAX` / `AUTH_RATE_LIMIT_MAX` in `.env` and restart; block abusive IPs in Nginx / provider firewall |
    | 500 on nearby/search | Missing 2dsphere index (indexes are created at start-up) | Restart API; check log for index errors |
    | 503 `maintenance.active` | Maintenance is on | Admin → Maintenance |
-   | Timeouts across all routes | Mongo slow / CPU 100 % | §6.3, `top`, `docker stats` |
+   | Timeouts across all routes | Mongo slow / CPU 100 % | §7.3, `top`, `docker stats` |
    | Errors right after a deploy | Code regression | Roll back §3.4 |
    | `unhandledRejection` lines | Bug in a code path | Capture the stack trace for engineering, workaround if possible |
 4. Memory leak suspicion (RSS growing until OOM): restart as stop-gap (`docker compose restart backend` / `pm2 restart food-api`); Path B can cap it with `pm2 start server.js --name food-api --max-memory-restart 800M` (delete + re-add, then `pm2 save`).
@@ -175,7 +175,7 @@ Why it matters: the app confirms payments via `/api/payments/verify`, but the we
 | HTTP 400 `invalid signature` / `Webhook Error` | Secret mismatch (rotated in dashboard, or using API key secret) | Copy the webhook secret from the dashboard into `.env`, restart |
 | HTTP 404 | Wrong URL (missing `/api`, wrong provider segment) | Fix the URL in the gateway dashboard |
 | HTTP 5xx / timeout | API down or erroring | §3 / §4 |
-| HTTP 503 `maintenance.active` | Should not happen (webhook path not exempt!) — maintenance blocks it | Turn maintenance off as soon as possible, then replay webhooks. Note for engineering: add `/payments/webhook` to the maintenance allow-list (backlog `OPS-07`). |
+| HTTP 503 `maintenance.active` | Should not happen — `/api/payments/webhook/*` is on the maintenance allow-list (`middleware/maintenance.js` `ALLOW_PREFIXES`). Seeing it means the API is running an older build | Deploy the current release, then replay webhooks. |
 
 After fixing: **replay failed deliveries** from the gateway dashboard (Razorpay: Webhooks → event log → Resend; Stripe: Developers → Webhooks → endpoint → Resend). Processing is idempotent (atomic `pending → paid` flip), so replays are safe. Then run the stuck-refund query in `admin-daily-runbook.md` §1.4.
 
@@ -266,7 +266,7 @@ Kill a runaway operation: `db.killOp(<opid>)`. Missing indexes are recreated at 
 2. Cloudflare or another proxy in front? WebSockets must be enabled there.
 3. Socket auth uses the JWT access token — if secrets were rotated, clients reconnect after refresh/re-login.
 4. More than one API instance? Events emitted on instance 1 don't reach sockets on instance 2 → needs sticky sessions + Redis adapter (`scaling-roadmap.md` stage 4). Short-term: run a single instance.
-5. Rider location not updating while other events work: rider app background location permission / battery optimisation (device side) — ask the rider to set location "Always" and disable battery optimisation.
+5. Rider location not updating while other events work: device side — check the rider is **Online** (Android shows the persistent "You are online" notification while location is shared; if it is missing, go offline and online again), location permission is allowed, and battery optimisation is disabled for the app. On iOS, background updates work only in a Rider build with the `location` background mode and `IOS_BACKGROUND_LOCATION=true` (docs/FLUTTER_BUILD_GUIDE.md §5); otherwise the rider must keep the app open.
 6. Restart the API (`docker compose restart backend` / `pm2 restart food-api`) — clients reconnect automatically.
 
 Fallback: order status is still visible by pulling (opening the order screen calls the REST API).

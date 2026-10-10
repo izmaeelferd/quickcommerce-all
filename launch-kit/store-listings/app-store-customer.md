@@ -2,7 +2,7 @@
 
 > **Before you submit:** replace every `[BRACKETED PLACEHOLDER]`. Never publish invented ratings, user counts, awards or press quotes; fill social-proof slots only with real, verifiable numbers, or delete them. The app name shown to users is set in **Admin Panel → Config → Branding**; keep it identical to the store name.
 
-> **iOS build check:** `ios/Runner/Info.plist` is shared by all flavors and declares `UIBackgroundModes` → `location` plus `NSLocationAlwaysAndWhenInUseUsageDescription`. These are only justified for the Rider app. Remove them from the Customer app build (per-flavor Info.plist or build-time plist edit), or App Review will likely reject under Guideline 2.5.4.
+> **iOS build check:** the shared `ios/Runner/Info.plist` declares only `NSLocationWhenInUseUsageDescription` and `UIBackgroundModes` → `remote-notification` + `fetch` (no `location` mode, no Always usage string). Background location is opted into only by the Rider target's own Info.plist, so the Customer app build needs no change for Guideline 2.5.4.
 
 ## App name (max 30)
 ```
@@ -119,7 +119,7 @@ Sizes: 6.9" (1320×2868) required; 6.5" (1284×2778) optional. Copy and design n
 
 **Payments:** All purchases are physical goods (food) and delivery services, paid via Razorpay/Stripe, UPI or COD, so In-App Purchase does not apply (Guideline 3.1.3(e)). The wallet stores refunds/referral credit and optional top-ups that can only be spent on food orders.
 
-**Location:** "When In Use" location is used only to show restaurants that deliver to the user and to pre-fill the delivery address. The customer app does not use background location. [Ensure UIBackgroundModes `location` and the Always usage string are removed from the customer build.]
+**Location:** "When In Use" location is used only to show restaurants that deliver to the user and to pre-fill the delivery address. The customer app does not use background location (its build declares no `location` background mode and no Always usage string).
 
 **Account deletion (Guideline 5.1.1(v)):** Profile → Settings → Delete account. Deletion is immediate after confirmation.
 

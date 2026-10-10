@@ -5,8 +5,8 @@ Flavor: `delivery` · Build: `flutter build appbundle --flavor delivery -t lib/m
 > **Before you submit:** replace every `[BRACKETED PLACEHOLDER]`. Never publish invented ratings, user counts, awards or press quotes; fill social-proof slots only with real, verifiable numbers, or delete them. The app name shown to users is set in **Admin Panel → Config → Branding**; keep it identical to the store name.
 
 ### Pre-submission technical checks (from the codebase)
-- `android/app/src/main/AndroidManifest.xml` declares `ACCESS_BACKGROUND_LOCATION` and `FOREGROUND_SERVICE_LOCATION`. For the Rider app this is justified, but Play requires the **Location permissions declaration** (Policy → App content → Sensitive permissions) plus a short video showing the in-app prominent disclosure and the feature that uses background location (live delivery tracking while online). Reuse the "ABOUT LOCATION" paragraph of the full description below and the background-location justification in `app-store-delivery.md`.
-- `android:usesCleartextTraffic="true"` is set in the main manifest. Point production builds at an `https://` API and set it to `false` so the "data encrypted in transit" answer is true.
+- The Rider flavor's `android/app/src/delivery/AndroidManifest.xml` adds `FOREGROUND_SERVICE` and `FOREGROUND_SERVICE_LOCATION` (no `ACCESS_BACKGROUND_LOCATION`). While the rider is online, GPS streams through a location foreground service with a persistent notification ("You are online / Sharing your location for deliveries. Go offline to stop."), so tracking continues when the app is backgrounded; it stops when the rider goes offline. In Play Console complete the **Foreground service permissions** declaration (Policy → App content) for the **location** type, with a short video showing the rider going online, the notification, and live delivery tracking. The background-location (`ACCESS_BACKGROUND_LOCATION`) declaration is **not** needed. Reuse the "ABOUT LOCATION" paragraph of the full description below and the background-location justification in `app-store-delivery.md`.
+- The main manifest sets `android:usesCleartextTraffic="false"` (only the debug/profile manifests re-enable it for local development). Point production builds at an `https://` API (`wss://` for sockets) so the "data encrypted in transit" answer stays true.
 
 ## App title (max 30)
 ```
@@ -94,7 +94,7 @@ Answers below reflect what the codebase does; tick only what your deployment act
 
 **Overview answers**
 - Does your app collect or share any required user data types? **Yes**
-- Is all user data encrypted in transit? **Yes** (HTTPS/TLS via Nginx + certbot; WSS for sockets). *Only true once cleartext traffic is disabled and the API URL is https.*
+- Is all user data encrypted in transit? **Yes** (HTTPS/TLS via Nginx + certbot; WSS for sockets). *Release builds block cleartext traffic; make sure the production API URL is https.*
 - Do you provide a way for users to request that their data is deleted? **Yes**: in-app via **Profile → Settings → Delete account** (calls `DELETE /api/users/profile`), and by email to [PRIVACY EMAIL]. Also provide the web deletion URL Play requires: [ACCOUNT DELETION URL].
 - Committed to Play Families Policy? **No** (not a children's app).
 - Independent security review? **No** (unless you obtain one).
