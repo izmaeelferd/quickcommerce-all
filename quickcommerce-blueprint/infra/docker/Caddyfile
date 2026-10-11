@@ -1,0 +1,140 @@
+# QuickCart edge configuration (blueprint, Caddy 2.8).
+#
+# Sites:
+#   {$PLATFORM_HOST}       platform host (super admin, installer, API). Certificate obtained at startup.
+#   https:// (catch-all)   tenant hosts: {slug}.{PLATFORM_ROOT_DOMAIN} and verified custom domains.
+#                          Certificates are issued on demand, only after the API "ask" endpoint approves
+#                          the hostname (active tenant slug or verified tenant_domains row).
+#
+# Path layout on every host:
+#   /api/*, /socket.io/*   reverse proxy to the api replicas (HTTP and WebSocket)
+#   /install, /install/*   reverse proxy to api; the api answers 404 once installation is locked
+#   /admin/*               admin-web static build (super admin on the platform host, tenant admin on tenant hosts)
+#   /store/*               store-web static build (dark-store dashboard)
+#   /internal/*, /metrics  never exposed (404); served on the api internal port for Prometheus and Caddy only
+
+{
+	email {$ACME_EMAIL}
+	acme_ca {$ACME_CA}
+	admin 127.0.0.1:2019
+
+	on_demand_tls {
+		# Caddy calls GET http://api:9464/internal/tls/ask?domain=<host> before issuing a certificate.
+		# 200 = allowed. Any other status = refused. The api caches answers in Redis for 5 minutes.
+		ask http://api:9464/internal/tls/ask
+	}
+
+	servers {
+		protocols h1 h2 h3
+	}
+
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+}
+
+(security_headers) {
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "geolocation=(self), camera=(self), microphone=(), payment=(self), usb=()"
+		Cross-Origin-Opener-Policy "same-origin"
+		Cross-Origin-Resource-Policy "same-site"
+		-Server
+		-X-Powered-By
+	}
+}
+
+# Usage: import spa_headers <name>. The argument keeps matcher names unique within a site block.
+(spa_headers) {
+	header {
+		Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' wss: https:; frame-ancestors 'none'; base-uri 'self'; form-action 'self'; object-src 'none'; upgrade-insecure-requests"
+		X-Frame-Options "DENY"
+	}
+	@hashed_{args[0]} path /assets/*
+	header @hashed_{args[0]} Cache-Control "public, max-age=31536000, immutable"
+	@html_{args[0]} not path /assets/*
+	header @html_{args[0]} Cache-Control "no-cache"
+}
+
+(app_routes) {
+	encode zstd gzip
+	import security_headers
+
+	# Internal endpoints are never routed from the internet.
+	@internal path /internal /internal/* /metrics /metrics/*
+	handle @internal {
+		respond 404
+	}
+
+	# API, realtime and installer. Socket.IO runs websocket-only, so no sticky sessions are needed:
+	# each WebSocket stays on the replica that accepted the upgrade, and room fan-out uses the Redis adapter.
+	@backend path /api/* /socket.io/* /install /install/*
+	handle @backend {
+		request_body {
+			max_size 20MB
+		}
+		reverse_proxy {
+			dynamic a {
+				name api
+				port 3000
+				refresh 5s
+			}
+			lb_policy least_conn
+			lb_try_duration 5s
+			lb_try_interval 250ms
+			fail_duration 10s
+			max_fails 3
+			unhealthy_status 502 503 504
+			# Keep WebSockets open for up to 5 minutes after a config reload instead of cutting them.
+			stream_close_delay 5m
+			header_up X-Request-Id {http.request.uuid}
+		}
+	}
+
+	redir /admin /admin/ 308
+	redir /store /store/ 308
+
+	handle_path /admin/* {
+		root * /srv/admin
+		import spa_headers admin
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle_path /store/* {
+		root * /srv/store
+		import spa_headers store
+		try_files {path} /index.html
+		file_server
+	}
+
+	handle / {
+		redir /admin/ 302
+	}
+
+	handle {
+		respond 404
+	}
+}
+
+# Platform host: certificate obtained eagerly at startup.
+{$PLATFORM_HOST} {
+	import app_routes
+}
+
+# Tenant subdomains and custom domains: on-demand certificates gated by the ask endpoint.
+https:// {
+	tls {
+		on_demand
+	}
+	import app_routes
+}
+
+# Plain HTTP: ACME HTTP-01 challenges are answered automatically; everything else is redirected.
+http:// {
+	redir https://{host}{uri} 308
+}
