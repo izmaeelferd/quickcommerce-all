@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Neutral fallbacks until /api/config is loaded — real values are injected by ConfigContext. */
+:root {
+  --color-primary: 92 107 192;
+  --color-secondary: 38 50 56;
+  --color-accent: 255 179 0;
+  --color-background: 255 255 255;
+  --color-surface: 245 245 245;
+  --color-text: 33 33 33;
+  --color-success: 46 125 50;
+  --color-warning: 249 168 37;
+  --color-error: 198 40 40;
+  --color-veg: 46 125 50;
+  --color-nonveg: 198 40 40;
+  --color-on-primary: 255 255 255;
+  --color-scrim: 0 0 0;
+  --radius-card: 12px;
+  --radius-button: 8px;
+  --radius-input: 8px;
+  --font-app: system-ui;
+}
+
+.dark {
+  --color-background: 18 18 18;
+  --color-surface: 33 33 33;
+  --color-text: 236 236 236;
+}
+
+@layer components {
+  .card { @apply bg-background border border-content/10 rounded-card p-5 shadow-sm; }
+  .btn { @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-btn font-medium transition disabled:opacity-50 disabled:cursor-not-allowed; }
+  .btn-primary { @apply btn bg-primary text-onprimary hover:bg-primary/90; }
+  .btn-outline { @apply btn border border-primary text-primary hover:bg-primary/10; }
+  .btn-ghost { @apply btn text-content/80 hover:bg-content/5; }
+  .btn-danger { @apply btn bg-danger text-onprimary hover:bg-danger/90; }
+  .input { @apply w-full rounded-input border border-content/15 bg-surface px-3 py-2 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20; }
+  .label { @apply block text-sm font-medium text-content/80 mb-1; }
+  .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold; }
+  .table-th { @apply px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-content/60; }
+  .table-td { @apply px-4 py-3 text-sm; }
+}
+
+.rte-content h1 { font-size: 1.6rem; font-weight: 700; }
+.rte-content h2 { font-size: 1.3rem; font-weight: 700; margin: .6rem 0; }
+.rte-content h3 { font-size: 1.1rem; font-weight: 600; }
+.rte-content ul { list-style: disc; padding-left: 1.4rem; }
+.rte-content ol { list-style: decimal; padding-left: 1.4rem; }
+.rte-content a { color: rgb(var(--color-primary)); text-decoration: underline; }
+.rte-content p { margin: .4rem 0; }

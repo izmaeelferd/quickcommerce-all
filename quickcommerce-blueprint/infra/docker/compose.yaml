@@ -1,0 +1,865 @@
+# QuickCart production Docker Compose (blueprint).
+#
+# This file is part of the QuickCart technical blueprint (06-INSTALLER-DEPLOYMENT.md). It describes the
+# intended single-host production topology. It has not been run against real images.
+#
+# Requirements: Docker Engine 24+, Docker Compose 2.24+ (uses depends_on.required and profiles).
+#
+# Profiles (set COMPOSE_PROFILES in .env):
+#   bundled-db       PostgreSQL 16 + PostGIS in this stack. Remove it to use an external database
+#                    (the "external-db" deployment: edit pgbouncer/pgbouncer.ini and the DATABASE_* secrets).
+#   local-storage    MinIO as the S3-compatible object store (single host). Remove it when using S3 / R2.
+#   backup           Scheduled pgBackRest + pg_dump, Meilisearch dumps, offsite copy.
+#   observability    Prometheus, Grafana, Loki, Promtail.
+#   Default for a self-contained install: COMPOSE_PROFILES=bundled-db,local-storage
+#
+# Networks:
+#   frontend  caddy <-> api                         (egress allowed: ACME, payment providers, license server)
+#   backend   api/worker <-> redis/meili/pgbouncer   (internal: no egress)
+#   data      pgbouncer/backup <-> postgres          (internal: no egress)
+#   egress    worker/backup outbound internet        (FCM, SMTP, payment webhooks, offsite backups)
+#
+# Secrets: every credential is a file under ./secrets (created by `quickcart secrets init` or by hand, see
+# .env.example). Files must be readable by the container user (chmod 0440, group 10001 for app images).
+
+name: quickcart
+
+x-app-image: &app-image "${QC_REGISTRY:-ghcr.io/example/quickcart}/server:${QC_VERSION:?set QC_VERSION in .env}"
+
+x-hardening: &hardening
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "5"
+    tag: "{{.Name}}"
+
+# Non-secret configuration shared by api, worker and migrate. Secrets come in as *_FILE below.
+x-app-env: &app-env
+  NODE_ENV: production
+  LOG_LEVEL: ${LOG_LEVEL:-info}
+  PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:?set PUBLIC_BASE_URL in .env}
+  PLATFORM_ROOT_DOMAIN: ${PLATFORM_ROOT_DOMAIN:?set PLATFORM_ROOT_DOMAIN in .env}
+  TRUST_PROXY: ${TRUST_PROXY:-loopback,uniquelocal}
+  CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS:-}
+  PORT: "3000"
+  INTERNAL_PORT: "9464"
+  DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-10}
+  DATABASE_STATEMENT_TIMEOUT_MS: ${DATABASE_STATEMENT_TIMEOUT_MS:-5000}
+  DATABASE_SSL_MODE: ${DATABASE_SSL_MODE:-disable}
+  REDIS_KEY_PREFIX: ${REDIS_KEY_PREFIX:-qc:}
+  MEILI_URL: http://meilisearch:7700
+  MEILI_INDEX_PREFIX: ${MEILI_INDEX_PREFIX:-}
+  STORAGE_DRIVER: s3
+  S3_ENDPOINT: ${S3_ENDPOINT:-http://minio:9000}
+  S3_REGION: ${S3_REGION:-us-east-1}
+  S3_BUCKET: ${S3_BUCKET:-quickcart}
+  S3_FORCE_PATH_STYLE: ${S3_FORCE_PATH_STYLE:-true}
+  S3_PUBLIC_BASE_URL: ${S3_PUBLIC_BASE_URL:-}
+  INSTALL_TOKEN_TTL_MINUTES: ${INSTALL_TOKEN_TTL_MINUTES:-120}
+  INSTALL_LOCK_FILE: /var/lib/quickcart/installed.lock
+  LICENSE_SERVER_URL: ${LICENSE_SERVER_URL:-https://license.quickcart.example/api/v1}
+  SOCKET_IO_TRANSPORTS: websocket
+  OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-}
+  MAIL_FROM: ${MAIL_FROM:-}
+  OSRM_URL: ${OSRM_URL:-}
+  # *_FILE secrets (see packages/config/src/env.schema.ts)
+  DATABASE_URL_FILE: /run/secrets/database_url
+  DATABASE_PLATFORM_URL_FILE: /run/secrets/database_platform_url
+  REDIS_URL_FILE: /run/secrets/redis_url
+  REDIS_CACHE_URL_FILE: /run/secrets/redis_cache_url
+  MEILI_MASTER_KEY_FILE: /run/secrets/meili_master_key
+  S3_ACCESS_KEY_ID_FILE: /run/secrets/s3_access_key_id
+  S3_SECRET_ACCESS_KEY_FILE: /run/secrets/s3_secret_access_key
+  JWT_SECRET_FILE: /run/secrets/jwt_secret
+  COOKIE_SECRET_FILE: /run/secrets/cookie_secret
+  DATA_ENCRYPTION_KEY_FILE: /run/secrets/data_encryption_key
+  SMTP_URL_FILE: /run/secrets/smtp_url
+
+x-app-secrets: &app-secrets
+  - database_url
+  - database_platform_url
+  - redis_url
+  - redis_cache_url
+  - meili_master_key
+  - s3_access_key_id
+  - s3_secret_access_key
+  - jwt_secret
+  - cookie_secret
+  - data_encryption_key
+  - smtp_url
+
+services:
+  # ------------------------------------------------------------------------------------------------
+  # Edge: TLS termination, static web apps, reverse proxy to api (HTTP + WebSocket).
+  # Image = caddy:2.8.4-alpine + built admin-web (/srv/admin) and store-web (/srv/store).
+  # ------------------------------------------------------------------------------------------------
+  caddy:
+    image: "${QC_REGISTRY:-ghcr.io/example/quickcart}/edge:${QC_VERSION:?set QC_VERSION in .env}"
+    <<: *hardening
+    cap_add:
+      - NET_BIND_SERVICE
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      PLATFORM_HOST: ${PLATFORM_HOST:?set PLATFORM_HOST in .env}
+      ACME_EMAIL: ${ACME_EMAIL:?set ACME_EMAIL in .env}
+      ACME_CA: ${ACME_CA:-https://acme-v02.api.letsencrypt.org/directory}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    tmpfs:
+      - /tmp:size=16m
+    networks:
+      - frontend
+    depends_on:
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:2019/config/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 256M
+        reservations:
+          memory: 64M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # API: REST + Socket.IO (websocket-only transport, Redis adapter), installer in install mode.
+  # Stateless; scale with API_REPLICAS. No published ports: reachable only through caddy.
+  # ------------------------------------------------------------------------------------------------
+  api:
+    image: *app-image
+    <<: *hardening
+    command: ["node", "--enable-source-maps", "dist/apps/api/main.js"]
+    user: "10001:10001"
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 30s
+    environment:
+      <<: *app-env
+      APP_ROLE: api
+      # Install-only credentials. Remove these two lines (and the secrets below) after installation is locked.
+      DATABASE_MIGRATION_URL_FILE: /run/secrets/database_migration_url
+      INSTALL_TOKEN_FILE: /run/secrets/install_token
+    secrets:
+      - database_url
+      - database_platform_url
+      - redis_url
+      - redis_cache_url
+      - meili_master_key
+      - s3_access_key_id
+      - s3_secret_access_key
+      - jwt_secret
+      - cookie_secret
+      - data_encryption_key
+      - smtp_url
+      - database_migration_url
+      - install_token
+    volumes:
+      - app_state:/var/lib/quickcart
+    tmpfs:
+      - /tmp:size=64m,uid=10001,gid=10001
+    networks:
+      - frontend
+      - backend
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+        required: false
+      migrate:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "dist/tools/healthcheck.js", "http://127.0.0.1:9464/internal/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: ${API_REPLICAS:-2}
+      resources:
+        limits:
+          cpus: "${API_CPUS:-1.0}"
+          memory: ${API_MEMORY:-768M}
+        reservations:
+          memory: 256M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Worker: BullMQ processors, outbox relay, search sync, schedulers (Redis-locked), webhooks out.
+  # ------------------------------------------------------------------------------------------------
+  worker:
+    image: *app-image
+    <<: *hardening
+    command: ["node", "--enable-source-maps", "dist/apps/worker/main.js"]
+    user: "10001:10001"
+    restart: unless-stopped
+    init: true
+    stop_grace_period: 60s
+    environment:
+      <<: *app-env
+      APP_ROLE: worker
+      WORKER_CONCURRENCY: ${WORKER_CONCURRENCY:-10}
+      OUTBOX_POLL_INTERVAL_MS: ${OUTBOX_POLL_INTERVAL_MS:-250}
+      OUTBOX_BATCH_SIZE: ${OUTBOX_BATCH_SIZE:-500}
+      SEARCH_SYNC_DEBOUNCE_MS: ${SEARCH_SYNC_DEBOUNCE_MS:-2000}
+      SEARCH_SYNC_BATCH_SIZE: ${SEARCH_SYNC_BATCH_SIZE:-1000}
+    secrets: *app-secrets
+    volumes:
+      - app_state:/var/lib/quickcart
+    tmpfs:
+      - /tmp:size=256m,uid=10001,gid=10001
+    networks:
+      - backend
+      - egress
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      pgbouncer:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "node", "dist/tools/healthcheck.js", "http://127.0.0.1:9464/internal/health/ready"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+      start_period: 30s
+    deploy:
+      replicas: ${WORKER_REPLICAS:-1}
+      resources:
+        limits:
+          cpus: "${WORKER_CPUS:-1.0}"
+          memory: ${WORKER_MEMORY:-1G}
+        reservations:
+          memory: 256M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Migrate: one-shot. Applies drizzle migrations under an advisory lock, syncs roles/grants/RLS,
+  # upserts reference data. api and worker start only after it exits 0. Connects as the schema owner
+  # through the pgbouncer session pool "quickcart_admin" (DATABASE_MIGRATION_URL).
+  # ------------------------------------------------------------------------------------------------
+  migrate:
+    image: *app-image
+    <<: *hardening
+    command: ["node", "dist/apps/cli/main.js", "migrate", "--wait-for-db=120"]
+    user: "10001:10001"
+    restart: "no"
+    init: true
+    environment:
+      <<: *app-env
+      APP_ROLE: migrate
+      DATABASE_MIGRATION_URL_FILE: /run/secrets/database_migration_url
+    secrets:
+      - database_url
+      - database_platform_url
+      - redis_url
+      - redis_cache_url
+      - meili_master_key
+      - s3_access_key_id
+      - s3_secret_access_key
+      - jwt_secret
+      - cookie_secret
+      - data_encryption_key
+      - smtp_url
+      - database_migration_url
+    volumes:
+      - app_state:/var/lib/quickcart
+    tmpfs:
+      - /tmp:size=32m,uid=10001,gid=10001
+    networks:
+      - backend
+    depends_on:
+      pgbouncer:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # PostgreSQL 16 + PostGIS 3.4 (profile bundled-db). Pin by digest in production.
+  # With the backup profile, set PG_IMAGE to the derived image (postgis/postgis:16-3.4 + pgbackrest)
+  # and PG_ARCHIVE_COMMAND to "pgbackrest --stanza=quickcart archive-push %p" (see 06, section 9.8).
+  # ------------------------------------------------------------------------------------------------
+  postgres:
+    image: ${PG_IMAGE:-postgis/postgis:16-3.4}
+    profiles: ["bundled-db"]
+    restart: unless-stopped
+    shm_size: 512m
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-quickcart}
+      POSTGRES_USER: ${POSTGRES_OWNER:-quickcart_owner}
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_INITDB_ARGS: "--data-checksums --auth-host=scram-sha-256 --auth-local=scram-sha-256"
+    command:
+      - postgres
+      - -c
+      - shared_buffers=${PG_SHARED_BUFFERS:-1GB}
+      - -c
+      - effective_cache_size=${PG_EFFECTIVE_CACHE_SIZE:-3GB}
+      - -c
+      - work_mem=16MB
+      - -c
+      - maintenance_work_mem=256MB
+      - -c
+      - max_connections=200
+      - -c
+      - wal_level=replica
+      - -c
+      - max_wal_size=4GB
+      - -c
+      - archive_mode=on
+      - -c
+      - archive_command=${PG_ARCHIVE_COMMAND:-/bin/true}
+      - -c
+      - shared_preload_libraries=pg_stat_statements
+      - -c
+      - track_io_timing=on
+      - -c
+      - log_min_duration_statement=500
+      - -c
+      - idle_in_transaction_session_timeout=60000
+      - -c
+      - random_page_cost=1.1
+    secrets:
+      - postgres_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+      - pg_socket:/var/run/postgresql
+    networks:
+      - data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U \"$${POSTGRES_USER}\" -d \"$${POSTGRES_DB}\" -h 127.0.0.1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "${PG_CPUS:-2.0}"
+          memory: ${PG_MEMORY:-4G}
+        reservations:
+          memory: 1G
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # PgBouncer: transaction pooling for app_user / app_platform, session pooling for the owner
+  # (installer migrations only). Bridges the backend and data networks.
+  # ------------------------------------------------------------------------------------------------
+  pgbouncer:
+    image: edoburu/pgbouncer:v1.23.1-p3
+    <<: *hardening
+    restart: unless-stopped
+    volumes:
+      - ./pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+    secrets:
+      - source: pgbouncer_userlist
+        target: /etc/pgbouncer/userlist.txt
+    tmpfs:
+      - /tmp:size=8m
+      - /var/run/pgbouncer:size=1m
+    networks:
+      - backend
+      - data
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -p 6432 -d quickcart"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Redis (durable): BullMQ queues, locks, Socket.IO adapter, install state.
+  # noeviction is mandatory for BullMQ. AOF on.
+  # ------------------------------------------------------------------------------------------------
+  redis:
+    image: redis:7.4.1-alpine
+    <<: *hardening
+    user: "999:1000"
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --aclfile
+      - /run/secrets/redis_acl
+      - --appendonly
+      - "yes"
+      - --appendfsync
+      - everysec
+      - --maxmemory
+      - ${REDIS_MAXMEMORY:-768mb}
+      - --maxmemory-policy
+      - noeviction
+      - --save
+      - "900 1"
+    secrets:
+      - redis_acl
+    volumes:
+      - redis_data:/data
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning --user healthcheck --pass healthcheck ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: ${REDIS_MEMORY:-1G}
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Redis (cache): serviceability, flag snapshots, carts cache, rate limits. LRU eviction, no persistence.
+  # ------------------------------------------------------------------------------------------------
+  redis-cache:
+    image: redis:7.4.1-alpine
+    <<: *hardening
+    user: "999:1000"
+    restart: unless-stopped
+    command:
+      - redis-server
+      - --aclfile
+      - /run/secrets/redis_acl
+      - --appendonly
+      - "no"
+      - --save
+      - ""
+      - --maxmemory
+      - ${REDIS_CACHE_MAXMEMORY:-512mb}
+      - --maxmemory-policy
+      - allkeys-lru
+    secrets:
+      - redis_acl
+    tmpfs:
+      - /data:size=8m
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli --no-auth-warning --user healthcheck --pass healthcheck ping | grep -q PONG"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: ${REDIS_CACHE_MEMORY:-640M}
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Meilisearch 1.x: one index per tenant + locale. Master key read from a secret file.
+  # ------------------------------------------------------------------------------------------------
+  meilisearch:
+    image: getmeili/meilisearch:v1.11.3
+    <<: *hardening
+    restart: unless-stopped
+    entrypoint: ["/sbin/tini", "--"]
+    command:
+      - /bin/sh
+      - -c
+      - MEILI_MASTER_KEY="$$(cat /run/secrets/meili_master_key)" exec /bin/meilisearch
+    environment:
+      MEILI_ENV: production
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_DB_PATH: /meili_data/data.ms
+      MEILI_DUMP_DIR: /meili_data/dumps
+      MEILI_SNAPSHOT_DIR: /meili_data/snapshots
+      MEILI_MAX_INDEXING_MEMORY: ${MEILI_MAX_INDEXING_MEMORY:-1GiB}
+      MEILI_MAX_INDEXING_THREADS: ${MEILI_MAX_INDEXING_THREADS:-2}
+      MEILI_HTTP_PAYLOAD_SIZE_LIMIT: 100MB
+    secrets:
+      - meili_master_key
+    volumes:
+      - meili_data:/meili_data
+    tmpfs:
+      - /tmp:size=256m
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1:7700/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 6
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "${MEILI_CPUS:-2.0}"
+          memory: ${MEILI_MEMORY:-2G}
+        reservations:
+          memory: 512M
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # MinIO (profile local-storage): S3-compatible store for single-host installs.
+  # MinIO community images are no longer published on Docker Hub; mirror the pinned image into your own
+  # registry and set MINIO_IMAGE / MINIO_MC_IMAGE (pin by digest). See 06, section 9.1.
+  # ------------------------------------------------------------------------------------------------
+  minio:
+    image: ${MINIO_IMAGE:-quay.io/minio/minio:RELEASE.2024-10-13T13-34-11Z}
+    profiles: ["local-storage"]
+    <<: *hardening
+    restart: unless-stopped
+    command: ["server", "/data", "--console-address", "127.0.0.1:9001"]
+    environment:
+      MINIO_ROOT_USER_FILE: minio_root_user
+      MINIO_ROOT_PASSWORD_FILE: minio_root_password
+      MINIO_BROWSER: "off"
+    secrets:
+      - minio_root_user
+      - minio_root_password
+    volumes:
+      - minio_data:/data
+    tmpfs:
+      - /tmp:size=64m
+      - /root/.minio:size=8m
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 15s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    logging: *logging
+
+  # One-shot: creates the bucket, enables versioning, creates the app's scoped access key.
+  minio-init:
+    image: ${MINIO_MC_IMAGE:-quay.io/minio/mc:RELEASE.2024-10-08T09-37-26Z}
+    profiles: ["local-storage"]
+    <<: *hardening
+    restart: "no"
+    entrypoint: ["/bin/sh", "/opt/quickcart/minio-init.sh"]
+    environment:
+      S3_BUCKET: ${S3_BUCKET:-quickcart}
+      MC_CONFIG_DIR: /tmp/mc
+    volumes:
+      - ./minio/minio-init.sh:/opt/quickcart/minio-init.sh:ro
+    secrets:
+      - minio_root_user
+      - minio_root_password
+      - s3_access_key_id
+      - s3_secret_access_key
+    tmpfs:
+      - /tmp:size=8m
+    networks:
+      - backend
+    depends_on:
+      minio:
+        condition: service_healthy
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Backup (profile backup): pgBackRest full/diff + WAL archive, nightly pg_dump (logical),
+  # Meilisearch dumps, offsite sync. Image built from tools/backup (supercronic, pgbackrest, mc).
+  # ------------------------------------------------------------------------------------------------
+  backup:
+    image: "${QC_REGISTRY:-ghcr.io/example/quickcart}/backup:${QC_VERSION:?set QC_VERSION in .env}"
+    profiles: ["backup"]
+    <<: *hardening
+    user: "999:999"
+    restart: unless-stopped
+    environment:
+      PGHOST: /var/run/postgresql
+      PGDATABASE: ${POSTGRES_DB:-quickcart}
+      PGUSER: ${POSTGRES_OWNER:-quickcart_owner}
+      PGPASSFILE: /run/secrets/backup_pgpass
+      MEILI_URL: http://meilisearch:7700
+      MEILI_MASTER_KEY_FILE: /run/secrets/meili_master_key
+      BACKUP_S3_ENDPOINT: ${BACKUP_S3_ENDPOINT:?set BACKUP_S3_ENDPOINT for the backup profile}
+      BACKUP_S3_BUCKET: ${BACKUP_S3_BUCKET:-quickcart-backups}
+      BACKUP_S3_REGION: ${BACKUP_S3_REGION:-us-east-1}
+      BACKUP_S3_ACCESS_KEY_ID_FILE: /run/secrets/backup_s3_access_key_id
+      BACKUP_S3_SECRET_ACCESS_KEY_FILE: /run/secrets/backup_s3_secret_access_key
+      BACKUP_ENCRYPTION_KEY_FILE: /run/secrets/backup_encryption_key
+      BACKUP_SCHEDULE_FULL: ${BACKUP_SCHEDULE_FULL:-15 2 * * 0}
+      BACKUP_SCHEDULE_DIFF: ${BACKUP_SCHEDULE_DIFF:-15 2 * * 1-6}
+      BACKUP_SCHEDULE_LOGICAL: ${BACKUP_SCHEDULE_LOGICAL:-45 3 * * *}
+      BACKUP_SCHEDULE_MEILI: ${BACKUP_SCHEDULE_MEILI:-30 4 * * *}
+      BACKUP_RETENTION_FULL: ${BACKUP_RETENTION_FULL:-4}
+      BACKUP_RETENTION_LOGICAL_DAYS: ${BACKUP_RETENTION_LOGICAL_DAYS:-14}
+    secrets:
+      - backup_pgpass
+      - meili_master_key
+      - backup_s3_access_key_id
+      - backup_s3_secret_access_key
+      - backup_encryption_key
+    volumes:
+      - pg_data:/var/lib/postgresql/data:ro
+      - pg_socket:/var/run/postgresql
+      - backup_spool:/var/spool/quickcart-backup
+    tmpfs:
+      - /tmp:size=512m
+    networks:
+      - data
+      - backend
+      - egress
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: false
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/backup-healthcheck"]
+      interval: 5m
+      timeout: 30s
+      retries: 1
+      start_period: 1m
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    logging: *logging
+
+  # ------------------------------------------------------------------------------------------------
+  # Observability (profile observability). Grafana is published on localhost only (use an SSH tunnel).
+  # ------------------------------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    profiles: ["observability"]
+    <<: *hardening
+    user: "65534:65534"
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=${PROMETHEUS_RETENTION:-15d}
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    networks:
+      - backend
+      - observability
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:9090/-/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    logging: *logging
+
+  loki:
+    image: grafana/loki:3.2.1
+    profiles: ["observability"]
+    <<: *hardening
+    user: "10001:10001"
+    restart: unless-stopped
+    command: ["-config.file=/etc/loki/local-config.yaml"]
+    volumes:
+      - loki_data:/loki
+    tmpfs:
+      - /tmp:size=64m
+    networks:
+      - observability
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3100/ready"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1G
+    logging: *logging
+
+  # Reads container logs from the Docker socket (read-only). The socket grants host-level visibility;
+  # on hardened hosts replace with the Loki Docker logging driver or ship logs from the host.
+  promtail:
+    image: grafana/promtail:3.2.1
+    profiles: ["observability"]
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    restart: unless-stopped
+    command: ["-config.file=/etc/promtail/promtail.yaml"]
+    volumes:
+      - ./observability/promtail.yaml:/etc/promtail/promtail.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - promtail_positions:/var/lib/promtail
+    tmpfs:
+      - /tmp:size=16m
+    networks:
+      - observability
+    depends_on:
+      loki:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+    logging: *logging
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    profiles: ["observability"]
+    <<: *hardening
+    user: "472:0"
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD__FILE: /run/secrets/grafana_admin_password
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_PATHS_PROVISIONING: /etc/grafana/provisioning
+    secrets:
+      - grafana_admin_password
+    volumes:
+      - ./observability/grafana/datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+      - grafana_data:/var/lib/grafana
+    tmpfs:
+      - /tmp:size=64m
+    networks:
+      - observability
+    depends_on:
+      prometheus:
+        condition: service_healthy
+      loki:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:3000/api/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+    logging: *logging
+
+networks:
+  frontend:
+    driver: bridge
+  backend:
+    driver: bridge
+    internal: true
+  data:
+    driver: bridge
+    internal: true
+  egress:
+    driver: bridge
+  observability:
+    driver: bridge
+
+volumes:
+  app_state:
+  caddy_data:
+  caddy_config:
+  pg_data:
+  pg_socket:
+  redis_data:
+  meili_data:
+  minio_data:
+  backup_spool:
+  prometheus_data:
+  loki_data:
+  grafana_data:
+  promtail_positions:
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
+  database_url:
+    file: ./secrets/database_url
+  database_platform_url:
+    file: ./secrets/database_platform_url
+  database_migration_url:
+    file: ./secrets/database_migration_url
+  pgbouncer_userlist:
+    file: ./secrets/pgbouncer_userlist.txt
+  redis_acl:
+    file: ./secrets/redis_users.acl
+  redis_url:
+    file: ./secrets/redis_url
+  redis_cache_url:
+    file: ./secrets/redis_cache_url
+  meili_master_key:
+    file: ./secrets/meili_master_key
+  s3_access_key_id:
+    file: ./secrets/s3_access_key_id
+  s3_secret_access_key:
+    file: ./secrets/s3_secret_access_key
+  minio_root_user:
+    file: ./secrets/minio_root_user
+  minio_root_password:
+    file: ./secrets/minio_root_password
+  jwt_secret:
+    file: ./secrets/jwt_secret
+  cookie_secret:
+    file: ./secrets/cookie_secret
+  data_encryption_key:
+    file: ./secrets/data_encryption_key
+  smtp_url:
+    file: ./secrets/smtp_url
+  install_token:
+    file: ./secrets/install_token
+  backup_pgpass:
+    file: ./secrets/backup_pgpass
+  backup_s3_access_key_id:
+    file: ./secrets/backup_s3_access_key_id
+  backup_s3_secret_access_key:
+    file: ./secrets/backup_s3_secret_access_key
+  backup_encryption_key:
+    file: ./secrets/backup_encryption_key
+  grafana_admin_password:
+    file: ./secrets/grafana_admin_password

@@ -1,0 +1,44 @@
+import 'package:flutter/foundation.dart';
+
+/// Build-time environment. Everything here comes from `--dart-define`,
+/// never from source: `flutter run --flavor customer -t lib/main_customer.dart
+/// --dart-define=API_BASE_URL=https://api.example.com`.
+enum AppFlavor { customer, vendor, delivery }
+
+class Env {
+  /// Required. No fallback is compiled in, so a build can never silently point at a dev server.
+  /// `API_BASE_URL=origin` (web builds only) means "same host that served the app", for builds
+  /// served behind a reverse proxy that forwards /api, /socket.io and /uploads (see docker-compose.demo.yml).
+  static const String _apiBaseUrl = String.fromEnvironment('API_BASE_URL');
+  static String get apiBaseUrl => _apiBaseUrl == 'origin' && kIsWeb ? Uri.base.origin : _apiBaseUrl;
+  static const String apiPrefix = String.fromEnvironment('API_PREFIX', defaultValue: '/api');
+  static const String googleMapsKey = String.fromEnvironment('GOOGLE_MAPS_KEY', defaultValue: '');
+  static const String googleServerClientId = String.fromEnvironment('GOOGLE_SERVER_CLIENT_ID', defaultValue: '');
+  /// Rider iOS builds only: set to true after adding the `location` background mode and
+  /// NSLocationAlwaysAndWhenInUseUsageDescription to the Rider target (docs/FLUTTER_BUILD_GUIDE.md).
+  static const bool iosBackgroundLocation = bool.fromEnvironment('IOS_BACKGROUND_LOCATION');
+  static const String flavorName = String.fromEnvironment('FLAVOR', defaultValue: 'customer');
+
+  static AppFlavor flavor = _parse(flavorName);
+
+  static AppFlavor _parse(String v) {
+    switch (v) {
+      case 'vendor':
+        return AppFlavor.vendor;
+      case 'delivery':
+        return AppFlavor.delivery;
+      default:
+        return AppFlavor.customer;
+    }
+  }
+
+  static bool get isConfigured => apiBaseUrl.startsWith('http');
+
+  static String get apiUrl => '$apiBaseUrl$apiPrefix';
+
+  /// Role expected by the backend for this flavor.
+  static String get role => flavor.name;
+
+  /// Header value used by the backend maintenance guard.
+  static String get appType => flavor.name;
+}

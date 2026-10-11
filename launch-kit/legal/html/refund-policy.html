@@ -1,0 +1,371 @@
+<h1 id="feastflow-refund--cancellation-policy">FeastFlow Refund &amp;
+Cancellation Policy</h1>
+<blockquote>
+<p><strong>TEMPLATE — NOT LEGAL ADVICE.</strong> This is a
+starting-point template for the FeastFlow platform. It is not legal
+advice. <strong>Have qualified legal counsel review it</strong>,
+including against consumer-protection law (e.g. India's Consumer
+Protection Act, 2019 and Consumer Protection (E-Commerce) Rules, 2020)
+and your payment gateway's merchant terms, before publishing. Replace
+every <code>[BRACKETED PLACEHOLDER]</code>.</p>
+<p><strong>Configured values:</strong> Numbers marked <em>"configured
+value"</em> are set in <strong>Admin Panel → Config → Business
+Rules</strong> (or <strong>Feature Flags</strong>) and can be changed at
+runtime. The shipped default and config key are shown, e.g.
+<code>businessRules.cancellationWindowMinutes</code> = 5. <strong>Before
+publishing, confirm every number matches your live Admin Panel
+settings</strong>, and update this policy whenever you change them.</p>
+<p><strong>Operator note — where refunds go (read before publishing;
+delete this note afterwards):</strong> In the current FeastFlow code,
+refunds for <strong>cancelled or rejected</strong> orders are credited
+to the customer's <strong>FeastFlow Wallet</strong> (instant)
+<strong>when the Wallet feature flag (<code>features.wallet</code>) is
+ON (the default)</strong>, and are sent back to the <strong>original
+payment method</strong> through Razorpay/Stripe only when the Wallet
+feature is OFF (if that gateway refund fails, the refund is credited to
+the Wallet instead). Refunds for <strong>payments that arrive after an
+order was already cancelled</strong> go back to the original payment
+method, falling back to the Wallet if the gateway refund fails. Admins
+can also issue a refund from <strong>Admin → Orders</strong> to either
+the original method or the Wallet. Section 4 below is written to match
+this behaviour with the Wallet ON. If your business or local law
+requires refunds to the original payment method by default (or a
+customer choice), either turn the Wallet feature off or change the
+backend (<code>backend/utils/orderFlow.js → refundCancelled</code>), and
+edit Section 4 accordingly. [COUNSEL: check whether refund-to-wallet
+without customer choice is acceptable in your jurisdiction.]</p>
+</blockquote>
+<p><strong>Last updated:</strong> [EFFECTIVE DATE]</p>
+<p>This policy explains when you can cancel a FeastFlow order, when you
+get a refund, how much, and how long it takes. It forms part of the
+FeastFlow <strong>Terms of Service</strong>. The legal entity operating
+FeastFlow is <strong>[COMPANY LEGAL NAME]</strong>, [REGISTERED
+ADDRESS].</p>
+<hr />
+<h2 id="1-quick-summary">1. Quick summary</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Situation</th>
+<th>Who cancels</th>
+<th>Refund</th>
+<th>Cancellation fee</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>You cancel <strong>within the cancellation window</strong>
+(configured value <code>businessRules.cancellationWindowMinutes</code> =
+<strong>5 minutes</strong> from placing the order)</td>
+<td>You</td>
+<td><strong>100%</strong> of what you paid (online + wallet)</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>You cancel <strong>after the window</strong>, while the order is
+still <em>placed</em> or <em>accepted</em></td>
+<td>You</td>
+<td>Amount paid <strong>minus the cancellation fee</strong></td>
+<td><strong>10%</strong> of the amount you paid (configured value
+<code>businessRules.cancellationPenaltyPercent</code> = 10)</td>
+</tr>
+<tr class="odd">
+<td>You try to cancel once the restaurant has started
+<strong>preparing</strong> or later</td>
+<td>—</td>
+<td>Cancellation not available in the app; contact support. Refund only
+at FeastFlow's discretion or where the order fails (see below).</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Restaurant <strong>rejects</strong> your order</td>
+<td>Restaurant</td>
+<td><strong>100%</strong></td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td>Restaurant <strong>does not accept in time</strong> — order
+auto-rejected (configured value
+<code>businessRules.vendorAcceptTimeoutMinutes</code> = <strong>5
+minutes</strong>)</td>
+<td>System</td>
+<td><strong>100%</strong></td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>Restaurant cancels after accepting (e.g. item unavailable, kitchen
+issue)</td>
+<td>Restaurant</td>
+<td><strong>100%</strong></td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td>FeastFlow cancels (e.g. no rider available, safety, fraud check,
+pricing error)</td>
+<td>FeastFlow</td>
+<td><strong>100%</strong> (except where cancelled due to your
+fraud/abuse)</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td><strong>Unpaid</strong> online order — payment not completed in time
+(configured value <code>businessRules.paymentTimeoutMinutes</code> =
+<strong>15 minutes</strong>)</td>
+<td>System</td>
+<td>Nothing was charged; any wallet amount and coupon are restored</td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td>Payment completes <strong>after</strong> the order was
+cancelled</td>
+<td>System</td>
+<td><strong>100% automatic refund</strong> to the original payment
+method (Wallet if the gateway refund fails)</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>Missing, wrong, damaged, spilled or poor-quality items</td>
+<td>You report</td>
+<td>Partial or full refund after review (Section 6)</td>
+<td>None</td>
+</tr>
+<tr class="odd">
+<td>Order not delivered (and you did not share the delivery OTP)</td>
+<td>You report</td>
+<td>Full refund after review (Section 6)</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>You were unreachable / gave a wrong address / refused delivery</td>
+<td>—</td>
+<td><strong>No refund</strong> [COUNSEL TO CONFIRM]</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="2-cancelling-an-order">2. Cancelling an order</h2>
+<p>2.1 <strong>How to cancel:</strong> Open <strong>Orders → [your
+order] → Cancel order</strong> in the FeastFlow app. The Cancel option
+is shown only while the order is <strong>placed</strong> or
+<strong>accepted</strong>.</p>
+<p>2.2 <strong>Free cancellation window:</strong> You can cancel free of
+charge for <strong>5 minutes</strong> after you place the order
+(configured value <code>businessRules.cancellationWindowMinutes</code> =
+5). The window is measured from the time the order was created.</p>
+<p>2.3 <strong>Cancellation after the window:</strong> If you cancel
+later than that, while the order is still placed or accepted, we deduct
+a <strong>cancellation fee of 10%</strong> (configured value
+<code>businessRules.cancellationPenaltyPercent</code> = 10) of the total
+amount you paid for the order (online payment + wallet amount used). The
+fee compensates the restaurant and delivery partner for work already
+started. [COUNSEL: decide whether part of the fee is passed to the
+restaurant; currently the fee is retained on the Platform.]</p>
+<p><em>Example:</em> You paid ₹400 (₹300 by UPI + ₹100 from Wallet) and
+cancel 8 minutes after ordering. Fee = 10% × ₹400 = ₹40. Refund =
+₹360.</p>
+<p>2.4 <strong>After preparation starts:</strong> Once the restaurant
+marks the order as <em>preparing</em>, it cannot be cancelled from the
+app because the food is being made. If there is a genuine problem (e.g.
+a long delay), contact support — we may cancel and refund at our
+discretion.</p>
+<p>2.5 <strong>Coupons:</strong> If an order is cancelled or rejected,
+the coupon usage is restored so you can use it again (subject to its
+validity dates).</p>
+<h2 id="3-orders-cancelled-by-the-restaurant-the-system-or-feastflow">3.
+Orders cancelled by the restaurant, the system or FeastFlow</h2>
+<p>3.1 <strong>Restaurant rejection:</strong> If the restaurant rejects
+your order, you receive a <strong>full refund</strong> with no fee.</p>
+<p>3.2 <strong>Auto-reject after timeout:</strong> Restaurants must
+accept orders within <strong>5 minutes</strong> (configured value
+<code>businessRules.vendorAcceptTimeoutMinutes</code> = 5). For online
+payments, the timer starts when your payment succeeds; for Cash on
+Delivery, when you place the order. If not accepted in time, the order
+is <strong>automatically rejected and fully refunded</strong>.
+(Scheduled orders are not auto-rejected by this timer.)</p>
+<p>3.3 <strong>Payment timeout:</strong> If you choose an online payment
+method but do not complete payment within <strong>15 minutes</strong>
+(configured value <code>businessRules.paymentTimeoutMinutes</code> =
+15), the order is <strong>automatically cancelled</strong>. No money was
+taken by the gateway, so there is nothing to refund; any <strong>wallet
+balance and coupon applied are restored</strong>.</p>
+<p>3.4 <strong>Late payment:</strong> If your bank or UPI app completes
+the payment <strong>after</strong> the order was cancelled (for example
+after the payment timeout), we <strong>never fulfil</strong> that order
+and <strong>automatically refund the full amount</strong> to your
+original payment method. If the gateway refund fails, the amount is
+credited to your FeastFlow Wallet instead.</p>
+<p>3.5 <strong>FeastFlow cancellation:</strong> We may cancel an order
+if no delivery partner is available, for safety reasons, suspected
+fraud, a clear pricing error, or a restaurant closure. You receive a
+full refund, unless the cancellation was due to your fraud or breach of
+the Terms.</p>
+<h2 id="4-how-and-where-refunds-are-paid">4. How and where refunds are
+paid</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Refund destination</th>
+<th>When used</th>
+<th>Typical timeline</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>FeastFlow Wallet</strong></td>
+<td>Default for cancelled or rejected orders while the Wallet feature is
+enabled; fallback whenever a gateway refund fails (late-payment refunds,
+and cancelled/rejected orders while the Wallet feature is disabled); and
+admin "refund to wallet"</td>
+<td><strong>Instant</strong> once the cancellation/rejection is
+processed</td>
+</tr>
+<tr class="even">
+<td><strong>Original payment method</strong> (UPI, card, net banking via
+Razorpay/Stripe)</td>
+<td>Late-payment refunds; cancelled/rejected orders when the Wallet
+feature is disabled; refunds issued by support to source</td>
+<td>Refund is initiated immediately; typically <strong>5–7 business
+days</strong> for the money to reach your account <strong>[CONFIRM WITH
+GATEWAY]</strong> — UPI is often faster; cards can take up to [10]
+business days depending on your bank</td>
+</tr>
+<tr class="odd">
+<td><strong>Cash on Delivery orders</strong></td>
+<td>Nothing is paid online, so there is nothing to refund for the cash
+portion. If you used wallet balance towards a COD order, that wallet
+amount is returned to your Wallet.</td>
+<td>Instant (wallet portion)</td>
+</tr>
+</tbody>
+</table>
+<p>4.1 Wallet balance can be used on future FeastFlow orders (up to the
+configured share of an order — configured value
+<code>businessRules.walletMaxUsePercent</code> = 50% — or in full when
+paying by Wallet). [STATE WHETHER/HOW A CUSTOMER CAN REQUEST WALLET
+REFUNDS TO SOURCE — e.g. "If you prefer a refund to your original
+payment method, contact support within [X] days and we will reverse the
+wallet credit and refund to source."]</p>
+<p>4.2 We initiate refunds; the time for the money to appear depends on
+your bank, card issuer or UPI provider. If a refund to source has not
+arrived within <strong>[10] business days</strong>, contact support with
+your order number — we will share the gateway refund reference (ARN/RRN)
+so you can trace it with your bank.</p>
+<p>4.3 Refund amounts never exceed the amount you paid for the order.
+Tips are refunded with cancelled orders as part of the amount paid.
+Discounts given by coupons are not paid out in cash.</p>
+<h2 id="5-cash-on-delivery-cod">5. Cash on Delivery (COD)</h2>
+<ul>
+<li>COD is available for orders up to the COD limit (configured value
+<code>businessRules.codMaxAmount</code> = ₹2,000).</li>
+<li>Cancelling a COD order within the window is free. After the window,
+the cancellation fee applies only to any wallet amount you used on that
+order (because no online payment was made). [COUNSEL: if you want to
+charge a fee on COD cancellations, it must be collected on the next
+order — not currently implemented.]</li>
+<li>Repeatedly refusing COD orders at the door may lead to COD being
+disabled for your account or suspension.</li>
+<li>If you paid cash and there is a problem with the delivered food
+(Section 6), approved refunds are credited to your FeastFlow Wallet [OR:
+via bank/UPI transfer — CONFIRM].</li>
+</ul>
+<h2 id="6-problems-with-a-delivered-order">6. Problems with a delivered
+order</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Issue</th>
+<th>What to do</th>
+<th>Outcome</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Missing item(s)</strong></td>
+<td>Report within <strong>[2 HOURS / 24 HOURS]</strong> of delivery via
+in-app support or [SUPPORT EMAIL], with order number</td>
+<td>Refund of the missing item(s) price (incl. applicable tax) after
+verification</td>
+</tr>
+<tr class="even">
+<td><strong>Wrong item(s)</strong></td>
+<td>Report within the same window, with a photo of what you
+received</td>
+<td>Refund of the wrong item(s), or full refund if the whole order is
+wrong</td>
+</tr>
+<tr class="odd">
+<td><strong>Damaged / spilled packaging</strong></td>
+<td>Report with photos</td>
+<td>Partial or full refund depending on extent</td>
+</tr>
+<tr class="even">
+<td><strong>Quality / food safety</strong> (e.g. foreign object, spoiled
+food)</td>
+<td>Report with photos; keep the food if possible</td>
+<td>Refund at our discretion after review with the restaurant; serious
+food-safety complaints are escalated to the restaurant [and the relevant
+authority where required]</td>
+</tr>
+<tr class="odd">
+<td><strong>Order marked delivered but not received</strong></td>
+<td>Report immediately. Note: delivery is confirmed by the
+<strong>delivery OTP</strong> you share at handover and may be backed by
+a <strong>photo proof</strong></td>
+<td>Full refund if investigation confirms non-delivery. If the OTP was
+shared, we will review the photo proof and rider location data before
+deciding.</td>
+</tr>
+<tr class="even">
+<td><strong>Very late delivery</strong></td>
+<td>Contact support</td>
+<td>Goodwill credit at our discretion; delivery times are estimates, not
+guarantees</td>
+</tr>
+</tbody>
+</table>
+<p>Refunds for these issues are typically credited to your
+<strong>FeastFlow Wallet</strong> (instant) or, on request, to your
+<strong>original payment method</strong> (5–7 business days, [CONFIRM
+WITH GATEWAY]). Refund decisions consider order history, photos, OTP and
+photo proof, and restaurant/rider input. Abuse of the refund process
+(e.g. repeated false claims) may lead to refusal and account
+suspension.</p>
+<h2 id="7-how-to-request-a-refund-or-raise-a-dispute">7. How to request
+a refund or raise a dispute</h2>
+<ol type="1">
+<li><strong>In the app:</strong> Orders → select order → Help / Support
+[CONFIRM IN-APP PATH], or call the restaurant using the call button for
+food issues.</li>
+<li><strong>Email:</strong> [SUPPORT EMAIL] with your order number
+(format <code>OD…</code>), registered phone number, a description and
+photos.</li>
+<li><strong>Phone:</strong> [SUPPORT PHONE] ([SUPPORT HOURS]).</li>
+<li><strong>Escalation:</strong> if you are not satisfied, contact our
+<strong>Grievance Officer — [GRIEVANCE OFFICER NAME], [GRIEVANCE EMAIL],
+[GRIEVANCE PHONE]</strong>. We acknowledge complaints within <strong>[48
+hours]</strong> and aim to resolve them within <strong>[30
+days]</strong>.</li>
+<li>You may also have the right to approach a consumer commission or
+other dispute body under applicable law (e.g. the National Consumer
+Helpline 1915 in India).</li>
+</ol>
+<h2 id="8-tips-wallet-top-ups-and-referral-credits">8. Tips, wallet
+top-ups and referral credits</h2>
+<ul>
+<li><strong>Tips</strong> are refunded as part of the amount paid if the
+order is cancelled before delivery. Tips on delivered orders are passed
+100% to the rider and are not refundable except in case of
+non-delivery.</li>
+<li><strong>Wallet top-ups</strong> are [non-refundable to source except
+where required by law / refundable on request within [X] days]. [COUNSEL
+TO DECIDE.]</li>
+<li><strong>Referral and promotional credits</strong> are not refundable
+or convertible to cash and may be reversed if obtained through
+abuse.</li>
+</ul>
+<h2 id="9-changes">9. Changes</h2>
+<p>We may update this policy, including the configured windows, fees and
+limits. The version in force at the time you place your order applies to
+that order.</p>
+<p><strong>Contact:</strong> [COMPANY LEGAL NAME] · [REGISTERED ADDRESS]
+· [SUPPORT EMAIL] · [SUPPORT PHONE]</p>

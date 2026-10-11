@@ -1,0 +1,28 @@
+# QuickCart Prometheus scrape configuration (blueprint).
+# api and worker expose /metrics on INTERNAL_PORT (9464), which is never routed by Caddy.
+# Docker DNS service discovery returns every replica of a scaled service.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: api
+    dns_sd_configs:
+      - names: ["api"]
+        type: A
+        port: 9464
+    metrics_path: /metrics
+
+  - job_name: worker
+    dns_sd_configs:
+      - names: ["worker"]
+        type: A
+        port: 9464
+    metrics_path: /metrics
+
+  # Meilisearch /metrics is an experimental feature that needs an API key; enable it per 06, section 9.6
+  # by mounting a key file and adding a job with authorization.credentials_file.
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["127.0.0.1:9090"]

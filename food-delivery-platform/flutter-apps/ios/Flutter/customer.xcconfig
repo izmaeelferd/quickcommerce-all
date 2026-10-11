@@ -1,0 +1,8 @@
+// Flavor: customer — select by duplicating the Runner scheme as "customer" and pointing
+// its Debug/Release/Profile configurations at Debug-customer / Release-customer / Profile-customer
+// (see docs/FLUTTER_BUILD_GUIDE.md → iOS flavors).
+APP_FLAVOR=customer
+APP_DISPLAY_NAME=$(CUSTOMER_APP_NAME:default=FeastFlow)
+PRODUCT_BUNDLE_IDENTIFIER=$(APP_ID_BASE:default=com.fooddelivery).customer
+GOOGLE_MAPS_KEY=$(GOOGLE_MAPS_KEY)
+FLUTTER_TARGET=lib/main_customer.dart
