@@ -15,6 +15,9 @@ class WidgetSection {
   final Map<String, dynamic> filter;
   final Map<String, dynamic> style;
 
+  /// Type-specific data for custom content sections (promo, pickedRestaurants, pickedDishes, text).
+  final Map<String, dynamic> content;
+
   const WidgetSection({
     required this.id,
     required this.type,
@@ -28,6 +31,7 @@ class WidgetSection {
     required this.limit,
     required this.filter,
     required this.style,
+    this.content = const {},
   });
 
   factory WidgetSection.fromJson(Map<String, dynamic> j) => WidgetSection(
@@ -43,5 +47,22 @@ class WidgetSection {
         limit: toInt(j['limit'], 10),
         filter: toMap(j['filter']),
         style: toMap(j['style']),
+        content: toMap(j['content']),
       );
+}
+
+/// Typed accessors for custom section content. All values are validated server-side.
+extension WidgetSectionContent on WidgetSection {
+  List<String> get pickedRestaurantIds => toList(content['restaurantIds']).map((e) => toStr(e)).where((e) => e.isNotEmpty).toList();
+  List<String> get pickedItemIds => toList(content['itemIds']).map((e) => toStr(e)).where((e) => e.isNotEmpty).toList();
+  String get html => toStr(content['html']);
+  String get imageUrl => toStr(content['imageUrl']);
+  String get ctaText => toStr(content['ctaText']);
+  String get linkType => toStr(content['linkType'], 'none');
+  String get linkValue => toStr(content['linkValue']);
+  String get backgroundColor => toStr(style['backgroundColor']);
+  String get textColor => toStr(style['textColor']);
+  String get textAlign => toStr(style['textAlign'], 'start');
+  double get height => toDouble(style['height'], 160);
+  double get paddingVertical => toDouble(style['paddingVertical'], 0);
 }

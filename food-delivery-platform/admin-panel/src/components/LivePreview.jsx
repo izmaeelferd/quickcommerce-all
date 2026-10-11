@@ -60,6 +60,53 @@ export default function LivePreview({ theme, layout, branding, banners, categori
             <div className="h-14" style={{ ...card, background: `linear-gradient(90deg, ${primary}, ${th.accentColor})` }} />
           </div>
         );
+      case 'promo': {
+        const c = s.content || {};
+        const st = s.style || {};
+        const fg = st.textColor || (c.imageUrl ? '#FFFFFF' : contrastOn(st.backgroundColor || primary, bg, text));
+        const align = { start: 'left', center: 'center', end: 'right' }[st.textAlign || 'start'];
+        return (
+          <div className="mx-3 mt-3 overflow-hidden" style={{ ...card, background: st.backgroundColor || primary, height: Math.min(Number(st.height) || 180, 260) * 0.6, position: 'relative' }}>
+            {c.imageUrl && <img src={c.imageUrl} alt="" className="absolute inset-0 h-full w-full object-cover" />}
+            <div className="absolute inset-0 flex flex-col justify-end p-3" style={{ textAlign: align, color: fg, background: c.imageUrl ? 'linear-gradient(to top, rgba(0,0,0,.6), transparent)' : undefined }}>
+              {title(s) && <div className="text-xs font-extrabold">{title(s)}</div>}
+              {s.subtitle && <div className="text-[10px] opacity-90">{s.subtitle}</div>}
+              {c.ctaText && c.linkType !== 'none' && <div><span className="mt-1 inline-block rounded px-2 py-0.5 text-[10px] font-bold" style={{ background: fg, color: st.backgroundColor || primary }}>{c.ctaText}</span></div>}
+            </div>
+          </div>
+        );
+      }
+      case 'text': {
+        // Plain-text preview: markup is rendered by the app after server-side sanitizing.
+        const plain = new DOMParser().parseFromString(s.content?.html || '', 'text/html').body.textContent || '';
+        return (
+          <div className="mt-3 px-3" style={{ color: s.style?.textColor || undefined, textAlign: { start: 'left', center: 'center', end: 'right' }[s.style?.textAlign || 'start'] }}>
+            {title(s) && <div className="mb-1 text-xs font-bold">{title(s)}</div>}
+            <div className="line-clamp-4 text-[10px] opacity-80">{plain}</div>
+          </div>
+        );
+      }
+      case 'spacer':
+        return <div style={{ height: Math.min(Number(s.style?.height) || 16, 120) * 0.6 }} />;
+      case 'pickedDishes': {
+        const n = Math.max(1, Math.min((s.content?.itemIds || []).length || 3, 4));
+        return (
+          <div className="mt-3 px-3">
+            {title(s) && <div className="mb-2 text-xs font-bold">{title(s)}</div>}
+            <div className={s.layout === 'grid' ? 'grid grid-cols-2 gap-2' : s.layout === 'list' ? 'space-y-2' : 'flex gap-2 overflow-hidden'}>
+              {Array.from({ length: n }, (_, i) => (
+                <div key={i} className={s.layout === 'list' ? 'flex items-center gap-2' : s.layout === 'carousel' ? 'w-20 shrink-0' : ''}>
+                  <div className={s.layout === 'list' ? 'h-10 w-10 shrink-0' : 'h-14'} style={card} />
+                  <div className="flex-1">
+                    <div className="mt-1 h-2 w-3/4 rounded" style={{ background: text, opacity: 0.6 }} />
+                    <div className="mt-1 h-2 w-1/3 rounded" style={{ background: primary, opacity: 0.7 }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      }
       default:
         return (
           <div className="mt-3 px-3">
@@ -85,7 +132,11 @@ export default function LivePreview({ theme, layout, branding, banners, categori
           {th.appIconUrl ? <img src={th.appIconUrl} alt="" className="h-6 w-6 rounded" /> : <div className="h-6 w-6 rounded" style={{ background: primary }} />}
           <div className="text-sm font-extrabold" style={{ color: primary }}>{br.appName}</div>
         </div>
-        {sections.map((s) => <div key={s.id}>{renderSection(s)}</div>)}
+        {sections.map((s) => (
+          <div key={s.id} style={{ background: s.type !== 'promo' ? s.style?.backgroundColor || undefined : undefined, paddingTop: (Number(s.style?.paddingVertical) || 0) * 0.6, paddingBottom: (Number(s.style?.paddingVertical) || 0) * 0.6 }}>
+            {renderSection(s)}
+          </div>
+        ))}
         <div className="sticky bottom-0 mt-4 flex justify-around border-t py-2 text-[10px]" style={{ background: bg, borderColor: surface }}>
           <span style={{ color: primary }}>● {t('nav.home')}</span>
           <span>{t('nav.search')}</span>

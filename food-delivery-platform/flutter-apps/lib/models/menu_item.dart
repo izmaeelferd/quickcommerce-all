@@ -107,3 +107,22 @@ class MenuCategory {
         toStr(j['_id']), toStr(j['name']), toStr(j['description']), toBool(j['isActive'], true), toInt(j['order']), toInt(j['itemCount'], items.length), items);
   }
 }
+
+/// A dish shown in a custom home section, with the restaurant data needed for the card.
+class PickedDish {
+  final MenuItem item;
+  final String restaurantId;
+  final String restaurantName;
+  final bool restaurantOpen;
+  const PickedDish({required this.item, required this.restaurantId, required this.restaurantName, required this.restaurantOpen});
+
+  factory PickedDish.fromJson(Map<String, dynamic> j) {
+    final r = toMap(j['restaurant']);
+    return PickedDish(
+      item: MenuItem.fromJson(j),
+      restaurantId: toStr(r['_id']),
+      restaurantName: toStr(r['name']),
+      restaurantOpen: toBool(r['isOpen'], true) && toBool(r['acceptingOrders'], true),
+    );
+  }
+}

@@ -2,6 +2,7 @@ const Restaurant = require('../models/Restaurant');
 const MenuCategory = require('../models/MenuCategory');
 const MenuItem = require('../models/MenuItem');
 const { asyncHandler, ok, ApiError, pick } = require('../utils/helpers');
+const { parseIdList, orderByIds } = require('../utils/idList');
 
 const ITEM_FIELDS = ['category', 'name', 'description', 'price', 'discountPrice', 'image', 'isVeg', 'isAvailable', 'isBestseller', 'spiceLevel', 'addOns', 'tags', 'order'];
 
@@ -63,6 +64,22 @@ const getItem = asyncHandler(async (req, res) => {
   return ok(res, item);
 });
 
+/**
+ * Public: hand-picked dishes for custom home sections (`?ids=a,b,c`, max 50).
+ * Returns only available items from approved restaurants, in the requested order,
+ * with the restaurant name and open state needed to render a dish card.
+ */
+const listPublicItems = asyncHandler(async (req, res) => {
+  const ids = parseIdList(req.query.ids);
+  if (!ids) return ok(res, []);
+  const items = await MenuItem.find({ _id: { $in: ids }, isAvailable: true })
+    .select('name description price discountPrice image isVeg isBestseller spiceLevel restaurant category')
+    .populate({ path: 'restaurant', select: 'name slug isOpen acceptingOrders status logo', match: { status: 'approved' } })
+    .lean();
+  const visible = items.filter((i) => i.restaurant);
+  return ok(res, orderByIds(visible, ids));
+});
+
 const createItem = asyncHandler(async (req, res) => {
   const r = await resolveRestaurant(req);
   if (!(await MenuCategory.exists({ _id: req.body.category, restaurant: r._id }))) throw new ApiError(400, 'menu.categoryNotFound');
@@ -104,6 +121,7 @@ const updateAddOns = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
+  listPublicItems,
   listCategories,
   createCategory,
   updateCategory,

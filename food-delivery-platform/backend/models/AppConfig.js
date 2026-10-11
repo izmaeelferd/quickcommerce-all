@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const { SECTION_TYPES } = require('../utils/layoutSections');
 
 const { Schema } = mongoose;
 
@@ -8,7 +9,7 @@ const homeSectionSchema = new Schema(
     type: {
       type: String,
       required: true,
-      enum: ['banner', 'categories', 'search', 'restaurants', 'offers', 'cuisines', 'featured', 'topRated', 'nearby', 'reorder', 'custom'],
+      enum: SECTION_TYPES,
     },
     enabled: { type: Boolean, default: true },
     order: { type: Number, default: 0 },
@@ -20,6 +21,8 @@ const homeSectionSchema = new Schema(
     limit: { type: Number, default: 10 },
     filter: { type: Schema.Types.Mixed, default: {} },
     style: { type: Schema.Types.Mixed, default: {} },
+    // Type-specific data for custom content sections (promo, pickedRestaurants, pickedDishes, text).
+    content: { type: Schema.Types.Mixed, default: {} },
   },
   { _id: false }
 );

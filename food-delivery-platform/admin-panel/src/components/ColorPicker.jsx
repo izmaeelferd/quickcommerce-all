@@ -7,7 +7,7 @@ export default function ColorPicker({ label, value, onChange }) {
       {label && <label className="label">{label}</label>}
       <div className="flex items-center gap-2">
         <input type="color" value={valid ? value : '#000000'} onChange={(e) => onChange(e.target.value.toUpperCase())} className="h-10 w-12 cursor-pointer rounded-input border border-content/15 bg-transparent p-1" />
-        <input className={`input font-mono ${valid ? '' : 'border-danger'}`} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="#RRGGBB" />
+        <input className={`input font-mono ${valid || !value ? '' : 'border-danger'}`} value={value || ''} onChange={(e) => onChange(e.target.value)} placeholder="#RRGGBB" />
       </div>
     </div>
   );

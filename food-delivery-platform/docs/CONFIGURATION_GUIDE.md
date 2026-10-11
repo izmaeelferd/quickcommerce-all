@@ -44,6 +44,16 @@ Nothing a user sees is compiled into an app. Colors, texts, layout, feature visi
 | `cuisines` | Cuisine tiles | `layout`, `limit` |
 | `offers` | Coupons with `showInOffers` | hidden when `features.coupons` is off |
 | `restaurants`, `featured`, `topRated`, `nearby`, `custom` | Restaurant lists | `layout` list/grid/carousel, `limit`, `filter.cuisine/category/veg/minRating/sort/featured` |
+| `promo` | Promotional card with optional image and button | `content.imageUrl`, `content.ctaText`, `content.linkType` (none/restaurant/category/cuisine/url/offers), `content.linkValue`, `style.backgroundColor/textColor/textAlign/height` |
+| `pickedRestaurants` | Restaurants chosen one by one, in the admin's order | `content.restaurantIds` (max 50), `layout` |
+| `pickedDishes` | Dishes from any restaurant; tapping opens the restaurant | `content.itemIds` (max 50), `layout`, `columns` |
+| `text` | Rich-text announcement | `content.html` (sanitized server-side), `style.textColor/textAlign` |
+| `spacer` | Empty space between sections | `style.height` |
+
+Every section also accepts `style.backgroundColor` (`#RGB` or `#RRGGBB`) and `style.paddingVertical`.
+In the Admin Panel these are under **Home layout builder → + Add section → Custom content**; nothing about them is coded into the app.
+
+**Validation.** `PUT /admin/config/layout` rebuilds every section from an allow-list (`backend/utils/layoutSections.js`): unknown keys are dropped, numbers are clamped, colors must be hex, links must be `http(s)` or a valid id, and `text` HTML keeps formatting tags only (no scripts, event handlers or `javascript:` links). An invalid section is rejected with `422 config.invalidSection` and the field that failed.
 
 Unknown types are ignored by older app builds, so new section types can be introduced safely.
 

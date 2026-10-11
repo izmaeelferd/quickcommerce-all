@@ -6,6 +6,7 @@ const Review = require('../models/Review');
 const Coupon = require('../models/Coupon');
 const { getConfig } = require('../utils/configCache');
 const { asyncHandler, ok, ApiError, pick, paginate, paged, escapeRegex } = require('../utils/helpers');
+const { parseIdList, orderByIds } = require('../utils/idList');
 
 const EDITABLE = [
   'name', 'description', 'logo', 'coverImage', 'images', 'cuisines', 'categories', 'phone', 'email', 'address',
@@ -39,6 +40,13 @@ const listRestaurants = asyncHandler(async (req, res) => {
   if (minRating) filter.rating = { $gte: Number(minRating) };
   if (featured === 'true') filter.isFeatured = true;
   if (maxPriceForTwo) filter.priceForTwo = { $lte: Number(maxPriceForTwo) };
+  // Hand-picked restaurants (custom home sections): results keep the admin's order unless a sort is requested.
+  const pickedIds = parseIdList(req.query.ids);
+  if (pickedIds) {
+    filter._id = { $in: pickedIds.map((i) => new mongoose.Types.ObjectId(i)) };
+    p.limit = Math.min(p.limit, pickedIds.length);
+  }
+  const keepPickedOrder = (list) => (pickedIds && !sort ? orderByIds(list, pickedIds) : list);
 
   const hasGeo = lat != null && lng != null && lat !== '' && lng !== '';
   const radiusKm = Number(req.query.radiusKm) || cfg.businessRules.radiusKm;
@@ -67,14 +75,14 @@ const listRestaurants = asyncHandler(async (req, res) => {
     ];
     const [agg] = await Restaurant.aggregate(pipeline);
     const items = agg.items.map((r) => ({ ...withOpenFlag(r), distanceKm: Math.round((r.distanceMeters / 1000) * 10) / 10 }));
-    return ok(res, paged(items, agg.total[0] ? agg.total[0].n : 0, p));
+    return ok(res, paged(keepPickedOrder(items), agg.total[0] ? agg.total[0].n : 0, p));
   }
 
   const [items, total] = await Promise.all([
     Restaurant.find(filter).sort(sortMap[sort] || { isFeatured: -1, rating: -1 }).skip(p.skip).limit(p.limit),
     Restaurant.countDocuments(filter),
   ]);
-  return ok(res, paged(items.map(withOpenFlag), total, p));
+  return ok(res, paged(keepPickedOrder(items.map(withOpenFlag)), total, p));
 });
 
 const getRestaurant = asyncHandler(async (req, res) => {

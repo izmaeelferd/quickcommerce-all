@@ -10,6 +10,7 @@ class ApiService {
   // ---------- Restaurants ----------
   Future<Map<String, dynamic>> restaurants(Map<String, dynamic> query) async => toMap(await _api.get('/restaurants', query: query));
   Future<Map<String, dynamic>> restaurant(String id) async => toMap(await _api.get('/restaurants/$id'));
+  Future<dynamic> publicItems(String ids) async => _api.get('/menu/public/items', query: {'ids': ids});
   Future<Map<String, dynamic>> menu(String id, {bool vegOnly = false, String? q}) async =>
       toMap(await _api.get('/restaurants/$id/menu', query: {'veg': vegOnly ? 'true' : null, 'q': q}));
   Future<Map<String, dynamic>> reviews(String restaurantId, {int page = 1}) async =>

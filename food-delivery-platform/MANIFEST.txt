@@ -20,19 +20,20 @@
         67  admin-panel/postcss.config.js
       4124  admin-panel/src/App.jsx
       2521  admin-panel/src/components/Charts.jsx
-       691  admin-panel/src/components/ColorPicker.jsx
+       701  admin-panel/src/components/ColorPicker.jsx
       2295  admin-panel/src/components/DataTable.jsx
       1447  admin-panel/src/components/DragDropList.jsx
       1223  admin-panel/src/components/Field.jsx
-      5970  admin-panel/src/components/Icon.jsx
+      6242  admin-panel/src/components/Icon.jsx
       1888  admin-panel/src/components/ImageUpload.jsx
        545  admin-panel/src/components/Layout.jsx
-      5471  admin-panel/src/components/LivePreview.jsx
+      8838  admin-panel/src/components/LivePreview.jsx
       1882  admin-panel/src/components/Modal.jsx
       2984  admin-panel/src/components/Navbar.jsx
        410  admin-panel/src/components/PageHeader.jsx
        576  admin-panel/src/components/ProtectedRoute.jsx
       2596  admin-panel/src/components/RichTextEditor.jsx
+      8762  admin-panel/src/components/SectionPickers.jsx
       4647  admin-panel/src/components/Sidebar.jsx
        741  admin-panel/src/components/StatCard.jsx
        855  admin-panel/src/components/StatusBadge.jsx
@@ -53,7 +54,7 @@
       4765  admin-panel/src/pages/DeliveryPartners.jsx
       1831  admin-panel/src/pages/FeatureFlags.jsx
       9543  admin-panel/src/pages/LanguageManager.jsx
-      8316  admin-panel/src/pages/LayoutBuilder.jsx
+     14354  admin-panel/src/pages/LayoutBuilder.jsx
       1566  admin-panel/src/pages/LegalPages.jsx
       2047  admin-panel/src/pages/Login.jsx
       2601  admin-panel/src/pages/Maintenance.jsx
@@ -83,14 +84,14 @@
       3636  backend/config/payments.js
      23717  backend/controllers/adminController.js
      12326  backend/controllers/authController.js
-      9224  backend/controllers/configController.js
+      9056  backend/controllers/configController.js
       4836  backend/controllers/couponController.js
       8070  backend/controllers/deliveryController.js
-      5294  backend/controllers/menuController.js
+      6179  backend/controllers/menuController.js
       4195  backend/controllers/notificationController.js
      18136  backend/controllers/orderController.js
      10299  backend/controllers/paymentController.js
-      8499  backend/controllers/restaurantController.js
+      9006  backend/controllers/restaurantController.js
       4275  backend/controllers/reviewController.js
        743  backend/controllers/uploadController.js
       6226  backend/controllers/userController.js
@@ -103,7 +104,7 @@
        744  backend/middleware/upload.js
      13435  backend/middleware/validation.js
        635  backend/models/AdminRole.js
-      5756  backend/models/AppConfig.js
+      5863  backend/models/AppConfig.js
       1233  backend/models/Banner.js
        567  backend/models/Category.js
       1286  backend/models/Coupon.js
@@ -128,7 +129,7 @@
        774  backend/routes/couponRoutes.js
        979  backend/routes/deliveryRoutes.js
        949  backend/routes/index.js
-      1161  backend/routes/menuRoutes.js
+      1239  backend/routes/menuRoutes.js
        357  backend/routes/notificationRoutes.js
       1111  backend/routes/orderRoutes.js
        633  backend/routes/paymentRoutes.js
@@ -139,18 +140,20 @@
       1673  backend/seeders/placeholderImage.js
       7408  backend/seeders/sampleData.js
       9794  backend/seeders/seedDatabase.js
-     19485  backend/seeders/translations/en-admin.js
-     35073  backend/seeders/translations/en.js
+     20809  backend/seeders/translations/en-admin.js
+     35198  backend/seeders/translations/en.js
      17601  backend/seeders/translations/others.js
       2990  backend/server.js
       5589  backend/sockets/orderTracking.js
-     19925  backend/tests/e2e.js
+     23522  backend/tests/e2e.js
       2609  backend/tests/scheduler.js
          0  backend/uploads/.gitkeep
       1371  backend/utils/configCache.js
       1979  backend/utils/email.js
       2864  backend/utils/helpers.js
       1053  backend/utils/i18n.js
+       921  backend/utils/idList.js
+      8110  backend/utils/layoutSections.js
       1849  backend/utils/notify.js
       8904  backend/utils/orderFlow.js
       3050  backend/utils/pricing.js
@@ -162,9 +165,9 @@
       2552  demo/nginx.conf
       1940  docker-compose.demo.yml
       1469  docker-compose.yml
-     16651  docs/API_DOCUMENTATION.md
+     16959  docs/API_DOCUMENTATION.md
       2179  docs/APP_STORE_DEPLOYMENT.md
-      6767  docs/CONFIGURATION_GUIDE.md
+      8084  docs/CONFIGURATION_GUIDE.md
       7692  docs/DATABASE_SCHEMA.md
       7183  docs/DEPLOYMENT_GUIDE.md
       7844  docs/ENVIRONMENT_SETUP.md
@@ -282,17 +285,17 @@
        622  flutter-apps/lib/models/category.dart
       1284  flutter-apps/lib/models/coupon.dart
       1108  flutter-apps/lib/models/json_utils.dart
-      3810  flutter-apps/lib/models/menu_item.dart
+      4490  flutter-apps/lib/models/menu_item.dart
       5767  flutter-apps/lib/models/order.dart
       3762  flutter-apps/lib/models/restaurant.dart
       1067  flutter-apps/lib/models/review.dart
       1564  flutter-apps/lib/models/user.dart
-      1336  flutter-apps/lib/models/widget_section.dart
+      2507  flutter-apps/lib/models/widget_section.dart
       3133  flutter-apps/lib/providers/auth_provider.dart
       3649  flutter-apps/lib/providers/cart_provider.dart
       3937  flutter-apps/lib/providers/config_provider.dart
       2873  flutter-apps/lib/providers/order_provider.dart
-      4120  flutter-apps/lib/providers/restaurant_provider.dart
+      4724  flutter-apps/lib/providers/restaurant_provider.dart
       9713  flutter-apps/lib/screens/customer/address_screens.dart
      14744  flutter-apps/lib/screens/customer/cart_screen.dart
       6582  flutter-apps/lib/screens/customer/customer_shell.dart
@@ -321,7 +324,7 @@
      16016  flutter-apps/lib/screens/vendor/vendor_order_screens.dart
      14817  flutter-apps/lib/screens/vendor/vendor_settings_screens.dart
       2027  flutter-apps/lib/screens/vendor/vendor_shell.dart
-      8546  flutter-apps/lib/services/api_service.dart
+      8650  flutter-apps/lib/services/api_service.dart
       3740  flutter-apps/lib/services/auth_service.dart
       1450  flutter-apps/lib/services/config_service.dart
       2463  flutter-apps/lib/services/location_service.dart
@@ -337,13 +340,15 @@
       1629  flutter-apps/lib/widgets/common/map_or_fallback.dart
       3695  flutter-apps/lib/widgets/common/states.dart
        897  flutter-apps/lib/widgets/common/status_chip.dart
-      5044  flutter-apps/lib/widgets/dynamic/banner_widget.dart
+      4443  flutter-apps/lib/widgets/dynamic/banner_widget.dart
       2510  flutter-apps/lib/widgets/dynamic/category_grid.dart
       2476  flutter-apps/lib/widgets/dynamic/cuisine_row.dart
+     13368  flutter-apps/lib/widgets/dynamic/custom_sections.dart
       4628  flutter-apps/lib/widgets/dynamic/offer_card.dart
       3283  flutter-apps/lib/widgets/dynamic/restaurant_card.dart
       2173  flutter-apps/lib/widgets/dynamic/restaurant_section.dart
-      3163  flutter-apps/lib/widgets/dynamic/section_renderer.dart
+      1151  flutter-apps/lib/widgets/dynamic/section_link.dart
+      3693  flutter-apps/lib/widgets/dynamic/section_renderer.dart
      40745  flutter-apps/pubspec.lock
        995  flutter-apps/pubspec.yaml
       2103  flutter-apps/test/models_test.dart
@@ -370,7 +375,7 @@
       2295  vendor-dashboard/src/components/DataTable.jsx
       1447  vendor-dashboard/src/components/DragDropList.jsx
       1223  vendor-dashboard/src/components/Field.jsx
-      5970  vendor-dashboard/src/components/Icon.jsx
+      6242  vendor-dashboard/src/components/Icon.jsx
       1889  vendor-dashboard/src/components/ImageUpload.jsx
       1336  vendor-dashboard/src/components/Layout.jsx
       1882  vendor-dashboard/src/components/Modal.jsx

@@ -9,11 +9,29 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import useConfigSection from '../utils/useConfigSection';
 import SaveBar from './_SaveBar.jsx';
 import Icon from '../components/Icon.jsx';
+import ImageUpload from '../components/ImageUpload.jsx';
+import ColorPicker from '../components/ColorPicker.jsx';
+import RichTextEditor from '../components/RichTextEditor.jsx';
+import { RestaurantPicker, DishPicker } from '../components/SectionPickers.jsx';
 
-const TYPES = ['banner', 'categories', 'search', 'restaurants', 'offers', 'cuisines', 'featured', 'topRated', 'nearby', 'custom'];
+const STANDARD_TYPES = ['banner', 'categories', 'search', 'restaurants', 'offers', 'cuisines', 'featured', 'topRated', 'nearby', 'custom'];
+const CUSTOM_TYPES = ['promo', 'pickedRestaurants', 'pickedDishes', 'text', 'spacer'];
+const TYPES = [...STANDARD_TYPES, ...CUSTOM_TYPES];
+const LINK_TYPES = ['none', 'restaurant', 'category', 'cuisine', 'url', 'offers'];
+const ALIGNS = ['start', 'center', 'end'];
+/** Section types whose content is a list that uses layout / columns / limit. */
+const LIST_TYPES = ['categories', 'cuisines', 'offers', 'restaurants', 'featured', 'topRated', 'nearby', 'custom', 'pickedRestaurants', 'pickedDishes'];
+/** Sensible starting values when an admin adds a custom section. */
+const CUSTOM_DEFAULTS = {
+  promo: { layout: 'list', content: { imageUrl: '', ctaText: '', linkType: 'none', linkValue: '' }, style: { height: 180, textAlign: 'start' } },
+  pickedRestaurants: { layout: 'carousel', content: { restaurantIds: [] } },
+  pickedDishes: { layout: 'carousel', content: { itemIds: [] } },
+  text: { layout: 'list', content: { html: '' }, style: { textAlign: 'start' } },
+  spacer: { layout: 'list', title: '', style: { height: 16 } },
+};
 const LAYOUTS = ['grid', 'list', 'carousel'];
 const SORTS = ['', 'rating', 'deliveryTime', 'priceLow', 'priceHigh', 'popular', 'newest'];
-const ICONS = { banner: 'image', categories: 'grid', search: 'search', restaurants: 'store', offers: 'tag', cuisines: 'utensils', featured: 'star', topRated: 'award', nearby: 'pin', custom: 'layout' };
+const ICONS = { banner: 'image', categories: 'grid', search: 'search', restaurants: 'store', offers: 'tag', cuisines: 'utensils', featured: 'star', topRated: 'award', nearby: 'pin', custom: 'list', promo: 'megaphone', pickedRestaurants: 'store', pickedDishes: 'utensils', text: 'document', spacer: 'spacing' };
 
 export default function LayoutBuilder() {
   const { t, config } = useConfig();
@@ -25,7 +43,8 @@ export default function LayoutBuilder() {
   const update = (id, patch) => setDraft(draft.map((s) => (s.id === id ? { ...s, ...patch } : s)));
   const remove = (id) => reorder(draft.filter((s) => s.id !== id));
   const add = (type) => {
-    const s = { id: `sec_${type}_${Date.now()}`, type, enabled: true, order: draft.length + 1, title: t(`section.${type}`), titleKey: '', layout: 'list', columns: 2, limit: 10, filter: {}, style: {} };
+    const base = { id: `sec_${type}_${Date.now()}`, type, enabled: true, order: draft.length + 1, title: t(`section.${type}`), titleKey: '', subtitle: '', layout: 'list', columns: 2, limit: 10, filter: {}, style: {}, content: {} };
+    const s = { ...base, ...(CUSTOM_DEFAULTS[type] || {}) };
     setDraft([...draft, s]);
     setEditing(s);
   };
@@ -41,7 +60,12 @@ export default function LayoutBuilder() {
         actions={
           <select className="input w-auto" value="" onChange={(e) => e.target.value && add(e.target.value)}>
             <option value="">{t('admin.addSection')}</option>
-            {TYPES.map((ty) => <option key={ty} value={ty}>{t(`section.${ty}`)}</option>)}
+            <optgroup label={t('admin.sectionGroupStandard')}>
+              {STANDARD_TYPES.map((ty) => <option key={ty} value={ty}>{t(`section.${ty}`)}</option>)}
+            </optgroup>
+            <optgroup label={t('admin.sectionGroupCustom')}>
+              {CUSTOM_TYPES.map((ty) => <option key={ty} value={ty}>{t(`section.${ty}`)}</option>)}
+            </optgroup>
           </select>
         }
       />
@@ -55,11 +79,11 @@ export default function LayoutBuilder() {
               <span className="flex h-10 w-10 items-center justify-center rounded-btn bg-primary/10 text-primary"><Icon name={ICONS[s.type] || 'layout'} className="h-5 w-5" /></span>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-semibold">{s.title || t(`section.${s.type}`)}</div>
-                <div className="text-xs text-content/60">{t(`section.${s.type}`)} · {t(`layout.${s.layout}`)} · #{i + 1}</div>
+                <div className="text-xs text-content/60">{t(`section.${s.type}`)}{LIST_TYPES.includes(s.type) ? ` · ${t(`layout.${s.layout}`)}` : ''} · #{i + 1}</div>
               </div>
               <div className="flex items-center gap-1">
-                <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveUp} disabled={i === 0}>↑</button>
-                <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveDown} disabled={i === sorted.length - 1}>↓</button>
+                <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveUp} disabled={i === 0}><Icon name="arrowUp" className="h-4 w-4" title={t('admin.moveUp')} /></button>
+                <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveDown} disabled={i === sorted.length - 1}><Icon name="arrowDown" className="h-4 w-4" title={t('admin.moveDown')} /></button>
                 <button type="button" className="btn-ghost px-2 py-1" onClick={() => setEditing(s)}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
                 <button type="button" className="btn-ghost px-2 py-1 text-danger" onClick={() => remove(s.id)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
               </div>
@@ -79,20 +103,34 @@ export default function LayoutBuilder() {
           const s = draft.find((x) => x.id === editing.id) || editing;
           const u = (patch) => update(s.id, patch);
           const isRestaurantList = ['restaurants', 'featured', 'topRated', 'nearby', 'custom'].includes(s.type);
+          const isList = LIST_TYPES.includes(s.type);
+          const content = s.content || {};
+          const style = s.style || {};
+          const setContent = (patch) => u({ content: { ...content, ...patch } });
+          const setStyle = (patch) => u({ style: { ...style, ...patch } });
+          const linkOptions = () => {
+            if (content.linkType === 'category') return categories.map((c) => ({ value: c._id, label: c.name }));
+            if (content.linkType === 'cuisine') return cuisines.map((c) => ({ value: c.name, label: c.name }));
+            return null;
+          };
           return (
             <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField label={t('admin.sectionType')} value={s.type} onChange={(v) => u({ type: v })} options={TYPES.map((x) => ({ value: x, label: t(`section.${x}`) }))} />
-              <SelectField label={t('admin.layoutStyle')} value={s.layout} onChange={(v) => u({ layout: v })} options={LAYOUTS.map((x) => ({ value: x, label: t(`layout.${x}`) }))} />
-              <TextField label={t('admin.sectionTitle')} value={s.title} onChange={(v) => u({ title: v })} />
-              <TextField label={t('admin.sectionTitleKey')} hint={t('admin.sectionTitleKeyHint')} value={s.titleKey} onChange={(v) => u({ titleKey: v })} />
-              <TextField label={t('admin.sectionSubtitle')} value={s.subtitle} onChange={(v) => u({ subtitle: v })} />
-              <TextField label={t('admin.itemLimit')} type="number" value={s.limit} onChange={(v) => u({ limit: v })} />
-              {s.layout === 'grid' && <TextField label={t('admin.columns')} type="number" value={s.columns} onChange={(v) => u({ columns: v })} />}
+              <SelectField label={t('admin.sectionType')} value={s.type} onChange={(v) => u({ type: v, ...(CUSTOM_DEFAULTS[v] ? { content: CUSTOM_DEFAULTS[v].content || {}, style: { ...style, ...(CUSTOM_DEFAULTS[v].style || {}) } } : {}) })} options={TYPES.map((x) => ({ value: x, label: t(`section.${x}`) }))} />
+              {isList && <SelectField label={t('admin.layoutStyle')} value={s.layout} onChange={(v) => u({ layout: v })} options={LAYOUTS.map((x) => ({ value: x, label: t(`layout.${x}`) }))} />}
+              {s.type !== 'spacer' && (
+                <>
+                  <TextField label={t('admin.sectionTitle')} value={s.title} onChange={(v) => u({ title: v })} />
+                  <TextField label={t('admin.sectionTitleKey')} hint={t('admin.sectionTitleKeyHint')} value={s.titleKey} onChange={(v) => u({ titleKey: v })} />
+                  <TextField label={t('admin.sectionSubtitle')} value={s.subtitle} onChange={(v) => u({ subtitle: v })} />
+                </>
+              )}
+              {isList && !['pickedRestaurants', 'pickedDishes'].includes(s.type) && <TextField label={t('admin.itemLimit')} type="number" value={s.limit} onChange={(v) => u({ limit: v })} />}
+              {isList && s.layout === 'grid' && <TextField label={t('admin.columns')} type="number" value={s.columns} onChange={(v) => u({ columns: v })} />}
               {s.type === 'banner' && (
                 <>
                   <SelectField label={t('banner.placement')} value={s.filter?.placement || 'home'} onChange={(v) => u({ filter: { ...s.filter, placement: v } })} options={['home', 'offers', 'restaurant', 'cart'].map((x) => ({ value: x, label: t(`placement.${x}`) }))} />
-                  <TextField label={t('admin.autoplaySeconds')} type="number" value={s.style?.autoplaySeconds ?? 4} onChange={(v) => u({ style: { ...s.style, autoplaySeconds: v } })} />
-                  <TextField label={t('admin.bannerHeight')} type="number" value={s.style?.height ?? 160} onChange={(v) => u({ style: { ...s.style, height: v } })} />
+                  <TextField label={t('admin.autoplaySeconds')} type="number" value={style.autoplaySeconds ?? 4} onChange={(v) => setStyle({ autoplaySeconds: v })} />
+                  <TextField label={t('admin.bannerHeight')} type="number" value={style.height ?? 160} onChange={(v) => setStyle({ height: v })} />
                 </>
               )}
               {isRestaurantList && (
@@ -107,6 +145,32 @@ export default function LayoutBuilder() {
                   </div>
                 </>
               )}
+
+              {s.type === 'promo' && (
+                <>
+                  <div className="sm:col-span-2"><ImageUpload label={t('admin.promoImage')} value={content.imageUrl} onChange={(v) => setContent({ imageUrl: v })} folder="layout" /></div>
+                  <SelectField label={t('admin.onTap')} value={content.linkType || 'none'} onChange={(v) => setContent({ linkType: v, linkValue: '' })} options={LINK_TYPES.map((x) => ({ value: x, label: t(`link.${x}`) }))} />
+                  {content.linkType === 'restaurant' && <div className="sm:col-span-2"><RestaurantPicker value={content.linkValue ? [content.linkValue] : []} onChange={(ids) => setContent({ linkValue: ids[ids.length - 1] || '' })} /></div>}
+                  {linkOptions() && <SelectField label={t('admin.linkTarget')} value={content.linkValue || ''} onChange={(v) => setContent({ linkValue: v })} options={[{ value: '', label: '-' }, ...linkOptions()]} />}
+                  {content.linkType === 'url' && <TextField label={t('admin.linkUrl')} value={content.linkValue || ''} onChange={(v) => setContent({ linkValue: v })} />}
+                  {content.linkType && content.linkType !== 'none' && <TextField label={t('admin.ctaText')} value={content.ctaText || ''} onChange={(v) => setContent({ ctaText: v })} />}
+                </>
+              )}
+              {s.type === 'pickedRestaurants' && <div className="sm:col-span-2"><RestaurantPicker value={content.restaurantIds || []} onChange={(ids) => setContent({ restaurantIds: ids })} /></div>}
+              {s.type === 'pickedDishes' && <div className="sm:col-span-2"><DishPicker value={content.itemIds || []} onChange={(ids) => setContent({ itemIds: ids })} /></div>}
+              {s.type === 'text' && (
+                <div className="sm:col-span-2">
+                  <label className="label">{t('admin.textContent')}</label>
+                  <RichTextEditor value={content.html || ''} onChange={(v) => setContent({ html: v })} minHeight={180} />
+                </div>
+              )}
+
+              <div className="sm:col-span-2 border-t border-content/10 pt-3 text-sm font-semibold">{t('admin.sectionStyle')}</div>
+              {s.type !== 'spacer' && <ColorPicker label={t('admin.backgroundColor')} value={style.backgroundColor || ''} onChange={(v) => setStyle({ backgroundColor: v || undefined })} />}
+              {['promo', 'text'].includes(s.type) && <ColorPicker label={t('admin.textColor')} value={style.textColor || ''} onChange={(v) => setStyle({ textColor: v || undefined })} />}
+              {['promo', 'text'].includes(s.type) && <SelectField label={t('admin.textAlign')} value={style.textAlign || 'start'} onChange={(v) => setStyle({ textAlign: v })} options={ALIGNS.map((x) => ({ value: x, label: t(`align.${x}`) }))} />}
+              {['promo', 'spacer'].includes(s.type) && <TextField label={t('admin.sectionHeight')} type="number" value={style.height ?? (s.type === 'spacer' ? 16 : 180)} onChange={(v) => setStyle({ height: v })} />}
+              {s.type !== 'spacer' && <TextField label={t('admin.verticalPadding')} type="number" value={style.paddingVertical ?? 0} onChange={(v) => setStyle({ paddingVertical: v })} />}
             </div>
           );
         })()}

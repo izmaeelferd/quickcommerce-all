@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/routes.dart';
-import '../../core/translation_manager.dart';
 import '../../models/widget_section.dart';
 import '../../providers/config_provider.dart';
 import '../../providers/restaurant_provider.dart';
@@ -11,6 +10,7 @@ import '../common/inputs.dart';
 import 'banner_widget.dart';
 import 'category_grid.dart';
 import 'cuisine_row.dart';
+import 'custom_sections.dart';
 import 'offer_card.dart';
 import 'restaurant_section.dart';
 
@@ -20,14 +20,11 @@ class SectionRenderer extends ConsumerWidget {
   final WidgetSection section;
   const SectionRenderer({super.key, required this.section});
 
-  String _title() {
-    if (section.titleKey.isNotEmpty && TranslationManager.instance.has(section.titleKey)) return tr(section.titleKey);
-    return section.title;
-  }
-
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final title = _title();
+  Widget build(BuildContext context, WidgetRef ref) => StyledSection(section: section, child: _content(context, ref));
+
+  Widget _content(BuildContext context, WidgetRef ref) {
+    final title = sectionTitle(section);
     switch (section.type) {
       case 'search':
         return Padding(
@@ -70,6 +67,16 @@ class SectionRenderer extends ConsumerWidget {
           ),
           RestaurantSection(section: section, query: query),
         ]);
+      case 'promo':
+        return PromoSection(section: section, title: title);
+      case 'pickedRestaurants':
+        return TitledSection(title: title, subtitle: section.subtitle, child: PickedRestaurantsSection(section: section));
+      case 'pickedDishes':
+        return TitledSection(title: title, subtitle: section.subtitle, child: PickedDishesSection(section: section));
+      case 'text':
+        return TitledSection(title: title, subtitle: section.subtitle, child: TextSection(section: section));
+      case 'spacer':
+        return SpacerSection(section: section);
       default:
         return const SizedBox.shrink();
     }

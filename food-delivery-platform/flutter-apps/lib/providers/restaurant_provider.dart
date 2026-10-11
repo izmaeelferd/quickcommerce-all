@@ -18,8 +18,11 @@ class RestaurantQuery {
   final bool featured;
   final int limit;
 
+  /// Comma-separated hand-picked restaurant ids (custom sections); empty for normal lists.
+  final String ids;
+
   const RestaurantQuery(
-      {this.q = '', this.cuisine = '', this.category = '', this.vegOnly = false, this.sort = '', this.minRating, this.featured = false, this.limit = 20});
+      {this.q = '', this.cuisine = '', this.category = '', this.vegOnly = false, this.sort = '', this.minRating, this.featured = false, this.limit = 20, this.ids = ''});
 
   RestaurantQuery copyWith(
           {String? q, String? cuisine, String? category, bool? vegOnly, String? sort, double? minRating, bool clearRating = false, bool? featured}) =>
@@ -32,6 +35,7 @@ class RestaurantQuery {
         minRating: clearRating ? null : (minRating ?? this.minRating),
         featured: featured ?? this.featured,
         limit: limit,
+        ids: ids,
       );
 
   /// Builds a query from a homeLayout section's `filter` map.
@@ -55,10 +59,11 @@ class RestaurantQuery {
       other.sort == sort &&
       other.minRating == minRating &&
       other.featured == featured &&
-      other.limit == limit;
+      other.limit == limit &&
+      other.ids == ids;
 
   @override
-  int get hashCode => Object.hash(q, cuisine, category, vegOnly, sort, minRating, featured, limit);
+  int get hashCode => Object.hash(q, cuisine, category, vegOnly, sort, minRating, featured, limit, ids);
 }
 
 final restaurantListProvider = FutureProvider.autoDispose.family<List<Restaurant>, RestaurantQuery>((ref, query) async {
@@ -72,6 +77,7 @@ final restaurantListProvider = FutureProvider.autoDispose.family<List<Restaurant
     'minRating': query.minRating,
     'featured': query.featured ? 'true' : null,
     'limit': query.limit,
+    'ids': query.ids.isEmpty ? null : query.ids,
     'lat': pos?.latitude,
     'lng': pos?.longitude,
   });
@@ -104,4 +110,11 @@ final reviewsProvider = FutureProvider.autoDispose.family<List<Review>, String>(
 final favoritesProvider = FutureProvider.autoDispose<List<Restaurant>>((ref) async {
   final list = await ApiService.instance.favorites();
   return list.map((e) => Restaurant.fromJson(toMap(e))).toList();
+});
+
+/// Hand-picked dishes for a custom home section. Key: comma-separated item ids (stable order).
+final pickedDishesProvider = FutureProvider.autoDispose.family<List<PickedDish>, String>((ref, ids) async {
+  if (ids.isEmpty) return const [];
+  final data = await ApiService.instance.publicItems(ids);
+  return toList(data).map((e) => PickedDish.fromJson(toMap(e))).toList();
 });

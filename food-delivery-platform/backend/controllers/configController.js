@@ -7,6 +7,7 @@ const { clearTranslationCache } = require('../utils/i18n');
 const { asyncHandler, ok, ApiError, toDotPaths, isPlainObject } = require('../utils/helpers');
 const env = require('../config/env');
 const payments = require('../config/payments');
+const { normalizeLayout } = require('../utils/layoutSections');
 
 let io = null;
 const attachIo = (socketServer) => {
@@ -63,14 +64,8 @@ const updateOnboarding = sectionUpdater('onboarding');
 const updateAppVersions = sectionUpdater('appVersions');
 
 const updateLayout = asyncHandler(async (req, res) => {
-  const sections = Array.isArray(req.body) ? req.body : req.body.homeLayout;
-  if (!Array.isArray(sections)) throw new ApiError(400, 'config.layoutMustBeArray');
-  const normalized = sections.map((s, i) => ({
-    ...s,
-    id: s.id || `sec_${s.type}_${Date.now()}_${i}`,
-    order: s.order != null ? s.order : i + 1,
-  }));
-  return ok(res, await updateSection(req, 'homeLayout', normalized, { replace: true }), 'config.updated');
+  const sections = normalizeLayout(Array.isArray(req.body) ? req.body : req.body.homeLayout);
+  return ok(res, await updateSection(req, 'homeLayout', sections, { replace: true }), 'config.updated');
 });
 
 const updateLanguages = asyncHandler(async (req, res) => {

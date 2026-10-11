@@ -126,6 +126,50 @@ const login = async (identifier, password, role) => (await call('POST', '/auth/l
     assert.ok(menu.categories.length > 0);
   });
 
+  await step('custom home sections: promo, hand-picked restaurants/dishes and text are validated and served', async () => {
+    const me = await call('GET', '/auth/me', { token: customer });
+    const [lng, lat] = me.user.addresses[0].location.coordinates;
+    const nearby = (await call('GET', `/restaurants?lat=${lat}&lng=${lng}`)).items;
+    const other = nearby.find((r) => r._id !== restaurant._id);
+    const dishes = restaurant.menu.categories.flatMap((c) => c.items).filter((i) => i.isAvailable).slice(0, 2);
+    const custom = [
+      { id: 'e2e_promo', type: 'promo', title: 'Promo', layout: 'list', content: { imageUrl: 'https://example.com/p.jpg', ctaText: 'Order now', linkType: 'url', linkValue: 'https://example.com/x', injected: 1 }, style: { backgroundColor: '#abc', textAlign: 'center', height: 9999 }, evil: true },
+      { id: 'e2e_picked', type: 'pickedRestaurants', title: 'Picked', layout: 'carousel', content: { restaurantIds: [other._id, restaurant._id] } },
+      { id: 'e2e_dishes', type: 'pickedDishes', title: 'Dishes', layout: 'grid', content: { itemIds: dishes.map((d) => d._id).reverse() } },
+      { id: 'e2e_text', type: 'text', title: 'Note', content: { html: '<p onclick="x()">Hello <b>world</b><script>alert(1)</script><a href="javascript:alert(1)">bad</a><a href="https://example.com">good</a></p>' } },
+      { id: 'e2e_spacer', type: 'spacer', style: { height: 24 } },
+    ];
+    const original = cfg.homeLayout;
+    await call('PUT', '/admin/config/layout', { token: admin, body: [...original, ...custom] });
+    const saved = (await call('GET', '/config')).homeLayout;
+    const promo = saved.find((x) => x.id === 'e2e_promo');
+    assert.strictEqual(promo.evil, undefined, 'unknown section keys are dropped');
+    assert.strictEqual(promo.content.injected, undefined, 'unknown content keys are dropped');
+    assert.strictEqual(promo.style.backgroundColor, '#AABBCC', 'short hex is normalized');
+    assert.strictEqual(promo.style.height, 480, 'height is clamped');
+    assert.strictEqual(promo.content.linkValue, 'https://example.com/x');
+    const html = saved.find((x) => x.id === 'e2e_text').content.html;
+    assert.ok(!/script|onclick|javascript:/i.test(html), `html sanitized: ${html}`);
+    assert.ok(html.includes('<b>world</b>') && html.includes('href="https://example.com"'));
+
+    const picked = (await call('GET', `/restaurants?ids=${other._id},${restaurant._id}&lat=${lat}&lng=${lng}`)).items;
+    assert.deepStrictEqual(picked.map((r) => r._id), [other._id, restaurant._id], 'admin order is kept');
+    const items = await call('GET', `/menu/public/items?ids=${dishes.map((d) => d._id).reverse().join(',')}`);
+    assert.deepStrictEqual(items.map((i) => i._id), dishes.map((d) => d._id).reverse());
+    assert.strictEqual(items[0].restaurant.name, restaurant.name);
+
+    const bad = async (section, why) => {
+      const err = await call('PUT', '/admin/config/layout', { token: admin, body: [section] }).catch((e) => e);
+      assert.strictEqual(err.status, 422, why);
+    };
+    await bad({ type: 'promo', content: { linkType: 'url', linkValue: 'javascript:alert(1)' } }, 'non-http link rejected');
+    await bad({ type: 'promo', style: { backgroundColor: 'red' } }, 'non-hex color rejected');
+    await bad({ type: 'pickedDishes', content: { itemIds: ['123'] } }, 'invalid id rejected');
+    await bad({ type: 'unknownType' }, 'unknown type rejected');
+    assert.strictEqual((await call('GET', '/restaurants?ids=zzz', { raw: true })).status, 422);
+    await call('PUT', '/admin/config/layout', { token: admin, body: original });
+  });
+
   let body;
   await step('quote is computed from business rules incl. coupon + tip', async () => {
     const me = await call('GET', '/auth/me', { token: customer });

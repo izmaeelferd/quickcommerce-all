@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/dynamic_theme.dart';
-import '../../core/routes.dart';
 import '../../models/banner.dart';
 import '../../models/widget_section.dart';
 import '../../providers/config_provider.dart';
 import '../common/cards.dart';
+import 'section_link.dart';
 
 /// Auto-playing banner carousel; banners, order and schedule are managed in Admin → Banner Manager.
 class BannerWidget extends ConsumerStatefulWidget {
@@ -50,19 +49,7 @@ class _BannerWidgetState extends ConsumerState<BannerWidget> {
 
   Future<void> _open(BannerModel b) async {
     ref.read(configProvider.notifier).trackBanner(b.id);
-    switch (b.linkType) {
-      case 'restaurant':
-        Navigator.pushNamed(context, Routes.restaurant, arguments: b.linkValue);
-      case 'category':
-        Navigator.pushNamed(context, Routes.search, arguments: {'category': b.linkValue, 'title': b.title});
-      case 'cuisine':
-        Navigator.pushNamed(context, Routes.search, arguments: {'cuisine': b.linkValue, 'title': b.title});
-      case 'coupon':
-        Navigator.pushNamed(context, Routes.offers);
-      case 'url':
-        final uri = Uri.tryParse(b.linkValue);
-        if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
-    }
+    await openSectionLink(context, b.linkType, b.linkValue, title: b.title);
   }
 
   @override

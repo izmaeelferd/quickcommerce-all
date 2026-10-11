@@ -73,7 +73,7 @@ Every config write increments `version`, invalidates the server cache and emits 
 
 | Method | Path | Auth | Description |
 |---|---|---|---|
-| GET | `/restaurants` | optional | Query: `q, lat, lng, radiusKm, cuisine, category, veg, minRating, sort (rating\|distance\|priceLow\|priceHigh\|deliveryTime\|popular\|newest), featured, maxPriceForTwo, page, limit`. With `lat/lng` results are geo-filtered within `businessRules.radiusKm` and include `distanceKm`. Every item has `isOpenNow` |
+| GET | `/restaurants` | optional | Query: `q, lat, lng, radiusKm, cuisine, category, veg, minRating, sort (rating\|distance\|priceLow\|priceHigh\|deliveryTime\|popular\|newest), featured, maxPriceForTwo, ids, page, limit`. `ids` = comma-separated restaurant ids (max 50) for hand-picked sections; results keep that order unless `sort` is given. With `lat/lng` results are geo-filtered within `businessRules.radiusKm` and include `distanceKm`. Every item has `isOpenNow` |
 | GET | `/restaurants/:id` | optional | By id or slug; includes applicable `offers` and `isFavorite` |
 | GET | `/restaurants/:id/menu` | public | `?veg=true&q=` → `{ categories:[{…, items}], recommended }` |
 | GET | `/restaurants/:id/reviews` | public | Paginated |
@@ -83,6 +83,7 @@ Every config write increments `version`, invalidates the server cache and emits 
 | POST | `/restaurants` | vendor/admin | Create (vendors start as `pending`) |
 | PUT / PATCH | `/restaurants/:id`, `/restaurants/:id/status` | vendor owner/admin | Admin may also set `status, commissionPercent, isFeatured` |
 | GET | `/categories?type=category\|cuisine` | public | Platform categories |
+| GET | `/menu/public/items` | public | `?ids=a,b,c` (max 50): available dishes from approved restaurants, in the given order, with `restaurant { name, isOpen, acceptingOrders }` |
 | GET | `/menu/items/:id` | public | Item detail |
 | GET/POST | `/menu/categories` | vendor/admin | Admin passes `?restaurantId=` |
 | PUT | `/menu/categories/reorder` | vendor/admin | `{ ids }` |

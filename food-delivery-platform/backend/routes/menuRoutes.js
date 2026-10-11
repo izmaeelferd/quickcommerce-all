@@ -4,7 +4,8 @@ const { protect } = require('../middleware/auth');
 const { authorize } = require('../middleware/roles');
 const { validate, rules } = require('../middleware/validation');
 
-router.get('/items/:id', c.getItem);
+router.get('/public/items', c.listPublicItems);
+router.get('/items/:id', validate([rules.objectId()]), c.getItem);
 
 router.use(protect, authorize('vendor', 'admin'));
 router.get('/categories', c.listCategories);

@@ -7,7 +7,11 @@ The format is based on [Keep a Changelog 1.1.0](https://keepachangelog.com/en/1.
 ## [Unreleased]
 
 ### Added
+- Custom home sections, configured in Admin Panel -> Home layout builder -> Custom content: promo card (image, text, button link), hand-picked restaurants, hand-picked dishes, rich-text block and spacer. Every section can also set a background color and vertical padding.
+- `GET /api/menu/public/items?ids=` and an `ids` filter on `GET /api/restaurants` for hand-picked sections.
+- Server-side validation of every home section (allow-listed fields, clamped numbers, hex colors, http(s) links, sanitized HTML).
 ### Changed
+- Admin Panel and vendor dashboard use an SVG line-icon set instead of emoji; default brand names are FeastFlow / FeastFlow Partner / FeastFlow Rider.
 ### Deprecated
 ### Removed
 ### Fixed
