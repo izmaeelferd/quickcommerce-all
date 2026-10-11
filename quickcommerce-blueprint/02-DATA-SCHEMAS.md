@@ -94,6 +94,12 @@ BEGIN
   END IF;
 END $$;
 
+-- Migrations run as a migrator login that is a member of app_owner and executes SET ROLE app_owner,
+-- so every table, function and schema below is owned by app_owner (required by the SECURITY DEFINER
+-- trigger functions in sections 10.2 and 16).
+ALTER SCHEMA app OWNER TO app_owner;
+GRANT USAGE, CREATE ON SCHEMA public TO app_owner;
+
 -- 1.4 Helper functions ------------------------------------------------------------
 CREATE OR REPLACE FUNCTION app.current_tenant() RETURNS uuid
 LANGUAGE sql STABLE PARALLEL SAFE AS $$
