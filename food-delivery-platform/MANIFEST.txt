@@ -10,7 +10,7 @@
        514  Dockerfile.admin
        347  Dockerfile.backend
        529  Dockerfile.vendor-dashboard
-      4964  README.md
+      5135  README.md
       4479  TESTING.md
        273  admin-panel/.env.example
        386  admin-panel/index.html
@@ -170,6 +170,7 @@
       8084  docs/CONFIGURATION_GUIDE.md
       7692  docs/DATABASE_SCHEMA.md
       7183  docs/DEPLOYMENT_GUIDE.md
+     37762  docs/ENTERPRISE_MULTI_TENANT_PLAN.md
       7844  docs/ENVIRONMENT_SETUP.md
       7289  docs/FLUTTER_BUILD_GUIDE.md
       2244  docs/PLAY_STORE_DEPLOYMENT.md

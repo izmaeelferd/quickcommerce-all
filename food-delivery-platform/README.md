@@ -69,3 +69,6 @@ cd backend && ADMIN_DEFAULT_PASSWORD="<seeded>" API_URL=http://localhost:5000/ap
 cd backend && npm run test:scheduler
 cd flutter-apps && flutter analyze && flutter test
 ```
+
+## Roadmap
+The plan for turning this into a multi-tenant, multi-region resale package is in [docs/ENTERPRISE_MULTI_TENANT_PLAN.md](docs/ENTERPRISE_MULTI_TENANT_PLAN.md).
