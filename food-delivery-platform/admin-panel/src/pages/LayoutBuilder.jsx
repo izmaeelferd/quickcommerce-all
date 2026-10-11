@@ -8,11 +8,12 @@ import { TextField, SelectField } from '../components/Field.jsx';
 import { useConfig } from '../context/ConfigContext.jsx';
 import useConfigSection from '../utils/useConfigSection';
 import SaveBar from './_SaveBar.jsx';
+import Icon from '../components/Icon.jsx';
 
 const TYPES = ['banner', 'categories', 'search', 'restaurants', 'offers', 'cuisines', 'featured', 'topRated', 'nearby', 'custom'];
 const LAYOUTS = ['grid', 'list', 'carousel'];
 const SORTS = ['', 'rating', 'deliveryTime', 'priceLow', 'priceHigh', 'popular', 'newest'];
-const ICONS = { banner: '🖼️', categories: '🗂️', search: '🔍', restaurants: '🍽️', offers: '🏷️', cuisines: '🍜', featured: '⭐', topRated: '🏆', nearby: '📍', custom: '🧩' };
+const ICONS = { banner: 'image', categories: 'grid', search: 'search', restaurants: 'store', offers: 'tag', cuisines: 'utensils', featured: 'star', topRated: 'award', nearby: 'pin', custom: 'layout' };
 
 export default function LayoutBuilder() {
   const { t, config } = useConfig();
@@ -40,7 +41,7 @@ export default function LayoutBuilder() {
         actions={
           <select className="input w-auto" value="" onChange={(e) => e.target.value && add(e.target.value)}>
             <option value="">{t('admin.addSection')}</option>
-            {TYPES.map((ty) => <option key={ty} value={ty}>{ICONS[ty]} {t(`section.${ty}`)}</option>)}
+            {TYPES.map((ty) => <option key={ty} value={ty}>{t(`section.${ty}`)}</option>)}
           </select>
         }
       />
@@ -51,7 +52,7 @@ export default function LayoutBuilder() {
           renderItem={(s, i, h) => (
             <div className={`card flex items-center gap-4 p-4 ${s.enabled ? '' : 'opacity-60'}`}>
               <span className="cursor-grab select-none text-xl text-content/40" title={t('admin.dragToReorder')}>⋮⋮</span>
-              <span className="text-2xl">{ICONS[s.type]}</span>
+              <span className="flex h-10 w-10 items-center justify-center rounded-btn bg-primary/10 text-primary"><Icon name={ICONS[s.type] || 'layout'} className="h-5 w-5" /></span>
               <div className="min-w-0 flex-1">
                 <div className="truncate font-semibold">{s.title || t(`section.${s.type}`)}</div>
                 <div className="text-xs text-content/60">{t(`section.${s.type}`)} · {t(`layout.${s.layout}`)} · #{i + 1}</div>
@@ -59,8 +60,8 @@ export default function LayoutBuilder() {
               <div className="flex items-center gap-1">
                 <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveUp} disabled={i === 0}>↑</button>
                 <button type="button" className="btn-ghost px-2 py-1" onClick={h.moveDown} disabled={i === sorted.length - 1}>↓</button>
-                <button type="button" className="btn-ghost px-2 py-1" onClick={() => setEditing(s)}>✎</button>
-                <button type="button" className="btn-ghost px-2 py-1 text-danger" onClick={() => remove(s.id)}>🗑</button>
+                <button type="button" className="btn-ghost px-2 py-1" onClick={() => setEditing(s)}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+                <button type="button" className="btn-ghost px-2 py-1 text-danger" onClick={() => remove(s.id)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
               </div>
               <Toggle checked={s.enabled} onChange={(v) => update(s.id, { enabled: v })} />
             </div>

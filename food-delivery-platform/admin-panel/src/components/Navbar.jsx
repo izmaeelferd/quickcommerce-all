@@ -4,6 +4,7 @@ import Modal from './Modal.jsx';
 import { useToast } from './Toast.jsx';
 import { put, errorKey } from '../services/api';
 import { useAuth } from '../context/AuthContext.jsx';
+import Icon from './Icon.jsx';
 
 export default function Navbar({ onMenu }) {
   const { config, t, language, setLanguage, dark, setDark } = useConfig();
@@ -22,7 +23,7 @@ export default function Navbar({ onMenu }) {
   const meta = Object.fromEntries((config?.languageMeta || []).map((l) => [l.code, l]));
   return (
     <header className="sticky top-0 z-20 flex items-center gap-3 border-b border-content/10 bg-background/90 px-4 py-3 backdrop-blur">
-      <button type="button" className="btn-ghost px-2 lg:hidden" onClick={onMenu} aria-label={t('common.menu')}>☰</button>
+      <button type="button" className="btn-ghost px-2 lg:hidden" onClick={onMenu} aria-label={t('common.menu')}><Icon name="menu" className="h-5 w-5" /></button>
       <div className="flex-1" />
       {config?.languages?.length > 1 && (
         <select className="input w-auto" value={language} onChange={(e) => setLanguage(e.target.value)}>
@@ -31,7 +32,7 @@ export default function Navbar({ onMenu }) {
           ))}
         </select>
       )}
-      <button type="button" className="btn-ghost px-3" onClick={() => setDark(!dark)} title={t('settings.theme')}>{dark ? '☀️' : '🌙'}</button>
+      <button type="button" className="btn-ghost px-3" onClick={() => setDark(!dark)} title={t('settings.theme')} aria-label={t('settings.theme')}><Icon name={dark ? 'sun' : 'moon'} className="h-5 w-5" /></button>
       <div className="hidden text-end sm:block">
         <div className="text-sm font-semibold">{user?.name}</div>
         <div className="text-xs text-content/60">{user?.adminRole?.name || t(`role.${user?.role}`)}</div>

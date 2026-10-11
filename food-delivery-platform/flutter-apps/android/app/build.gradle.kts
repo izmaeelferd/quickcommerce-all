@@ -61,17 +61,17 @@ android {
         create("customer") {
             dimension = "app"
             applicationIdSuffix = ".customer"
-            resValue("string", "app_name", prop("CUSTOMER_APP_NAME", "Customer"))
+            resValue("string", "app_name", prop("CUSTOMER_APP_NAME", "FeastFlow"))
         }
         create("vendor") {
             dimension = "app"
             applicationIdSuffix = ".vendor"
-            resValue("string", "app_name", prop("VENDOR_APP_NAME", "Vendor"))
+            resValue("string", "app_name", prop("VENDOR_APP_NAME", "FeastFlow Partner"))
         }
         create("delivery") {
             dimension = "app"
             applicationIdSuffix = ".delivery"
-            resValue("string", "app_name", prop("DELIVERY_APP_NAME", "Delivery"))
+            resValue("string", "app_name", prop("DELIVERY_APP_NAME", "FeastFlow Rider"))
         }
     }
 

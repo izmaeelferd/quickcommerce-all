@@ -6,6 +6,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { get, post, put, del, errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 export default function AdminRoles() {
   const { t } = useConfig();
@@ -39,8 +40,8 @@ export default function AdminRoles() {
                 <div className="text-xs text-content/60">{r.description}</div>
               </div>
               <div className="flex gap-1">
-                <button type="button" className="btn-ghost px-2" onClick={() => setForm(r)}>✎</button>
-                <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(r)}>🗑</button>
+                <button type="button" className="btn-ghost px-2" onClick={() => setForm(r)}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+                <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(r)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
               </div>
             </div>
             <div className="flex flex-wrap gap-1">{r.permissions.map((p) => <span key={p} className="badge bg-primary/10 text-primary">{t(`perm.${p}`)}</span>)}</div>

@@ -82,6 +82,6 @@ module.exports = {
   ...prefix('channel', { push: 'Push', inapp: 'In-app', email: 'Email', sms: 'SMS' }),
   ...prefix('bill', { subtotal: 'Subtotal', discount: 'Discount', deliveryFee: 'Delivery fee', surgeFee: 'Surge fee', packagingFee: 'Packaging', platformFee: 'Platform fee', tax: 'Tax', tip: 'Tip', walletUsed: 'Wallet used', total: 'Total' }),
   'delivery.vehicle': 'Vehicle',
-  'admin.nav.reviews': 'Reviews', 'admin.reviewsSubtitle': 'Moderate customer reviews; hidden reviews do not count toward ratings', 'admin.anyRating': 'Any rating', 'admin.ratingAtMost': '{n}★ or lower', 'admin.visible': 'Visible', 'admin.hidden': 'Hidden',
+  'admin.nav.reviews': 'Reviews', 'admin.reviewsSubtitle': 'Moderate customer reviews; hidden reviews do not count toward ratings', 'admin.anyRating': 'Any rating', 'admin.ratingAtMost': '{n} stars or lower', 'admin.deliveryRating': 'Delivery rating', 'admin.visible': 'Visible', 'admin.hidden': 'Hidden',
   'admin.deactivateRestaurant': 'Deactivate', 'admin.deactivateRestaurantConfirm': 'Deactivate this restaurant? It will be hidden and closed.',
 };

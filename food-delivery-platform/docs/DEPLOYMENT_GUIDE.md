@@ -128,7 +128,7 @@ Restart the API after editing `.env` (`docker compose up -d backend` or `pm2 res
 ```bash
 curl -s https://api.example.com/api/health                       # {"status":"ok","env":"production"}
 curl -s https://api.example.com/api/config | head -c 300          # config JSON
-curl -sI -H "Origin: https://evil.test" https://api.example.com/api/config | grep -i access-control || echo "CORS locked ✔"
+curl -sI -H "Origin: https://evil.test" https://api.example.com/api/config | grep -i access-control || echo "CORS locked"
 ```
 Then: log in at `https://admin.example.com` with `ADMIN_DEFAULT_EMAIL`, **change the password**, configure branding/theme/rules, and build the mobile apps with `--dart-define=API_BASE_URL=https://api.example.com`.
 

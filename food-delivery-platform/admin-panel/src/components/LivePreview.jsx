@@ -1,5 +1,6 @@
 import { useConfig } from '../context/ConfigContext.jsx';
 import { contrastOn } from '../utils/format';
+import Icon from './Icon.jsx';
 
 /**
  * Phone-frame preview of the customer app home screen rendered from a (draft) config.
@@ -24,7 +25,7 @@ export default function LivePreview({ theme, layout, branding, banners, categori
   const renderSection = (s) => {
     switch (s.type) {
       case 'search':
-        return <div style={{ ...card, borderRadius: th.inputRadius }} className="mx-3 mt-3 px-3 py-2 text-[11px] opacity-70">🔍 {title(s) || t('home.searchHint')}</div>;
+        return <div style={{ ...card, borderRadius: th.inputRadius }} className="mx-3 mt-3 px-3 py-2 text-[11px] opacity-70"><Icon name="search" className="me-1 inline h-3 w-3 align-[-2px]" />{title(s) || t('home.searchHint')}</div>;
       case 'banner':
         return (
           <div className="mx-3 mt-3 flex gap-2 overflow-hidden">

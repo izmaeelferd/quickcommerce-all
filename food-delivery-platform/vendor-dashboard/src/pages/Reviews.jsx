@@ -6,6 +6,7 @@ import { vendorApi } from '../services/vendor';
 import { errorKey } from '../services/api';
 import { formatDate } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 /** Customer reviews of this restaurant with inline replies. */
 export default function Reviews() {
@@ -37,7 +38,7 @@ export default function Reviews() {
               <div className="font-semibold">{r.user?.name}</div>
               <div className="text-sm text-content/60">{formatDate(r.createdAt, language)}</div>
             </div>
-            <div className="text-warning">{'★'.repeat(r.rating)}<span className="text-content/20">{'★'.repeat(5 - r.rating)}</span></div>
+            <div className="flex gap-0.5" role="img" aria-label={`${r.rating}/5`}>{[1, 2, 3, 4, 5].map((n) => <Icon key={n} name="star" filled className={`h-4 w-4 ${n <= r.rating ? 'text-warning' : 'text-content/20'}`} />)}</div>
             {r.comment && <p className="text-sm">{r.comment}</p>}
             {r.images?.length > 0 && <div className="flex gap-2">{r.images.map((u) => <img key={u} src={u} alt="" className="h-16 w-16 rounded-btn object-cover" />)}</div>}
             {r.reply?.text ? (

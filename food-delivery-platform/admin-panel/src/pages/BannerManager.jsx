@@ -12,6 +12,7 @@ import { configApi } from '../services/config';
 import { errorKey, get } from '../services/api';
 import { formatDay, toInputDate } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 const EMPTY = { title: '', subtitle: '', imageUrl: '', placement: 'home', linkType: 'none', linkValue: '', startDate: '', endDate: '', isActive: true, backgroundColor: '' };
 
@@ -81,8 +82,8 @@ export default function BannerManager() {
                 </div>
               </div>
               <span className="badge bg-primary/10 text-primary">{t(`banner.status.${status(b)}`)}</span>
-              <button type="button" className="btn-ghost px-2" onClick={() => setForm({ ...b, startDate: toInputDate(b.startDate), endDate: toInputDate(b.endDate) })}>✎</button>
-              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(b)}>🗑</button>
+              <button type="button" className="btn-ghost px-2" onClick={() => setForm({ ...b, startDate: toInputDate(b.startDate), endDate: toInputDate(b.endDate) })}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(b)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
             </div>
           )}
         />

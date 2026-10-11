@@ -9,6 +9,7 @@ import { useToast } from '../components/Toast.jsx';
 import { get, patch, post, errorKey } from '../services/api';
 import { money } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import { Dot, Rating } from '../components/Icon.jsx';
 
 export default function DeliveryPartners() {
   const { t, currency, language } = useConfig();
@@ -43,9 +44,9 @@ export default function DeliveryPartners() {
           { key: 'name', label: t('common.name'), render: (p) => <div><div className="font-semibold">{p.user?.name}</div><div className="text-xs text-content/60">{p.user?.phone || p.user?.email}</div></div> },
           { key: 'vehicle', label: t('delivery.vehicle'), render: (p) => `${t(`vehicle.${p.vehicleType}`)} · ${p.vehicleNumber || '—'}` },
           { key: 'license', label: t('delivery.licenseNumber'), render: (p) => p.licenseNumber || '—' },
-          { key: 'online', label: t('admin.online'), render: (p) => (p.isOnline ? '🟢' : '⚪') },
+          { key: 'online', label: t('admin.online'), render: (p) => <Dot on={p.isOnline} label={p.isOnline ? t('admin.online') : t('common.offline')} /> },
           { key: 'active', label: t('admin.activeOrder'), render: (p) => p.activeOrder?.orderNumber || '—' },
-          { key: 'stats', label: t('admin.deliveries'), render: (p) => `${p.totalDeliveries} · ★${p.rating?.toFixed?.(1) ?? 0}` },
+          { key: 'stats', label: t('admin.deliveries'), render: (p) => <span className="inline-flex items-center gap-2">{p.totalDeliveries}<Rating value={p.rating} /></span> },
           { key: 'wallet', label: t('admin.pendingPayout'), render: (p) => money(p.walletBalance, currency, language) },
           { key: 'status', label: t('common.status'), render: (p) => <StatusBadge status={p.status} /> },
           {

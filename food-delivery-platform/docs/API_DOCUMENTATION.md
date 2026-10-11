@@ -59,10 +59,10 @@ Every config write increments `version`, invalidates the server cache and emits 
 | POST | `/auth/refresh-token` | `refreshToken` | Rotates refresh token |
 | POST | `/auth/google-signin` | `idToken, role?` | Verified against `GOOGLE_CLIENT_IDS`; gated by `features.googleSignIn` |
 | POST | `/auth/apple-signin` | `identityToken, name?, role?` | Verified against Apple JWKS; gated by `features.appleSignIn` |
-| POST | `/auth/logout` | `refreshToken?, fcmToken?` | 🔒 |
-| GET | `/auth/me` | — | 🔒 `{ user, restaurant?, deliveryProfile? }` |
+| POST | `/auth/logout` | `refreshToken?, fcmToken?` | Auth |
+| GET | `/auth/me` | — | Auth `{ user, restaurant?, deliveryProfile? }` |
 
-## 3. Users (🔒)
+## 3. Users (Auth)
 
 `GET/PUT/DELETE /users/profile` · `PUT /users/change-password {currentPassword,newPassword}` · `POST /users/fcm-token {token}` ·
 `GET/POST /users/addresses` · `PUT/DELETE /users/addresses/:addressId` (body: `label, fullAddress*, landmark, city, state, pincode, contactName, contactPhone, lat, lng, isDefault`) ·
@@ -128,11 +128,11 @@ deliveryEarning = payout.base + km × payout.perKm + tip × tipSharePercent / 10
 
 | Method | Path | Description |
 |---|---|---|
-| POST | `/payments/create-intent` | 🔒 `{ orderId }` or `{ purpose: "wallet_topup", amount }` → Razorpay order or Stripe PaymentIntent (provider = `PAYMENT_PROVIDER`) with `publicKey`, branding and prefill |
-| POST | `/payments/verify` | 🔒 `{ orderId?, intentId, paymentId?, signature? }` — HMAC (Razorpay) or intent status (Stripe). Marks paid and emits `order:new` to the vendor |
+| POST | `/payments/create-intent` | Auth `{ orderId }` or `{ purpose: "wallet_topup", amount }` → Razorpay order or Stripe PaymentIntent (provider = `PAYMENT_PROVIDER`) with `publicKey`, branding and prefill |
+| POST | `/payments/verify` | Auth `{ orderId?, intentId, paymentId?, signature? }` — HMAC (Razorpay) or intent status (Stripe). Marks paid and emits `order:new` to the vendor |
 | POST | `/payments/webhook/:provider` | Gateway webhooks. Razorpay: HMAC-SHA256 of the raw body with `RAZORPAY_WEBHOOK_SECRET` (timing-safe); Stripe: `STRIPE_WEBHOOK_SECRET`. Confirms orders and wallet top-ups idempotently; a payment that arrives after the order was cancelled is refunded automatically |
 | POST | `/payments/refund` · `/admin/orders/:orderId/refund` | admin `{ orderId, amount?, toWallet? }` |
-| GET | `/payments/history` | 🔒 user transactions |
+| GET | `/payments/history` | Auth user transactions |
 
 ## 7. Coupons & reviews
 

@@ -6,6 +6,7 @@ import { TextField, TextArea } from '../components/Field.jsx';
 import { useT } from '../context/ConfigContext.jsx';
 import useConfigSection from '../utils/useConfigSection';
 import SaveBar from './_SaveBar.jsx';
+import Icon from '../components/Icon.jsx';
 
 /** Onboarding screens + app version gates (force update). */
 export default function Settings() {
@@ -38,7 +39,7 @@ export default function Settings() {
                 <TextField label={t('common.title')} value={p.title} onChange={(v) => setPages(pages.map((x, j) => (j === i ? { ...x, title: v } : x)))} />
                 <TextArea label={t('common.description')} value={p.description} onChange={(v) => setPages(pages.map((x, j) => (j === i ? { ...x, description: v } : x)))} />
               </div>
-              <button type="button" className="btn-ghost self-start text-danger" onClick={() => setPages(pages.filter((_, j) => j !== i))}>🗑</button>
+              <button type="button" className="btn-ghost self-start text-danger" onClick={() => setPages(pages.filter((_, j) => j !== i))}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
             </div>
           )}
         />

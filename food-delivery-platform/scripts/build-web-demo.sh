@@ -10,7 +10,7 @@ cd "$ROOT/flutter-apps"
 flutter pub get
 for pair in customer:customer vendor:partner delivery:rider; do
   flavor="${pair%%:*}"; dir="${pair##*:}"
-  echo "▶ Flutter web: $flavor → /$dir/"
+  echo "==> Flutter web: $flavor → /$dir/"
   flutter build web --release --no-web-resources-cdn -t "lib/main_$flavor.dart" --base-href "/$dir/" \
     --dart-define=API_BASE_URL=origin --dart-define=FLAVOR="$flavor"
   rm -rf "${OUT:?}/$dir" && cp -r build/web "$OUT/$dir"
@@ -20,8 +20,8 @@ done
 
 for pair in admin-panel:admin vendor-dashboard:vendor; do
   app="${pair%%:*}"; dir="${pair##*:}"
-  echo "▶ $app → demo/web/$dir"
+  echo "==> $app → demo/web/$dir"
   (cd "$ROOT/$app" && npm ci && VITE_API_URL= npm run build)
   rm -rf "${OUT:?}/$dir" && cp -r "$ROOT/$app/dist" "$OUT/$dir"
 done
-echo "✅ demo/web ready — start with ./scripts/demo.sh"
+echo "Done: demo/web ready — start with ./scripts/demo.sh"

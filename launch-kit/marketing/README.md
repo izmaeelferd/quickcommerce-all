@@ -30,7 +30,7 @@ Marketing materials for launching **FeastFlow** (customer app), **FeastFlow Part
 
 1. **Who pays for coupon discounts.** As built, item discounts from `percent` and `flat` coupons are taken out of the restaurant's earning (`vendorEarning = subtotal − discount − commission + packaging`). If FeastFlow is paying for launch offers, you have to reimburse restaurants by hand. Details are in promo-strategies.md §1.3.
 2. **No segmentation, website or WhatsApp integration.** Win-back lists come from a manual database query. The waitlist page needs a form tool. WhatsApp templates are sent through a BSP or by hand.
-3. **No invented proof.** None of the files contain testimonials, ratings, user counts or awards. Social proof is left as placeholders such as `[★ 4.X rating from X,XXX reviews]`. Fill those in only with real numbers.
+3. **No invented proof.** None of the files contain testimonials, ratings, user counts or awards. Social proof is left as placeholders such as `[4.X/5 rating from X,XXX reviews]`. Fill those in only with real numbers.
 
 ## Placeholders used across files
 `[CITY]`, `[LOCALITY]`, `[APP LINK]`, `[PLAY STORE LINK]`, `[APP STORE LINK]`, `[WAITLIST LINK]`, `[WAITLIST FORM TOOL]`, `[WEBSITE URL]`, `[PARTNER SIGNUP URL]`, `[RIDER SIGNUP URL]`, `[PARTNER DASHBOARD URL]`, `[@HANDLE]`, `[LAUNCH DATE]`, `[COMPANY LEGAL NAME]`, `[REGISTERED ADDRESS]`, `[SUPPORT EMAIL]`, `[SUPPORT PHONE]`, `[PRESS EMAIL]`, `[MEDIA CONTACT NAME]`, `[SPOKESPERSON NAME]`, `[FOUNDER NAME]`, `[RESTAURANT NAME]`, `[BSP NAME]`, `[BUDGET]`, `[TARGET]`.

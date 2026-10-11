@@ -3,9 +3,9 @@
 Nothing a user sees is compiled into an app. Colors, texts, layout, feature visibility, prices and rules live in MongoDB and are edited in the Admin Panel.
 
 ```
- Admin Panel ──PUT /api/admin/config/*──▶ Backend (MongoDB) ──GET /api/config──▶ Customer / Vendor / Delivery apps,
+ Admin Panel ──PUT /api/admin/config/*──> Backend (MongoDB) ──GET /api/config──> Customer / Vendor / Delivery apps,
       ▲                                       │                                   Vendor dashboard, Admin panel
-      └────────── live preview ───────────────┴── socket "config:updated" ──────▶ apps reload instantly
+      └────────── live preview ───────────────┴── socket "config:updated" ──────> apps reload instantly
 ```
 
 ## 1. Sources of truth

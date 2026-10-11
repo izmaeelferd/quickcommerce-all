@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { useT } from '../context/ConfigContext.jsx';
+import Icon from './Icon.jsx';
 
 export default function Modal({ open, onClose, title, children, footer, size = 'md' }) {
   const t = useT();
@@ -16,7 +17,7 @@ export default function Modal({ open, onClose, title, children, footer, size = '
       <div className={`card my-8 w-full ${widths[size]}`} onMouseDown={(e) => e.stopPropagation()}>
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-bold">{title}</h3>
-          <button type="button" className="btn-ghost px-2 py-1" onClick={onClose} aria-label={t('common.close')}>✕</button>
+          <button type="button" className="btn-ghost px-2 py-1" onClick={onClose} aria-label={t('common.close')}><Icon name="close" className="h-5 w-5" /></button>
         </div>
         <div>{children}</div>
         {footer && <div className="mt-6 flex justify-end gap-2">{footer}</div>}

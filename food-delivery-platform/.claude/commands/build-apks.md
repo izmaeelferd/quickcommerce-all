@@ -21,7 +21,7 @@ Build Android APKs of the three apps so the user can test them on a phone agains
      - install Android Studio (Windows: `winget install -e --id Google.AndroidStudio`; macOS: `brew install --cask android-studio`) and ask the user to open it once to finish the SDK setup wizard, or
      - install the command-line tools and run `sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"`.
    - Then run `flutter doctor --android-licenses`. The user must accept the licenses themselves, so tell them to type `y`.
-   - Re-run `flutter doctor` until the Android toolchain shows a ✓.
+   - Re-run `flutter doctor` until the Android toolchain reports no issues.
 5. **Build** with `flutter pub get`, then:
    ```
    flutter build apk --debug --flavor customer -t lib/main_customer.dart --dart-define=API_BASE_URL=http://<LAN-IP>:8080

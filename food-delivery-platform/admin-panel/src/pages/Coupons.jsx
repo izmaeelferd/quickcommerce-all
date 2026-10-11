@@ -10,6 +10,7 @@ import { useToast } from '../components/Toast.jsx';
 import { get, post, put, del, errorKey } from '../services/api';
 import { formatDay, toInputDate } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon, { Dot } from '../components/Icon.jsx';
 
 const EMPTY = { code: '', title: '', description: '', discountType: 'percent', value: 10, maxDiscount: '', minOrderValue: 0, validFrom: '', validTo: '', usageLimit: '', perUserLimit: 1, restaurant: '', firstOrderOnly: false, isActive: true, showInOffers: true, bannerImage: '' };
 
@@ -56,8 +57,8 @@ export default function Coupons() {
           { key: 'scope', label: t('coupon.scope'), render: (c) => c.restaurant?.name || t('coupon.allRestaurants') },
           { key: 'usage', label: t('coupon.usage'), render: (c) => `${c.usedCount}${c.usageLimit ? ` / ${c.usageLimit}` : ''}` },
           { key: 'validity', label: t('coupon.validity'), render: (c) => `${formatDay(c.validFrom, language)} → ${c.validTo ? formatDay(c.validTo, language) : '∞'}` },
-          { key: 'active', label: t('common.active'), render: (c) => (c.isActive ? '🟢' : '⚪') },
-          { key: 'x', label: '', render: (c) => <button type="button" className="btn-ghost px-2 text-danger" onClick={(e) => { e.stopPropagation(); setDeleting(c); }}>🗑</button> },
+          { key: 'active', label: t('common.active'), render: (c) => <Dot on={c.isActive} label={c.isActive ? t('common.active') : t('common.inactive')} /> },
+          { key: 'x', label: '', render: (c) => <button type="button" className="btn-ghost px-2 text-danger" onClick={(e) => { e.stopPropagation(); setDeleting(c); }}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button> },
         ]}
       />
       <Modal open={!!form} onClose={() => setForm(null)} title={t(form?._id ? 'coupon.edit' : 'coupon.add')} size="lg" footer={<button type="button" className="btn-primary" onClick={save}>{t('common.save')}</button>}>

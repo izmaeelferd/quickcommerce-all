@@ -97,7 +97,7 @@ CAC payback (months)  = CAC ÷ (CM × orders/customer/month)
 | Gateway fee (2%, assumption) | 501 × 2% | 10.02 |
 | Other variable cost (assumption) | | 5.00 |
 | **Contribution margin** | 72 + 46 − 49 − 10.02 − 5 | **53.98** |
-| Check | 501 − 343 − 49 − 20 − 20 − 10.02 − 5 | 53.98 ✓ |
+| Check | 501 − 343 − 49 − 20 − 20 − 10.02 − 5 | 53.98 (matches) |
 | Take rate | 53.98 ÷ 400 | 13.5% |
 
 Where the platform's ₹53.98 comes from: **commission +72**, **delivery −3** (46 in, 49 out), **gateway −10.02**, **other −5**.

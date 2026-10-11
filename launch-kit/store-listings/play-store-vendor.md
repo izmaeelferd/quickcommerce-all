@@ -26,7 +26,7 @@ Manage FeastFlow orders, menu, timings and payouts for your restaurant.
 ```
 FeastFlow Partner is the app for restaurants that sell on FeastFlow. Accept orders, run your kitchen flow, keep your menu up to date and track your earnings, all from your phone.
 
-[XXX+ restaurant partners in [CITY]] · [★ X.X partner rating]
+[XXX+ restaurant partners in [CITY]] · [X.X/5 partner rating]
 
 NEVER MISS AN ORDER
 • Instant push alerts for new orders

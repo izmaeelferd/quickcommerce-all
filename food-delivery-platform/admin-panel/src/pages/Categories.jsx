@@ -9,6 +9,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { get, post, put, del, errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 /** Platform food categories ("What's on your mind") and cuisines. */
 export default function Categories() {
@@ -59,8 +60,8 @@ export default function Categories() {
                 {c.nameKey && <div className="font-mono text-xs text-content/50">{c.nameKey}</div>}
               </div>
               <Toggle checked={c.isActive} onChange={async (v) => { await put(`/admin/categories/${c._id}`, { isActive: v }); done('category.saved'); }} />
-              <button type="button" className="btn-ghost px-2" onClick={() => setForm(c)}>✎</button>
-              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(c)}>🗑</button>
+              <button type="button" className="btn-ghost px-2" onClick={() => setForm(c)}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(c)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
             </div>
           )}
         />

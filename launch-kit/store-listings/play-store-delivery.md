@@ -26,7 +26,7 @@ Deliver food with FeastFlow. Go online, get orders, earn per km + 100% tips.
 ```
 Earn on your own schedule. FeastFlow Rider is the delivery partner app for FeastFlow: go online, get orders assigned automatically and deliver food from local restaurants to customers nearby.
 
-[XXX+ riders delivering in [CITY]] · [★ X.X rider rating]
+[XXX+ riders delivering in [CITY]] · [X.X/5 rider rating]
 
 WORK WHEN YOU WANT
 • Go online or offline with one tap

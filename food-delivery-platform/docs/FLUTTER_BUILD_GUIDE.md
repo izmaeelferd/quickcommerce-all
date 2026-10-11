@@ -9,7 +9,7 @@
 Each flavor has its own placeholder launcher icon in `android/app/src/<flavor>/res/mipmap-*/ic_launcher.png` (plus a 512 px `ic_launcher-playstore.png`) — replace them with your brand icons. `APP_ID_BASE` defaults to `com.fooddelivery` (`-PAPP_ID_BASE=com.yourco` or env var). The launcher name comes from `CUSTOMER_APP_NAME` / `VENDOR_APP_NAME` / `DELIVERY_APP_NAME`; the **in-app** name, logo, colors and every string are loaded at runtime from `/api/config`.
 
 ## 1. Setup
-Install the Flutter SDK (https://docs.flutter.dev/get-started/install), then `flutter doctor` until Android toolchain (and Xcode on macOS) are ✓. Android SDK 34+, JDK 17.
+Install the Flutter SDK (https://docs.flutter.dev/get-started/install), then `flutter doctor` until Android toolchain (and Xcode on macOS) report no issues. Android SDK 34+, JDK 17.
 ```bash
 cd flutter-apps
 flutter pub get

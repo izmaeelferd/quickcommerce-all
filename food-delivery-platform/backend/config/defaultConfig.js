@@ -31,10 +31,10 @@ module.exports = {
     adminLogoUrl: '',
   },
   branding: {
-    appName: 'FoodHub',
+    appName: 'FeastFlow',
     appTagline: 'Delicious food, delivered fast',
-    vendorAppName: 'FoodHub Partner',
-    deliveryAppName: 'FoodHub Rider',
+    vendorAppName: 'FeastFlow Partner',
+    deliveryAppName: 'FeastFlow Rider',
     supportEmail: 'support@example.com',
     supportPhone: '+910000000000',
     websiteUrl: 'https://example.com',

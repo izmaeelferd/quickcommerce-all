@@ -7,7 +7,7 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
-say() { printf '\n\033[1;36m▶ %s\033[0m\n' "$1"; }
+say() { printf '\n\033[1;36m==> %s\033[0m\n' "$1"; }
 
 [ -f backend/.env ] || { cp backend/.env.example backend/.env; say "Created backend/.env — edit secrets before going to production"; }
 [ -f admin-panel/.env ] || cp admin-panel/.env.example admin-panel/.env

@@ -24,19 +24,19 @@ if [ "${1:-}" = "--lan" ]; then
 fi
 export DEMO_HOST="${DEMO_HOST:-$HOST}"
 
-echo "▶ Starting containers (first run builds the API image; takes a few minutes)"
+echo "==> Starting containers (first run builds the API image; takes a few minutes)"
 "${DC[@]}" up -d --build
-echo "▶ Waiting for the API"
+echo "==> Waiting for the API"
 for i in $(seq 1 60); do
   "${DC[@]}" exec -T backend wget -qO- http://127.0.0.1:5000/api/health >/dev/null 2>&1 && break
   sleep 2
 done
-echo "▶ Seeding demo data (safe to repeat)"
+echo "==> Seeding demo data (safe to repeat)"
 "${DC[@]}" exec -T backend node seeders/seedDatabase.js
 
 cat <<MSG
 
-✅ Demo is running
+Done: Demo is running
   Customer app      http://$DEMO_HOST:8080/customer/   customer@example.com / Password@123
   Partner app       http://$DEMO_HOST:8080/partner/    vendor1@example.com  / Password@123
   Rider app         http://$DEMO_HOST:8080/rider/      rider@example.com    / Password@123

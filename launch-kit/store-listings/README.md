@@ -13,8 +13,8 @@ Ready-to-paste Google Play and Apple App Store listing copy for the three Flutte
 | `screenshot-copy.md` | Headline, subtext, screen to capture and design notes for all 8 screenshots of each app. |
 
 ## Before you use them
-1. **App name:** the name users see inside the apps is set at runtime in **Admin Panel → Config → Branding** (the code's seeded default is "FoodHub"). Set it to match the store names here (FeastFlow / FeastFlow Partner / FeastFlow Rider) before taking screenshots or submitting.
-2. Replace every `[BRACKETED PLACEHOLDER]` (company, URLs, emails, city, review accounts). Social-proof placeholders such as `[★ X.X rating from X,XXX reviews]` must be filled with real numbers or deleted; never invent ratings, user counts or quotes.
+1. **App name:** the name users see inside the apps is set at runtime in **Admin Panel → Config → Branding** (the seeded default is "FeastFlow"). Set it to match the store names here (FeastFlow / FeastFlow Partner / FeastFlow Rider) before taking screenshots or submitting.
+2. Replace every `[BRACKETED PLACEHOLDER]` (company, URLs, emails, city, review accounts). Social-proof placeholders such as `[X.X/5 rating from X,XXX reviews]` must be filled with real numbers or deleted; never invent ratings, user counts or quotes.
 3. Publish the Privacy Policy and Terms from **Admin Panel → Config → Legal Pages** and use those URLs in both consoles.
 4. Check the permission notes at the top of each listing: the shared Android manifest and iOS Info.plist declare only foreground (when-in-use) location, and cleartext traffic is disabled in release builds. Only the Rider app adds background tracking: on Android via its flavor manifest (location foreground service; complete the Play foreground-service declaration), on iOS via its own Info.plist plus `--dart-define=IOS_BACKGROUND_LOCATION=true`.
 5. Create dedicated reviewer accounts (`[REVIEW DEMO EMAIL]` / `[REVIEW DEMO PASSWORD]`) on the production backend; do not give reviewers the seed demo accounts.

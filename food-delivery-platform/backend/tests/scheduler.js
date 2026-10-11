@@ -34,7 +34,7 @@ const { sweep } = require('../utils/scheduler');
   assert.strictEqual(b.status, 'cancelled', 'unpaid online order should be auto-cancelled');
   assert.strictEqual(c.status, 'placed', 'fresh order must be untouched');
   await Order.deleteMany({ _id: { $in: [unaccepted._id, unpaid._id, fresh._id] } });
-  console.log('  ✓ scheduler: vendor accept timeout, payment timeout, fresh orders untouched');
+  console.log('  PASS scheduler: vendor accept timeout, payment timeout, fresh orders untouched');
   await mongoose.disconnect();
 })().catch(async (e) => {
   console.error(e);

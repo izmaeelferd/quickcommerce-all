@@ -9,6 +9,7 @@ import { useToast } from '../components/Toast.jsx';
 import { vendorApi } from '../services/vendor';
 import { errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 export default function Categories() {
   const { t } = useConfig();
@@ -42,8 +43,8 @@ export default function Categories() {
                 <div className="text-xs text-content/60">{t('vendor.itemsCount', { count: c.itemCount })}</div>
               </div>
               <Toggle checked={c.isActive} onChange={(v) => run(() => vendorApi.updateCategory(c._id, { isActive: v }), 'menu.categoryUpdated')} />
-              <button type="button" className="btn-ghost px-2" onClick={() => setForm(c)}>✎</button>
-              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(c)}>🗑</button>
+              <button type="button" className="btn-ghost px-2" onClick={() => setForm(c)}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+              <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(c)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
             </div>
           )}
         />

@@ -10,6 +10,7 @@ import { errorKey } from '../services/api';
 import { formatDate, money } from '../utils/format';
 import useAsync from '../utils/useAsync';
 import useVendorEvents from '../utils/useVendorEvents';
+import Icon from '../components/Icon.jsx';
 
 const TABS = { 'vendor.tab.new': 'placed', 'vendor.tab.inProgress': 'accepted,preparing,ready', 'vendor.tab.outForDelivery': 'picked', 'vendor.tab.past': 'delivered,cancelled,rejected' };
 const NEXT = { placed: 'accepted', accepted: 'preparing', preparing: 'ready' };
@@ -66,7 +67,7 @@ export default function Orders() {
               <span>{t('payment.method.' + o.payment?.method)}</span>
               <span className="font-bold">{t('vendor.youEarn', { amount: m(o.vendorEarning) })}</span>
             </div>
-            {o.deliveryPartner && <div className="text-xs text-content/70">🛵 {o.deliveryPartner.name} · {o.deliveryPartner.phone}</div>}
+            {o.deliveryPartner && <div className="text-xs text-content/70"><Icon name="truck" className="me-1 inline h-4 w-4 align-text-bottom" />{o.deliveryPartner.name} · {o.deliveryPartner.phone}</div>}
             <div className="mt-auto flex gap-2">
               {o.status === 'placed' && <button type="button" className="btn-danger flex-1" onClick={() => { setReject(o); setReason(''); }}>{t('vendor.reject')}</button>}
               {NEXT[o.status] && <button type="button" className="btn-primary flex-1" onClick={() => update(o, NEXT[o.status])}>{t(NEXT_LABEL[o.status])}</button>}

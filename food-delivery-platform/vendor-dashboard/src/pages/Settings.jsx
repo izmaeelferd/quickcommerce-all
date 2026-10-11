@@ -8,6 +8,7 @@ import { useAuth } from '../context/AuthContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { vendorApi } from '../services/vendor';
 import { errorKey } from '../services/api';
+import Icon from '../components/Icon.jsx';
 
 const EMPTY = { name: '', description: '', phone: '', email: '', address: { fullAddress: '', city: '', state: '', pincode: '' }, cuisines: [], priceForTwo: 0, avgPrepTimeMinutes: 25, isPureVeg: false, offerText: '', logo: '', coverImage: '', licenseNumber: '', gstNumber: '', bankDetails: { accountName: '', accountNumber: '', ifsc: '', upiId: '' } };
 
@@ -75,7 +76,7 @@ export default function Settings() {
             <TextField label={t('address.pincode')} value={f.address.pincode} onChange={(v) => setF({ ...f, address: { ...f.address, pincode: v } })} />
             <TextField label={t('admin.latitude')} type="number" value={f.lat} onChange={(v) => setF({ ...f, lat: v })} step="any" />
             <TextField label={t('admin.longitude')} type="number" value={f.lng} onChange={(v) => setF({ ...f, lng: v })} step="any" />
-            <div className="flex items-end"><button type="button" className="btn-outline w-full" onClick={locate}>📍 {t('address.useCurrent')}</button></div>
+            <div className="flex items-end"><button type="button" className="btn-outline w-full" onClick={locate}><Icon name="pin" className="me-1 inline h-4 w-4 align-text-bottom" />{t('address.useCurrent')}</button></div>
           </div>
         </div>
         <div className="card space-y-4">

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useT } from '../context/ConfigContext.jsx';
+import Icon from './Icon.jsx';
 
 const TOOLS = [
   { cmd: 'formatBlock', arg: 'H2', icon: 'H2', key: 'rte.heading' },
@@ -10,7 +11,7 @@ const TOOLS = [
   { cmd: 'underline', icon: 'U', key: 'rte.underline' },
   { cmd: 'insertUnorderedList', icon: '•', key: 'rte.bullets' },
   { cmd: 'insertOrderedList', icon: '1.', key: 'rte.numbered' },
-  { cmd: 'createLink', icon: '🔗', key: 'rte.link', prompt: true },
+  { cmd: 'createLink', icon: <Icon name="link" className="h-4 w-4" />, key: 'rte.link', prompt: true },
   { cmd: 'removeFormat', icon: '⌫', key: 'rte.clear' },
 ];
 

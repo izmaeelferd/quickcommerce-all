@@ -10,6 +10,7 @@ import { vendorApi } from '../services/vendor';
 import { errorKey } from '../services/api';
 import { money } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 const EMPTY = { name: '', description: '', price: '', discountPrice: '', image: '', category: '', isVeg: true, isAvailable: true, isBestseller: false, spiceLevel: 0, addOns: [], tags: [] };
 
@@ -62,8 +63,8 @@ export default function Menu() {
               <div className="flex items-center justify-between pt-1">
                 <Toggle label={t('vendor.available')} checked={i.isAvailable} onChange={async (v) => { await vendorApi.toggleItem(i._id, v); items.reload(); }} />
                 <div>
-                  <button type="button" className="btn-ghost px-2" onClick={() => setForm({ ...EMPTY, ...i, category: i.category?._id || i.category, discountPrice: i.discountPrice ?? '' })}>✎</button>
-                  <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(i)}>🗑</button>
+                  <button type="button" className="btn-ghost px-2" onClick={() => setForm({ ...EMPTY, ...i, category: i.category?._id || i.category, discountPrice: i.discountPrice ?? '' })}><Icon name="edit" className="h-4 w-4" title={t('common.edit')} /></button>
+                  <button type="button" className="btn-ghost px-2 text-danger" onClick={() => setDeleting(i)}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
                 </div>
               </div>
             </div>
@@ -101,7 +102,7 @@ export default function Menu() {
                       <TextField label={t('vendor.groupName')} value={g.name} onChange={(v) => setGroup(gi, { name: v })} />
                       <TextField label={t('vendor.maxSelect')} type="number" value={g.maxSelect} onChange={(v) => setGroup(gi, { maxSelect: v })} />
                       <Toggle label={t('vendor.required')} checked={g.required} onChange={(v) => setGroup(gi, { required: v, minSelect: v ? Math.max(1, g.minSelect || 0) : 0 })} />
-                      <button type="button" className="btn-ghost text-danger" onClick={() => setForm({ ...form, addOns: form.addOns.filter((_, i) => i !== gi) })}>🗑</button>
+                      <button type="button" className="btn-ghost text-danger" onClick={() => setForm({ ...form, addOns: form.addOns.filter((_, i) => i !== gi) })}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
                     </div>
                     <div className="mt-2 space-y-2">
                       {g.options.map((o, oi) => (
@@ -109,7 +110,7 @@ export default function Menu() {
                           <input className="input" placeholder={t('vendor.optionName')} value={o.name} onChange={(e) => setOption(gi, oi, { name: e.target.value })} />
                           <input className="input" type="number" placeholder={t('vendor.price')} value={o.price} onChange={(e) => setOption(gi, oi, { price: Number(e.target.value) })} />
                           <Toggle checked={o.isVeg !== false} onChange={(v) => setOption(gi, oi, { isVeg: v })} label={t('menu.veg')} />
-                          <button type="button" className="btn-ghost px-2" onClick={() => setGroup(gi, { options: g.options.filter((_, i) => i !== oi) })}>✕</button>
+                          <button type="button" className="btn-ghost px-2" onClick={() => setGroup(gi, { options: g.options.filter((_, i) => i !== oi) })}><Icon name="close" className="h-4 w-4" title={t('common.remove')} /></button>
                         </div>
                       ))}
                       <button type="button" className="btn-ghost px-2 py-1 text-sm" onClick={() => setGroup(gi, { options: [...g.options, { name: '', price: 0, isVeg: true, isAvailable: true }] })}>+ {t('vendor.addOption')}</button>

@@ -5,6 +5,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { get, downloadCsv, errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 const TYPES = ['orders', 'restaurants', 'delivery', 'reviews'];
 
@@ -25,7 +26,7 @@ export default function Reports() {
         subtitle={t('admin.reportsSubtitle')}
         actions={
           <button type="button" className="btn-primary" onClick={() => downloadCsv('/admin/reports', { ...params, to: `${params.to}T23:59:59` }, `${params.type}-${params.from}-${params.to}.csv`).catch((e) => toast(errorKey(e), 'error'))}>
-            ⬇ {t('admin.exportCsv')}
+            <Icon name="download" className="h-4 w-4" />{t('admin.exportCsv')}
           </button>
         }
       />

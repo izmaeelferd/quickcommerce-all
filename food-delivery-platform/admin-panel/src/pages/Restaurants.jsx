@@ -10,6 +10,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { useToast } from '../components/Toast.jsx';
 import { get, put, post, del, errorKey } from '../services/api';
 import useAsync from '../utils/useAsync';
+import { Dot } from '../components/Icon.jsx';
 
 const EMPTY = { name: '', description: '', cuisines: [], phone: '', email: '', address: { fullAddress: '', city: '' }, priceForTwo: 0, avgPrepTimeMinutes: 25, isPureVeg: false, isFeatured: false, offerText: '', logo: '', coverImage: '', commissionPercent: null, status: 'approved', owner: '' };
 
@@ -48,12 +49,12 @@ export default function Restaurants() {
         onPage={setPage}
         onRowClick={(r) => setForm({ ...EMPTY, ...r, owner: r.owner?._id, lat: r.location?.coordinates?.[1], lng: r.location?.coordinates?.[0] })}
         columns={[
-          { key: 'name', label: t('admin.restaurant'), render: (r) => <div className="font-semibold">{r.name}{r.isFeatured && ' ⭐'}</div> },
+          { key: 'name', label: t('admin.restaurant'), render: (r) => <div className="font-semibold">{r.name}{r.isFeatured && <span className="ms-2 rounded-full bg-accent/15 px-2 py-0.5 text-[11px] font-semibold text-accent">{t('admin.featured')}</span>}</div> },
           { key: 'rating', label: t('admin.rating'), render: (r) => `${r.rating?.toFixed?.(1) ?? 0} (${r.ratingCount})` },
           { key: 'orders', label: t('admin.totalOrders'), render: (r) => r.totalOrders },
           { key: 'commission', label: t('admin.commission'), render: (r) => (r.commissionPercent != null ? `${r.commissionPercent}%` : t('admin.globalCommission', { v: config?.businessRules?.commissionPercent })) },
           { key: 'wallet', label: t('admin.pendingPayout'), render: (r) => `${currency}${r.walletBalance?.toFixed?.(2) ?? 0}` },
-          { key: 'open', label: t('admin.open'), render: (r) => (r.isOpen ? '🟢' : '⚪') },
+          { key: 'open', label: t('admin.open'), render: (r) => <Dot on={r.isOpen} label={r.isOpen ? t('admin.open') : t('common.closed')} /> },
           { key: 'status', label: t('common.status'), render: (r) => <StatusBadge status={r.status} /> },
         ]}
       />

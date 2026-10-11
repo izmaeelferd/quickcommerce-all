@@ -8,6 +8,7 @@ import { vendorApi } from '../services/vendor';
 import { money } from '../utils/format';
 import useAsync from '../utils/useAsync';
 import useVendorEvents from '../utils/useVendorEvents';
+import Icon from '../components/Icon.jsx';
 
 export default function Dashboard() {
   const { t, currency, language } = useConfig();
@@ -32,14 +33,14 @@ export default function Dashboard() {
       {s && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon="🧾" label={t('vendor.todayOrders')} value={s.today.orders} />
-            <StatCard icon="💰" label={t('vendor.todayEarnings')} value={m(s.today.revenue)} tone="success" />
+            <StatCard icon={<Icon name="receipt" />} label={t('vendor.todayOrders')} value={s.today.orders} />
+            <StatCard icon={<Icon name="coins" />} label={t('vendor.todayEarnings')} value={m(s.today.revenue)} tone="success" />
             <StatCard icon="⏳" label={t('vendor.pending')} value={s.pendingOrders} tone="warning" />
-            <StatCard icon="％" label={t('vendor.commission')} value={`${s.commissionPercent}%`} tone="accent" />
-            <StatCard icon="📦" label={t('vendor.totalOrders')} value={s.totals.orders} />
-            <StatCard icon="🏦" label={t('vendor.totalEarnings')} value={m(s.totals.earnings)} tone="success" />
-            <StatCard icon="📈" label={t('vendor.grossSales')} value={m(s.totals.gross)} />
-            <StatCard icon="⭐" label={t('admin.rating')} value={s.restaurant.rating?.toFixed?.(1) ?? '0'} tone="accent" />
+            <StatCard icon={<Icon name="percent" />} label={t('vendor.commission')} value={`${s.commissionPercent}%`} tone="accent" />
+            <StatCard icon={<Icon name="package" />} label={t('vendor.totalOrders')} value={s.totals.orders} />
+            <StatCard icon={<Icon name="bank" />} label={t('vendor.totalEarnings')} value={m(s.totals.earnings)} tone="success" />
+            <StatCard icon={<Icon name="chart" />} label={t('vendor.grossSales')} value={m(s.totals.gross)} />
+            <StatCard icon={<Icon name="star" />} label={t('admin.rating')} value={s.restaurant.rating?.toFixed?.(1) ?? '0'} tone="accent" />
           </div>
           <div className="grid gap-6 xl:grid-cols-3">
             <div className="card xl:col-span-2">

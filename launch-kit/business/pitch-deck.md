@@ -132,7 +132,7 @@
 - Restaurants signed: **[N]** ([N] live) · pipeline **[N]**
 - Riders approved: **[N]**
 - Orders to date: **[N]**, week-on-week growth **[X]%**
-- Repeat rate (30-day): **[X]%** · rating **[★ 4.X from X,XXX reviews]**
+- Repeat rate (30-day): **[X]%** · rating **[4.X/5 from X,XXX reviews]**
 - LOIs / partnerships: [NAMES, with permission]
 
 **Visual:** a line chart of weekly orders (from Finance → Reports) plus 3–4 KPI tiles. If pre-launch, use a milestone timeline instead ("product built → [N] LOIs → soft launch [DATE]").

@@ -6,6 +6,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { vendorApi } from '../services/vendor';
 import { formatDate, money } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 /** Commission % shown here is the effective one (restaurant override or global businessRules). */
 export default function Payouts() {
@@ -18,9 +19,9 @@ export default function Payouts() {
       <PageHeader title={t('vendor.earnings')} subtitle={t('vendor.payoutsSubtitle')} />
       {data && (
         <div className="grid gap-4 sm:grid-cols-3">
-          <StatCard icon="🏦" label={t('vendor.pendingPayout')} value={m(data.walletBalance)} tone="success" />
-          <StatCard icon="％" label={t('vendor.commission')} value={`${data.commissionPercent}%`} tone="accent" />
-          <StatCard icon="⬇" label={t('vendor.minPayoutLabel')} value={m(data.minPayoutAmount)} />
+          <StatCard icon={<Icon name="bank" />} label={t('vendor.pendingPayout')} value={m(data.walletBalance)} tone="success" />
+          <StatCard icon={<Icon name="percent" />} label={t('vendor.commission')} value={`${data.commissionPercent}%`} tone="accent" />
+          <StatCard icon={<Icon name="download" />} label={t('vendor.minPayoutLabel')} value={m(data.minPayoutAmount)} />
         </div>
       )}
       <div>

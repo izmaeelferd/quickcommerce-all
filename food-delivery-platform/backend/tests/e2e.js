@@ -21,9 +21,9 @@ async function step(name, fn) {
   try {
     await fn();
     passed += 1;
-    console.log(`  ✓ ${name}`);
+    console.log(`  PASS ${name}`);
   } catch (e) {
-    console.error(`  ✗ ${name}\n    ${e.stack || e.message}`);
+    console.error(`  FAIL ${name}\n    ${e.stack || e.message}`);
     process.exitCode = 1;
     throw e;
   }

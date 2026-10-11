@@ -8,6 +8,7 @@ import { useConfig } from '../context/ConfigContext.jsx';
 import { get, SOCKET_URL, tokens } from '../services/api';
 import { money, formatDate } from '../utils/format';
 import useAsync from '../utils/useAsync';
+import Icon from '../components/Icon.jsx';
 
 export default function Dashboard() {
   const { t, currency, language } = useConfig();
@@ -40,14 +41,14 @@ export default function Dashboard() {
       {s && (
         <>
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            <StatCard icon="🧾" label={t('admin.todayOrders')} value={s.today.orders} />
-            <StatCard icon="💰" label={t('admin.todayGmv')} value={m(s.today.gmv)} tone="success" />
-            <StatCard icon="％" label={t('admin.todayCommission')} value={m(s.today.commission)} tone="accent" />
-            <StatCard icon="📦" label={t('admin.totalOrders')} value={s.counts.orders} />
-            <StatCard icon="👥" label={t('admin.customers')} value={s.counts.users} />
-            <StatCard icon="🍽️" label={t('admin.activeVendors')} value={s.counts.vendors} hint={t('admin.pendingCount', { n: s.counts.pendingVendors })} tone="warning" />
-            <StatCard icon="🛵" label={t('admin.deliveryPartners')} value={s.counts.partners} hint={t('admin.onlineCount', { n: s.counts.onlinePartners })} />
-            <StatCard icon="🏦" label={t('admin.lifetimeRevenue')} value={m(s.totals.commission)} hint={t('admin.gmvValue', { v: m(s.totals.gmv) })} tone="success" />
+            <StatCard icon={<Icon name="receipt" />} label={t('admin.todayOrders')} value={s.today.orders} />
+            <StatCard icon={<Icon name="coins" />} label={t('admin.todayGmv')} value={m(s.today.gmv)} tone="success" />
+            <StatCard icon={<Icon name="percent" />} label={t('admin.todayCommission')} value={m(s.today.commission)} tone="accent" />
+            <StatCard icon={<Icon name="package" />} label={t('admin.totalOrders')} value={s.counts.orders} />
+            <StatCard icon={<Icon name="users" />} label={t('admin.customers')} value={s.counts.users} />
+            <StatCard icon={<Icon name="store" />} label={t('admin.activeVendors')} value={s.counts.vendors} hint={t('admin.pendingCount', { n: s.counts.pendingVendors })} tone="warning" />
+            <StatCard icon={<Icon name="truck" />} label={t('admin.deliveryPartners')} value={s.counts.partners} hint={t('admin.onlineCount', { n: s.counts.onlinePartners })} />
+            <StatCard icon={<Icon name="bank" />} label={t('admin.lifetimeRevenue')} value={m(s.totals.commission)} hint={t('admin.gmvValue', { v: m(s.totals.gmv) })} tone="success" />
           </div>
         </>
       )}

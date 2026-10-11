@@ -1,11 +1,11 @@
 # File manifest (bytes  path) — generated at packaging time
-      2965  .claude/commands/build-apks.md
+      2971  .claude/commands/build-apks.md
        976  .claude/commands/install-apks.md
       2474  .claude/commands/setup-demo.md
        122  .dockerignore
        427  .env.example
        548  .gitignore
-     13092  AUDIT_REPORT.md
+     13052  AUDIT_REPORT.md
       2083  CLAUDE.md
        514  Dockerfile.admin
        347  Dockerfile.backend
@@ -24,15 +24,16 @@
       2295  admin-panel/src/components/DataTable.jsx
       1447  admin-panel/src/components/DragDropList.jsx
       1223  admin-panel/src/components/Field.jsx
+      5970  admin-panel/src/components/Icon.jsx
       1888  admin-panel/src/components/ImageUpload.jsx
        545  admin-panel/src/components/Layout.jsx
-      5378  admin-panel/src/components/LivePreview.jsx
-      1813  admin-panel/src/components/Modal.jsx
-      2852  admin-panel/src/components/Navbar.jsx
+      5471  admin-panel/src/components/LivePreview.jsx
+      1882  admin-panel/src/components/Modal.jsx
+      2984  admin-panel/src/components/Navbar.jsx
        410  admin-panel/src/components/PageHeader.jsx
        576  admin-panel/src/components/ProtectedRoute.jsx
-      2531  admin-panel/src/components/RichTextEditor.jsx
-      4593  admin-panel/src/components/Sidebar.jsx
+      2596  admin-panel/src/components/RichTextEditor.jsx
+      4647  admin-panel/src/components/Sidebar.jsx
        741  admin-panel/src/components/StatCard.jsx
        855  admin-panel/src/components/StatusBadge.jsx
       1027  admin-panel/src/components/Toast.jsx
@@ -41,27 +42,27 @@
       5609  admin-panel/src/context/ConfigContext.jsx
       2225  admin-panel/src/index.css
        687  admin-panel/src/index.js
-      3532  admin-panel/src/pages/AdminRoles.jsx
-      7176  admin-panel/src/pages/BannerManager.jsx
+      3701  admin-panel/src/pages/AdminRoles.jsx
+      7345  admin-panel/src/pages/BannerManager.jsx
       2720  admin-panel/src/pages/BrandingEditor.jsx
-      6071  admin-panel/src/pages/BusinessRules.jsx
-      4337  admin-panel/src/pages/Categories.jsx
+      6178  admin-panel/src/pages/BusinessRules.jsx
+      4506  admin-panel/src/pages/Categories.jsx
       3710  admin-panel/src/pages/Commission.jsx
-      7127  admin-panel/src/pages/Coupons.jsx
-      4531  admin-panel/src/pages/Dashboard.jsx
-      4613  admin-panel/src/pages/DeliveryPartners.jsx
+      7300  admin-panel/src/pages/Coupons.jsx
+      4713  admin-panel/src/pages/Dashboard.jsx
+      4765  admin-panel/src/pages/DeliveryPartners.jsx
       1831  admin-panel/src/pages/FeatureFlags.jsx
       9543  admin-panel/src/pages/LanguageManager.jsx
-      8042  admin-panel/src/pages/LayoutBuilder.jsx
+      8316  admin-panel/src/pages/LayoutBuilder.jsx
       1566  admin-panel/src/pages/LegalPages.jsx
       2047  admin-panel/src/pages/Login.jsx
       2601  admin-panel/src/pages/Maintenance.jsx
       4443  admin-panel/src/pages/Notifications.jsx
       8652  admin-panel/src/pages/Orders.jsx
-      2139  admin-panel/src/pages/Reports.jsx
-      7702  admin-panel/src/pages/Restaurants.jsx
-      2904  admin-panel/src/pages/Reviews.jsx
-      4127  admin-panel/src/pages/Settings.jsx
+      2222  admin-panel/src/pages/Reports.jsx
+      7919  admin-panel/src/pages/Restaurants.jsx
+      3161  admin-panel/src/pages/Reviews.jsx
+      4234  admin-panel/src/pages/Settings.jsx
       4770  admin-panel/src/pages/ThemeEditor.jsx
       3253  admin-panel/src/pages/Transactions.jsx
       7889  admin-panel/src/pages/Users.jsx
@@ -77,7 +78,7 @@
        694  admin-panel/vite.config.js
       3558  backend/.env.example
       1087  backend/config/database.js
-      6002  backend/config/defaultConfig.js
+      6008  backend/config/defaultConfig.js
       4841  backend/config/env.js
       3636  backend/config/payments.js
      23717  backend/controllers/adminController.js
@@ -137,14 +138,14 @@
       1080  backend/routes/userRoutes.js
       1673  backend/seeders/placeholderImage.js
       7408  backend/seeders/sampleData.js
-      9808  backend/seeders/seedDatabase.js
-     19439  backend/seeders/translations/en-admin.js
-     34986  backend/seeders/translations/en.js
+      9794  backend/seeders/seedDatabase.js
+     19485  backend/seeders/translations/en-admin.js
+     35073  backend/seeders/translations/en.js
      17601  backend/seeders/translations/others.js
       2990  backend/server.js
       5589  backend/sockets/orderTracking.js
-     19923  backend/tests/e2e.js
-      2608  backend/tests/scheduler.js
+     19925  backend/tests/e2e.js
+      2609  backend/tests/scheduler.js
          0  backend/uploads/.gitkeep
       1371  backend/utils/configCache.js
       1979  backend/utils/email.js
@@ -163,16 +164,16 @@
       1469  docker-compose.yml
      16651  docs/API_DOCUMENTATION.md
       2179  docs/APP_STORE_DEPLOYMENT.md
-      6773  docs/CONFIGURATION_GUIDE.md
+      6767  docs/CONFIGURATION_GUIDE.md
       7692  docs/DATABASE_SCHEMA.md
-      7187  docs/DEPLOYMENT_GUIDE.md
+      7183  docs/DEPLOYMENT_GUIDE.md
       7844  docs/ENVIRONMENT_SETUP.md
-      7280  docs/FLUTTER_BUILD_GUIDE.md
+      7289  docs/FLUTTER_BUILD_GUIDE.md
       2244  docs/PLAY_STORE_DEPLOYMENT.md
        216  flutter-apps/.gitignore
        275  flutter-apps/analysis_options.yaml
        253  flutter-apps/android/.gitignore
-      3475  flutter-apps/android/app/build.gradle.kts
+      3494  flutter-apps/android/app/build.gradle.kts
        407  flutter-apps/android/app/proguard-rules.pro
      14623  flutter-apps/android/app/src/customer/ic_launcher-playstore.png
       2031  flutter-apps/android/app/src/customer/res/mipmap-hdpi/ic_launcher.png
@@ -223,9 +224,9 @@
         57  flutter-apps/ios/Flutter/Release-delivery.xcconfig
         55  flutter-apps/ios/Flutter/Release-vendor.xcconfig
         30  flutter-apps/ios/Flutter/Release.xcconfig
-       468  flutter-apps/ios/Flutter/customer.xcconfig
-       468  flutter-apps/ios/Flutter/delivery.xcconfig
-       448  flutter-apps/ios/Flutter/vendor.xcconfig
+       469  flutter-apps/ios/Flutter/customer.xcconfig
+       475  flutter-apps/ios/Flutter/delivery.xcconfig
+       459  flutter-apps/ios/Flutter/vendor.xcconfig
       1723  flutter-apps/ios/Podfile
      25815  flutter-apps/ios/Runner.xcodeproj/project.pbxproj
        135  flutter-apps/ios/Runner.xcodeproj/project.xcworkspace/contents.xcworkspacedata
@@ -353,9 +354,9 @@
      21666  flutter-apps/web/icons/Icon-maskable-512.png
       1715  flutter-apps/web/index.html
        907  flutter-apps/web/manifest.json
-      1229  scripts/build-web-demo.sh
+      1231  scripts/build-web-demo.sh
       2733  scripts/demo.ps1
-      2199  scripts/demo.sh
+      2201  scripts/demo.sh
        747  scripts/seed-database.js
       2698  scripts/setup.sh
        273  vendor-dashboard/.env.example
@@ -369,13 +370,14 @@
       2295  vendor-dashboard/src/components/DataTable.jsx
       1447  vendor-dashboard/src/components/DragDropList.jsx
       1223  vendor-dashboard/src/components/Field.jsx
+      5970  vendor-dashboard/src/components/Icon.jsx
       1889  vendor-dashboard/src/components/ImageUpload.jsx
       1336  vendor-dashboard/src/components/Layout.jsx
-      1813  vendor-dashboard/src/components/Modal.jsx
-      1835  vendor-dashboard/src/components/Navbar.jsx
+      1882  vendor-dashboard/src/components/Modal.jsx
+      1995  vendor-dashboard/src/components/Navbar.jsx
        410  vendor-dashboard/src/components/PageHeader.jsx
        726  vendor-dashboard/src/components/ProtectedRoute.jsx
-      2186  vendor-dashboard/src/components/Sidebar.jsx
+      2234  vendor-dashboard/src/components/Sidebar.jsx
        741  vendor-dashboard/src/components/StatCard.jsx
        855  vendor-dashboard/src/components/StatusBadge.jsx
       1027  vendor-dashboard/src/components/Toast.jsx
@@ -384,14 +386,14 @@
       5646  vendor-dashboard/src/context/ConfigContext.jsx
       2225  vendor-dashboard/src/index.css
        687  vendor-dashboard/src/index.js
-      3454  vendor-dashboard/src/pages/Categories.jsx
-      3493  vendor-dashboard/src/pages/Dashboard.jsx
+      3623  vendor-dashboard/src/pages/Categories.jsx
+      3661  vendor-dashboard/src/pages/Dashboard.jsx
       2637  vendor-dashboard/src/pages/Login.jsx
-      9469  vendor-dashboard/src/pages/Menu.jsx
-      5133  vendor-dashboard/src/pages/Orders.jsx
-      2895  vendor-dashboard/src/pages/Payouts.jsx
-      2988  vendor-dashboard/src/pages/Reviews.jsx
-      6743  vendor-dashboard/src/pages/Settings.jsx
+      9767  vendor-dashboard/src/pages/Menu.jsx
+      5242  vendor-dashboard/src/pages/Orders.jsx
+      2995  vendor-dashboard/src/pages/Payouts.jsx
+      3119  vendor-dashboard/src/pages/Reviews.jsx
+      6850  vendor-dashboard/src/pages/Settings.jsx
       2691  vendor-dashboard/src/pages/Timings.jsx
       2944  vendor-dashboard/src/services/api.js
        634  vendor-dashboard/src/services/auth.js

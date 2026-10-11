@@ -40,7 +40,7 @@ Go online when it suits you, get orders assigned automatically, and keep 100% of
 ```
 Earn on your own schedule. FeastFlow Rider is the delivery partner app for FeastFlow: go online, get orders assigned automatically and deliver food from local restaurants to customers nearby.
 
-[XXX+ riders delivering in [CITY]] · [★ X.X rider rating]
+[XXX+ riders delivering in [CITY]] · [X.X/5 rider rating]
 
 WORK WHEN YOU WANT
 • Go online or offline with one tap

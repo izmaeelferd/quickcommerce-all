@@ -85,7 +85,7 @@
 
 ## Week −5: Admin configuration (Config section)
 
-- [ ] **Branding**: app name "FeastFlow", logos, support contacts (replace seeded "FoodHub" defaults everywhere) · owner: ___
+- [ ] **Branding**: app name "FeastFlow", logos, support contacts · owner: ___
 - [ ] **Theme**: brand colours, light/dark · owner: ___
 - [ ] **Languages**: review en and hi strings (also es, ar RTL, fr if used); disable languages you won't support · owner: ___
 - [ ] **Business Rules**, reviewed line by line (see `revenue-model.md`):

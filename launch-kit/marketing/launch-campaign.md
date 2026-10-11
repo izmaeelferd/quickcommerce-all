@@ -26,7 +26,7 @@ A day-by-day / week-by-week plan from a 14-day pre-launch waitlist through the f
 
 | # | Action | Where | Settings |
 |---|---|---|---|
-| 0.1 | Brand the apps | Config → Branding | App name **FeastFlow** (replace seeded "FoodHub"), logo, support email/phone `[SUPPORT EMAIL]` / `[SUPPORT PHONE]` |
+| 0.1 | Brand the apps | Config → Branding | App name **FeastFlow**, logo, support email/phone `[SUPPORT EMAIL]` / `[SUPPORT PHONE]` |
 | 0.2 | Colours | Config → Theme | Brand palette; check dark mode (`darkModeToggle` flag) |
 | 0.3 | Commercials | Config → Business Rules | Confirm: `commissionPercent` (default 18), `deliveryFee` {base 30, baseKm 2, perKm 8, freeAbove 499}, `packagingFee` 15, `platformFee` 0, `taxPercent` 5, `minOrderValue` 99, `radiusKm` 10, `deliverySlots`, `paymentMethods` (card/upi/wallet/cod), `codMaxAmount` 2000, `minPayoutAmount` 500, `deliveryPartnerPayout` {base 25, perKm 6, tipSharePercent 100} |
 | 0.4 | Per-restaurant commission deals | Finance → Commission | Override for launch partners if you offered intro rates |

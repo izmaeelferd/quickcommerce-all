@@ -41,7 +41,7 @@ async function seedConfig() {
   }
   await AppConfig.deleteMany({});
   await AppConfig.create({ key: 'main', ...defaults });
-  console.log('✓ default app config');
+  console.log('- default app config');
 }
 
 async function seedTranslations() {
@@ -51,7 +51,7 @@ async function seedTranslations() {
     const doc = await Translation.findOne({ code: lang.code });
     if (!doc) {
       await Translation.create({ code: lang.code, name: lang.name, nativeName: lang.nativeName, isRTL: lang.isRTL, strings: Translation.encodeStrings(lang.strings) });
-      console.log(`✓ language ${lang.code} (${Object.keys(lang.strings).length} strings)`);
+      console.log(`- language ${lang.code} (${Object.keys(lang.strings).length} strings)`);
       continue;
     }
     // Only add keys that do not exist yet so admin edits are preserved.
@@ -75,7 +75,7 @@ async function seedAdmins() {
     }
     if (password.length < 8) throw new Error('ADMIN_DEFAULT_PASSWORD must be at least 8 characters');
     admin = await User.create({ name: 'Super Admin', email: env.seed.adminEmail, password, role: 'superadmin', isVerified: true });
-    console.log(`✓ superadmin ${env.seed.adminEmail} — log in and CHANGE THIS PASSWORD IMMEDIATELY`);
+    console.log(`- superadmin ${env.seed.adminEmail} — log in and CHANGE THIS PASSWORD IMMEDIATELY`);
   }
   const roles = [
     { name: 'Operations', description: 'Orders, vendors, delivery and support', permissions: ['dashboard', 'orders', 'vendors', 'restaurants', 'delivery', 'users', 'notifications'] },
@@ -94,7 +94,7 @@ async function seedCategories() {
     await Category.updateOne({ name: c.name, type: 'cuisine' }, { $setOnInsert: { image: image(`cuisine-${c.name}`, c.colors, 320, 320), order: i + 1, isActive: true } }, { upsert: true });
   }
   for (const c of sample.coupons) await Coupon.updateOne({ code: c.code }, { $setOnInsert: { ...c, isActive: true, showInOffers: true } }, { upsert: true });
-  console.log('✓ categories, cuisines & coupons');
+  console.log('- categories, cuisines & coupons');
 }
 
 async function seedCatalog() {
@@ -108,7 +108,7 @@ async function seedCatalog() {
     const linkValue = b.linkType === 'category' ? String(catMap[b.linkValue] || '') : b.linkValue || '';
     await Banner.create({ title: b.title, subtitle: b.subtitle, imageUrl: image(`banner-${i}`, b.colors, 1200, 480), linkType: b.linkType, linkValue, order: i + 1, placement: 'home' });
   }
-  console.log('✓ banners');
+  console.log('- banners');
 
   for (const r of sample.restaurants) {
     let owner = await User.findOne({ email: r.owner.email });
@@ -149,7 +149,7 @@ async function seedCatalog() {
         });
       }
     }
-    console.log(`✓ restaurant ${r.name}`);
+    console.log(`- restaurant ${r.name}`);
   }
 
   if (!(await User.exists({ email: 'customer@example.com' }))) {
@@ -168,7 +168,7 @@ async function seedCatalog() {
     const rider = await User.create({ name: 'Demo Rider', email: 'rider@example.com', phone: '+910000000301', password: SAMPLE_PASSWORD, role: 'delivery', isVerified: true });
     await DeliveryPartner.create({ user: rider._id, status: 'approved', vehicleType: 'bike', vehicleNumber: 'KA01AB1234', licenseNumber: 'DL-0001', currentLocation: { type: 'Point', coordinates: CENTER } });
   }
-  console.log(`✓ demo accounts (customer@example.com / rider@example.com / vendor1-4@example.com, password: ${SAMPLE_PASSWORD})`);
+  console.log(`- demo accounts (customer@example.com / rider@example.com / vendor1-4@example.com, password: ${SAMPLE_PASSWORD})`);
 }
 
 async function run() {

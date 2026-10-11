@@ -4,6 +4,7 @@ import { TextField } from '../components/Field.jsx';
 import { useT } from '../context/ConfigContext.jsx';
 import useConfigSection from '../utils/useConfigSection';
 import SaveBar from './_SaveBar.jsx';
+import Icon from '../components/Icon.jsx';
 
 function Card({ title, children }) {
   return (
@@ -98,7 +99,7 @@ export default function BusinessRules() {
                 <input className="input w-28" type="time" value={s.start} onChange={(e) => setSlot(i, { start: e.target.value })} />
                 <input className="input w-28" type="time" value={s.end} onChange={(e) => setSlot(i, { end: e.target.value })} />
                 <Toggle checked={s.enabled} onChange={(v) => setSlot(i, { enabled: v })} />
-                <button type="button" className="btn-ghost px-2 text-danger" onClick={() => set('deliverySlots', slots.filter((_, j) => j !== i))}>🗑</button>
+                <button type="button" className="btn-ghost px-2 text-danger" onClick={() => set('deliverySlots', slots.filter((_, j) => j !== i))}><Icon name="trash" className="h-4 w-4" title={t('common.delete')} /></button>
               </div>
             ))}
           </div>

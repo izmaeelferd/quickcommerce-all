@@ -78,36 +78,36 @@ Questions? WhatsApp [RIDER SUPPORT WHATSAPP] or call [RIDER SUPPORT PHONE].
 ## 3. Short post: WhatsApp / Facebook groups (copy-paste)
 
 ```
-🛵 DELIVERY PARTNERS WANTED, FeastFlow ([AREA], [CITY])
+DELIVERY PARTNERS WANTED, FeastFlow ([AREA], [CITY])
 
-✅ ₹[25]/delivery + ₹[6]/km + 100% tips
-✅ Choose your own hours, go online anytime
-✅ Earnings shown after every trip, paid [WEEKLY]
-✅ Bike / scooter / bicycle welcome
+- ₹[25]/delivery + ₹[6]/km + 100% tips
+- Choose your own hours, go online anytime
+- Earnings shown after every trip, paid [WEEKLY]
+- Bike / scooter / bicycle welcome
 
 Need: 18+, smartphone, licence + RC (for motor vehicles), bank/UPI
 
-👉 Download "FeastFlow Rider": [APP LINK]
-👉 Register → upload documents → get approved → start earning
+Download "FeastFlow Rider": [APP LINK]
+Register → upload documents → get approved → start earning
 
-📞 [RIDER SUPPORT PHONE] · No joining fee
+[RIDER SUPPORT PHONE] · No joining fee
 ```
 
 **Hindi version (IN):**
 ```
-🛵 डिलीवरी पार्टनर चाहिए: FeastFlow ([AREA], [CITY])
+डिलीवरी पार्टनर चाहिए: FeastFlow ([AREA], [CITY])
 
-✅ ₹[25] प्रति डिलीवरी + ₹[6] प्रति किमी + 100% टिप आपकी
-✅ अपने समय पर काम करें
-✅ हर ट्रिप की कमाई ऐप में, भुगतान [हर सोमवार]
-✅ बाइक / स्कूटर / साइकिल
+- ₹[25] प्रति डिलीवरी + ₹[6] प्रति किमी + 100% टिप आपकी
+- अपने समय पर काम करें
+- हर ट्रिप की कमाई ऐप में, भुगतान [हर सोमवार]
+- बाइक / स्कूटर / साइकिल
 
 ज़रूरी: 18+, स्मार्टफोन, लाइसेंस + RC (मोटर वाहन के लिए), बैंक/UPI
 
-👉 "FeastFlow Rider" ऐप डाउनलोड करें: [APP LINK]
-👉 रजिस्टर करें → दस्तावेज़ अपलोड करें → अप्रूवल → कमाई शुरू
+"FeastFlow Rider" ऐप डाउनलोड करें: [APP LINK]
+रजिस्टर करें → दस्तावेज़ अपलोड करें → अप्रूवल → कमाई शुरू
 
-📞 [RIDER SUPPORT PHONE] · कोई जॉइनिंग फीस नहीं
+[RIDER SUPPORT PHONE] · कोई जॉइनिंग फीस नहीं
 ```
 (Have a native speaker check translations before posting.)
 
@@ -121,7 +121,7 @@ Need: 18+, smartphone, licence + RC (for motor vehicles), bank/UPI
 >
 > **BIG NUMBER BLOCK:** ₹[25] per delivery + ₹[6] per km
 >
-> **3 ICONS:** 🕒 Your hours · 📍 Orders near you · 💰 Paid [weekly]
+> **3 ICONS (line icons, not emoji):** Clock: Your hours · Map pin: Orders near you · Wallet: Paid [weekly]
 >
 > **REQUIREMENTS (small):** 18+ · Smartphone · Licence & RC for motor vehicles · Bank account / UPI
 >

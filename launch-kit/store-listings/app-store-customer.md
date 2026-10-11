@@ -40,7 +40,7 @@ New on FeastFlow: schedule lunch or dinner for a delivery slot that suits you, a
 ```
 Hungry? FeastFlow brings your favourite local restaurants to your door, with live tracking from kitchen to doorstep.
 
-[★ X.X rating from X,XXX reviews] · [XXX+ restaurants in [CITY]]
+[X.X/5 rating from X,XXX reviews] · [XXX+ restaurants in [CITY]]
 
 WHY FEASTFLOW
 • Local favourites: browse restaurants near you by cuisine, category, top rated and featured picks

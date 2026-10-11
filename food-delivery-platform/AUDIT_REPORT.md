@@ -7,16 +7,16 @@ Method: Python/Node scanners (regex scans, route-map cross-check, import/depende
 
 | # | Audit | Issues found | Fixed | Status |
 |---|---|---|---|---|
-| 1 | Hardcoded values | 6 | 6 | ✅ PASS |
-| 2 | API connection integrity | 5 | 5 | ✅ PASS |
-| 3 | Payment flow integrity | 4 | 4 | ✅ PASS |
-| 4 | Config system integrity | 4 | 4 | ✅ PASS |
-| 5 | Deployment file completeness | 7 | 7 | ✅ PASS |
-| 6 | Security hardening | 9 | 9 | ✅ PASS |
-| 7 | Static runtime checks | 0 | — | ✅ PASS |
-| 8 | Documentation | 8 docs updated | — | ✅ PASS |
-| 9 | Default admin & first run | 3 | 3 | ✅ PASS |
-| + | Found during verification | 4 | 4 | ✅ PASS |
+| 1 | Hardcoded values | 6 | 6 | PASS |
+| 2 | API connection integrity | 5 | 5 | PASS |
+| 3 | Payment flow integrity | 4 | 4 | PASS |
+| 4 | Config system integrity | 4 | 4 | PASS |
+| 5 | Deployment file completeness | 7 | 7 | PASS |
+| 6 | Security hardening | 9 | 9 | PASS |
+| 7 | Static runtime checks | 0 | — | PASS |
+| 8 | Documentation | 8 docs updated | — | PASS |
+| 9 | Default admin & first run | 3 | 3 | PASS |
+| + | Found during verification | 4 | 4 | PASS |
 
 ---
 
@@ -40,13 +40,13 @@ Method: Python/Node scanners (regex scans, route-map cross-check, import/depende
 ## 3. Payment flow integrity
 | Check | Finding | Fix |
 |---|---|---|
-| Razorpay keys | `key_id` sent to clients, `key_secret` server-only ✔ | — |
+| Razorpay keys | `key_id` sent to clients, `key_secret` server-only Yes | — |
 | Razorpay **webhook** | Verified with the API key secret (Razorpay signs webhooks with a separate webhook secret), non-constant-time compare | `RAZORPAY_WEBHOOK_SECRET` + `timingSafeEqual`; 503 if unset. Verified: bad signature → 400, valid → 200 |
-| Stripe | secret + webhook signature from env ✔ | — |
+| Stripe | secret + webhook signature from env Yes | — |
 | Double confirmation | `/verify` and the webhook could both process a payment | Atomic `pending → paid` flip; wallet top-ups credited exactly once (webhook now also credits top-ups) |
 | Late payment | A payment completing after the order was cancelled would have confirmed a dead order | Refunded automatically (gateway, wallet fallback) |
 | Wallet | Balance check and debit were separate (race) | Conditional atomic debit `{walletBalance: {$gte: amount}}`; E2E fires concurrent orders and verifies no overdraw |
-| COD / refunds / amounts | COD skips gateway ✔; cancel → refund (wallet or gateway) with penalty rules ✔; all totals recomputed server-side from `businessRules` ✔ | — |
+| COD / refunds / amounts | COD skips gateway Yes; cancel → refund (wallet or gateway) with penalty rules Yes; all totals recomputed server-side from `businessRules` Yes | — |
 
 ## 4. Config system integrity
 - `/api/config` returns theme, branding, onboarding, homeLayout, features, businessRules, legal, languages, maintenance, appVersions, banners, categories, cuisines (E2E asserts every section).
@@ -71,11 +71,11 @@ Method: Python/Node scanners (regex scans, route-map cross-check, import/depende
 ## 6. Security hardening
 | Check | Finding | Fix |
 |---|---|---|
-| Passwords | bcrypt, never logged ✔ | — |
-| JWT | short access + rotating refresh ✔ | Header-only; production refuses weak/identical secrets |
+| Passwords | bcrypt, never logged Yes | — |
+| JWT | short access + rotating refresh Yes | Header-only; production refuses weak/identical secrets |
 | Input validation | Only ~10 routes validated | **Every** POST/PUT/PATCH/DELETE route validated (express-validator) except webhooks (signature), uploads (multer type/size) and delete-account (no input) |
 | NoSQL injection | `{"$ne": null}` in body or `?a[$ne]=` reached queries | `sanitize` middleware strips `$`/dotted keys from body/query/params + flat query parser. E2E sends operator payloads |
-| Rate limiting | auth/OTP limited ✔ | refresh-token also limited |
+| Rate limiting | auth/OTP limited Yes | refresh-token also limited |
 | CORS | `*` allowed in production | Production refuses `*`; disallowed origins get no CORS headers (was a 500 + stack trace) |
 | OTP | no attempt limit, no resend cooldown | Burn after `OTP_MAX_ATTEMPTS`, `OTP_RESEND_SECONDS` cooldown (429), same for reset codes |
 | Uploads | SVG accepted (stored-XSS vector) | SVG removed; MIME + extension both checked; file/field count limits |
